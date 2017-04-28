@@ -16,5 +16,10 @@ namespace LexerAnalyser.Models
             Row = row;
             Column = column;
         }
+
+        public override string ToString()
+        {
+            return "";
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace LexerAnalyser.Models
 {
-    internal class Symbol
+    public class Symbol
     {
         public readonly int RowCount;
         public readonly int ColCount;

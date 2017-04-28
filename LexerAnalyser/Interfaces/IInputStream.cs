@@ -5,8 +5,8 @@ using LexerAnalyser.Models;
 
 namespace LexerAnalyser.Interfaces
 {
-    internal interface IInputStream
+    public interface IInputStream
     {
-        Token GetNextToken();
+        Symbol GetNextSymbol();
     }
 }
