@@ -19,18 +19,16 @@ namespace LexerAnalyser
 
         public List<Token> GetTokens()
         {
-            //var tokens = new List<Token>();
-            //var token = _automaton.GetToken();
+            var tokens = new List<Token>();
+            var token = _automaton.GetToken();
 
-            //while (token.Type != TokenType.Eof)
-            //{
-            //    tokens.Add(token);
-            //    token = _automaton.GetToken();
-            //}
+            while (token.Type != TokenType.Eof)
+            {
+                tokens.Add(token);
+                token = _automaton.GetToken();
+            }
 
-            //return tokens;
-            _automaton.GetToken();
-            return null;
+            return tokens;
         }
     }
 }
