@@ -15,6 +15,7 @@ namespace LexerAnalyser.Automata
         {
             _inputStream = inputStream;
             _currentSymbol = _inputStream.GetNextSymbol();
+            InitEscapeSecuenceDictionary();
         }
 
         public Token GetToken()
@@ -34,6 +35,7 @@ namespace LexerAnalyser.Automata
         private Token GetIdToken()
         {
             //TODO validar si el id formado no es una palabra reservada.
+            //BUG tirar una excepcion cuando se ingrese caracteres no permitidos como \
             var lexeme = new StringBuilder();
             var rowCount = _currentSymbol.RowCount;
             var colCount = _currentSymbol.ColCount;
