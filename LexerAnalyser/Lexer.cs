@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LexerAnalyser.Automata;
 using LexerAnalyser.Enums;
 using LexerAnalyser.Interfaces;
 using LexerAnalyser.Models;

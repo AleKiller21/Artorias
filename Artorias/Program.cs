@@ -13,7 +13,7 @@ namespace Artorias
             var tokens = lexer.GetTokens();
             foreach (var token in tokens)
             {
-                Console.WriteLine(token.Lexeme + "-" + token.Row + "-" + token.Column);
+                Console.WriteLine(token.Lexeme + "-" + token.Row + "-" + token.Column + "-" + token.Type);
             }
         }
     }

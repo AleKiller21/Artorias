@@ -7,6 +7,8 @@ namespace LexerAnalyser.Enums
     public enum TokenType
     {
         Id,
-        Eof
+        Eof,
+        LiteralSimpleNum,
+        LiteralBinary
     }
 }
