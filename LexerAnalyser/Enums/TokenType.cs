@@ -23,6 +23,8 @@ namespace LexerAnalyser.Enums
         EscapeSecuenceNewLine,
         EscapeSecuenceCarriageReturn,
         EscapeSecuenceHorizontalTab,
-        EscapeSecuenceVerticalQuote
+        EscapeSecuenceVerticalQuote,
+        LiteralTrue,
+        LiteralFalse
     }
 }

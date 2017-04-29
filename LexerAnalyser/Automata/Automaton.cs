@@ -22,7 +22,7 @@ namespace LexerAnalyser.Automata
         {
             while (_currentSymbol.Character != '\0')
             {
-                if (Char.IsLetter(_currentSymbol.Character)) return GetIdToken();
+                if (Char.IsLetter(_currentSymbol.Character)) return GetOpenToken();
                 if (Char.IsDigit(_currentSymbol.Character)) return GetNumLiteralToken();
                 if (_currentSymbol.Character == '\'') return GetCharToken();
 
@@ -30,6 +30,16 @@ namespace LexerAnalyser.Automata
             }
 
             return new Token("\0", TokenType.Eof, _currentSymbol.RowCount, _currentSymbol.ColCount);
+        }
+
+        private Token GetOpenToken()
+        {
+            Token token = GetIdToken();
+
+            if(token.Lexeme.Equals("true")) return new Token(token.Lexeme, TokenType.LiteralTrue, token.Row, token.Column);
+            if(token.Lexeme.Equals("false")) return new Token(token.Lexeme, TokenType.LiteralFalse, token.Row, token.Column);
+
+            return token;
         }
 
         private Token GetIdToken()

@@ -4,8 +4,8 @@ namespace LexerAnalyser.Models
 {
     public class Token
     {
-        public readonly string Lexeme;
-        public readonly TokenType Type;
+        public string Lexeme;
+        public TokenType Type;
         public readonly int Row;
         public readonly int Column;
 
