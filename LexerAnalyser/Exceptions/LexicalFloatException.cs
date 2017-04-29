@@ -8,7 +8,7 @@ namespace LexerAnalyser.Exceptions
     {
         private static string cause = "Invalid float literal.";
 
-        public LexicalFloatException(int row, int col) : base(row, col, cause)
+        public LexicalFloatException(int row, int col) : base(String.Format("{0} at row {1} column {2}", cause, row, col))
         {
             
         }

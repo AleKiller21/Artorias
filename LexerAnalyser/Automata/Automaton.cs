@@ -23,6 +23,7 @@ namespace LexerAnalyser.Automata
             {
                 if (Char.IsLetter(_currentSymbol.Character)) return GetIdToken();
                 if (Char.IsDigit(_currentSymbol.Character)) return GetNumLiteralToken();
+                if (_currentSymbol.Character == '\'') return GetCharToken();
 
                 _currentSymbol = _inputStream.GetNextSymbol();
             }
@@ -32,6 +33,7 @@ namespace LexerAnalyser.Automata
 
         private Token GetIdToken()
         {
+            //TODO validar si el id formado no es una palabra reservada.
             var lexeme = new StringBuilder();
             var rowCount = _currentSymbol.RowCount;
             var colCount = _currentSymbol.ColCount;

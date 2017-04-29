@@ -8,7 +8,7 @@ namespace LexerAnalyser.Exceptions
     {
         private static string cause = "Identifier expected.";
 
-        public LexicalIdException(int row, int col) : base(row, col, cause)
+        public LexicalIdException(int row, int col) : base(String.Format("Invalid Integer at row {0} column {1}. {2}", row, col, cause))
         {
         }
     }

@@ -6,8 +6,8 @@ namespace LexerAnalyser.Exceptions
 {
     public class LexicalBinaryException : LexicalException
     {
-        private static string cause = "Expected a binary literal.";
-        public LexicalBinaryException(int row, int col) : base(row, col, cause)
+        private static string cause = "Invalid binary literal.";
+        public LexicalBinaryException(int row, int col) : base(String.Format("{0} at row {1} column {2}", cause, row, col))
         {
 
         }
