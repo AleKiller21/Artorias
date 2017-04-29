@@ -26,7 +26,28 @@ namespace LexerAnalyser.Automata
                 _currentSymbol = _inputStream.GetNextSymbol();
             }
 
+            if (_currentSymbol.Character == '.')
+            {
+                if(Char.IsDigit(_inputStream.PeekNextSymbol().Character))
+                    return GetFloatToken(lexeme, rowCount, colCount);
+            }
+
             return new Token(lexeme.ToString(), TokenType.LiteralSimpleNum, rowCount, colCount);
+        }
+
+        private Token GetFloatToken(StringBuilder lexeme, int row, int col)
+        {
+            do
+            {
+                lexeme.Append(_currentSymbol.Character);
+                _currentSymbol = _inputStream.GetNextSymbol();
+            } while (Char.IsDigit(_currentSymbol.Character));
+
+            if(!(_currentSymbol.Character == 'f' || _currentSymbol.Character == 'F')) throw new LexicalFloatException(row, col);
+
+            lexeme.Append(_currentSymbol.Character);
+            _currentSymbol = _inputStream.GetNextSymbol();
+            return new Token(lexeme.ToString(), TokenType.LiteralFloat, row, col);
         }
 
         private Token GetNumWithPrefixToken()

@@ -8,5 +8,6 @@ namespace LexerAnalyser.Interfaces
     public interface IInputStream
     {
         Symbol GetNextSymbol();
+        Symbol PeekNextSymbol();
     }
 }

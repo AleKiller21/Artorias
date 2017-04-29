@@ -47,5 +47,10 @@ namespace LexerAnalyser
             _finished = true;
             return new Symbol(_currentRow, _currentColumn, '\0');
         }
+
+        public Symbol PeekNextSymbol()
+        {
+            return new Symbol(_currentRow, _currentColumn, (char)_reader.Peek());
+        }
     }
 }

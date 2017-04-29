@@ -10,6 +10,7 @@ namespace LexerAnalyser.Enums
         Eof,
         LiteralSimpleNum,
         LiteralBinary,
-        LiteralHexadecimal
+        LiteralHexadecimal,
+        LiteralFloat
     }
 }
