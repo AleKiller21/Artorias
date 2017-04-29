@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
+using LexerAnalyser.Exceptions;
 using LexerAnalyser.Models;
 
 namespace LexerAnalyser.Automata
@@ -60,7 +61,7 @@ namespace LexerAnalyser.Automata
 
             _currentSymbol = _inputStream.GetNextSymbol();
             if (_currentSymbol.Character != '0' && _currentSymbol.Character != '1')
-                throw new LexicalException("Invalid integer literal at row " + rowCount + " column " + colCount);
+                throw new LexicalBinaryException(rowCount, colCount);
 
             while (_currentSymbol.Character == '0' || _currentSymbol.Character == '1')
             {
@@ -73,9 +74,30 @@ namespace LexerAnalyser.Automata
 
         private Token GetHexadecimalToken(Symbol symbol)
         {
+            var lexeme = new StringBuilder("" + _currentSymbol.Character + symbol.Character);
+            var rowCount = _currentSymbol.RowCount;
+            var colCount = _currentSymbol.ColCount;
 
+            _currentSymbol = _inputStream.GetNextSymbol();
+            if(!IsCharacterInHexadecimalRange(_currentSymbol.Character))
+                throw new LexicalHexadecimalException(rowCount, colCount);
 
-            throw new NotImplementedException();
+            do
+            {
+                lexeme.Append(_currentSymbol.Character);
+                _currentSymbol = _inputStream.GetNextSymbol();
+            } while (IsCharacterInHexadecimalRange(_currentSymbol.Character));
+
+            return new Token(lexeme.ToString(), TokenType.LiteralHexadecimal, rowCount, colCount);
+        }
+
+        private bool IsCharacterInHexadecimalRange(char symbol)
+        {
+            var numericValue = symbol;
+
+            return (numericValue >= 48 && numericValue <= 57) ||
+                   (numericValue >= 65 && numericValue <= 70) ||
+                   (numericValue >= 97 && numericValue <= 102);
         }
     }
 }

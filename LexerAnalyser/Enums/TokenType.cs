@@ -9,6 +9,7 @@ namespace LexerAnalyser.Enums
         Id,
         Eof,
         LiteralSimpleNum,
-        LiteralBinary
+        LiteralBinary,
+        LiteralHexadecimal
     }
 }
