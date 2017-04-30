@@ -20,7 +20,7 @@ namespace LexerAnalyser.Automata
             _currentSymbol = _inputStream.GetNextSymbol();
             if(_currentSymbol.Character == '\'') throw new LexicalCharException(String.Format("Empty character literal at row {0} column {1}.", row, col));
 
-            if (_currentSymbol.Character == '\\') return GetEscapeSecuenceToken(lexeme, row, col);
+            if (IsCurrentSymbolBackSlash()) return GetEscapeSecuenceToken(lexeme, row, col);
             if (IsValidCharacter(_currentSymbol.Character)) return GetSimpleCharToken(lexeme, row, col);
 
             throw new LexicalCharException(String.Format("Invalid char literal at row {0} column {1}.", row, col));
@@ -37,7 +37,7 @@ namespace LexerAnalyser.Automata
 
             lexeme.Append(_currentSymbol.Character);
             _currentSymbol = _inputStream.GetNextSymbol();
-            return new Token(lexeme.ToString(), TokenType.CharSimple, row, col);
+            return new Token(lexeme.ToString(), TokenType.LiteralCharSimple, row, col);
         }
 
         private Token GetEscapeSecuenceToken(StringBuilder lexeme, int row, int col)
@@ -72,6 +72,11 @@ namespace LexerAnalyser.Automata
             int value = symbol;
 
             return (value >= 32 && value <= 38) || (value >= 40 && value <= 126);
+        }
+
+        private bool IsCurrentSymbolBackSlash()
+        {
+            return _currentSymbol.Character == '\\';
         }
 
         private void InitEscapeSecuenceDictionary()

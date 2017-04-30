@@ -12,7 +12,7 @@ namespace LexerAnalyser.Enums
         LiteralBinary,
         LiteralHexadecimal,
         LiteralFloat,
-        CharSimple,
+        LiteralCharSimple,
         EscapeSecuenceSingleQuote,
         EscapeSecuenceDoubleQuote,
         EscapeSecuenceBackslash,
@@ -25,6 +25,7 @@ namespace LexerAnalyser.Enums
         EscapeSecuenceHorizontalTab,
         EscapeSecuenceVerticalQuote,
         LiteralTrue,
-        LiteralFalse
+        LiteralFalse,
+        LiteralRegularString
     }
 }

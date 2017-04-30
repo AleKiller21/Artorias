@@ -25,6 +25,7 @@ namespace LexerAnalyser.Automata
                 if (Char.IsLetter(_currentSymbol.Character)) return GetOpenToken();
                 if (Char.IsDigit(_currentSymbol.Character)) return GetNumLiteralToken();
                 if (_currentSymbol.Character == '\'') return GetCharToken();
+                if (_currentSymbol.Character == '\"') return GetStringToken();
 
                 _currentSymbol = _inputStream.GetNextSymbol();
             }
