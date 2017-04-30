@@ -14,10 +14,8 @@ namespace Artorias
             var tokens = lexer.GetTokens();
             foreach (var token in tokens)
             {
-                Console.WriteLine(token.Lexeme + "-" + token.Row + "-" + token.Column + "-" + token.Type);
+                Console.WriteLine(token.Lexeme + " - " + "Row " + token.Row + " - " + "Column " + token.Column + " - " + "Type " + token.Type + "\n");
             }
-            //var x = @"Hello World\n\n";
-            //Console.WriteLine(@x);
         }
     }
 }

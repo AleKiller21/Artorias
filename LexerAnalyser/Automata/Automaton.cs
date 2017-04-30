@@ -28,10 +28,10 @@ namespace LexerAnalyser.Automata
 
         public Token GetToken()
         {
-            //string _ = "jack";
             while (_currentSymbol.Character != '\0')
             {
                 while(Char.IsWhiteSpace(_currentSymbol.Character)) _currentSymbol = _inputStream.GetNextSymbol();
+                if(SkipComments()) continue;
 
                 if (Char.IsLetter(_currentSymbol.Character) || _currentSymbol.Character == '_') return GetOpenToken();
                 if (Char.IsDigit(_currentSymbol.Character)) return GetNumLiteralToken();
@@ -49,6 +49,42 @@ namespace LexerAnalyser.Automata
             }
 
             return new Token("\0", TokenType.Eof, _currentSymbol.RowCount, _currentSymbol.ColCount);
+        }
+
+        private bool SkipComments()
+        {
+            if(_currentSymbol.Character == '/' && _inputStream.PeekNextSymbol().Character == '/') return SkipLineComment();
+            if (_currentSymbol.Character == '/' &&
+                     _inputStream.PeekNextSymbol().Character == '*') return SkipBlockComment(_currentSymbol.RowCount, _currentSymbol.ColCount);
+
+            return false;
+        }
+
+        private bool SkipBlockComment(int row, int col)
+        {
+            _currentSymbol = _inputStream.GetNextSymbol();
+
+            do
+            {
+                _currentSymbol = _inputStream.GetNextSymbol();
+                if(_currentSymbol.Character == '\0')
+                    throw new LexicalException(String.Format("End of file found. The block-line comment at row {0} column {1} was never closed.", row, col));
+            } while (_currentSymbol.Character != '*' || _inputStream.PeekNextSymbol().Character != '/');
+
+            _currentSymbol = _inputStream.GetNextSymbol();
+            _currentSymbol = _inputStream.GetNextSymbol();
+            return true;
+        }
+
+        private bool SkipLineComment()
+        {
+            do
+            {
+                _currentSymbol = _inputStream.GetNextSymbol();
+            } while (_currentSymbol.Character != '\n' && _currentSymbol.Character != '\0');
+
+            _currentSymbol = _inputStream.GetNextSymbol();
+            return true;
         }
 
         private Token GetOpenToken()
