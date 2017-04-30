@@ -70,7 +70,7 @@ namespace LexerAnalyser.Automata
             var col = _currentSymbol.ColCount;
 
             _currentSymbol = _inputStream.GetNextSymbol();
-            if(_currentSymbol.Character != '"') throw new LexicalException(String.Format("Invalid verbatim string literal at row {0} column{1}", row, col));
+            if(_currentSymbol.Character != '"') throw new LexicalException(String.Format("Invalid verbatim string literal at row {0} column {1}", row, col));
 
             do
             {

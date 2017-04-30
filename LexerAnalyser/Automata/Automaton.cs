@@ -20,7 +20,7 @@ namespace LexerAnalyser.Automata
             _currentSymbol = _inputStream.GetNextSymbol();
             InitEscapeSecuenceDictionary();
             InitializePunctuatorsDictionary();
-            InitEscapeSecuenceDictionary();
+            InitializeOperatorsDictionary();
         }
 
         public Token GetToken()
@@ -34,6 +34,9 @@ namespace LexerAnalyser.Automata
                 if (_currentSymbol.Character == '@') return GetVerbatimStringToken();
 
                 var token = GetPunctuatorToken();
+                if (token != null) return token;
+
+                token = GetOperatorToken();
                 if (token != null) return token;
 
                 _currentSymbol = _inputStream.GetNextSymbol();
@@ -55,6 +58,7 @@ namespace LexerAnalyser.Automata
 
         private Token GetIdToken()
         {
+            //TODO validar si el id es as o is los cuales son operadores
             //TODO Aceptar Unicode characters (opcional)
             //TODO permitir que el id pueda empezar con _
             //TODO validar si el id formado no es una palabra reservada.
@@ -94,51 +98,6 @@ namespace LexerAnalyser.Automata
         {
             lexeme.Append(_currentSymbol.Character);
             _currentSymbol = _inputStream.GetNextSymbol();
-        }
-
-        private void InitializeOperatorsDictionary()
-        {
-            _operatorsDictionary = new Dictionary<string, TokenType>
-            {
-                ["+"] = TokenType.Addition,
-                ["-"] = TokenType.Subtract,
-                ["*"] = TokenType.Multiply,
-                ["/"] = TokenType.Division,
-                ["&"] = TokenType.LogicalAnd,
-                ["|"] = TokenType.LogicalOr,
-                ["^"] = TokenType.LogicalXor,
-                ["!"] = TokenType.LogicalNegation,
-                ["~"] = TokenType.BitwiseNegation,
-                ["<<"] = TokenType.ShiftLeft,
-                [">>"] = TokenType.ShiftRight,
-                ["++"] = TokenType.Increment,
-                ["--"] = TokenType.Decrement,
-                ["??"] = TokenType.NullCoalescing,
-                ["as"] = TokenType.AsType,
-                ["is"] = TokenType.IsType,
-                ["="] = TokenType.Assignment,
-                ["%"] = TokenType.Modulo,
-                ["<="] = TokenType.LessThanOrEqual,
-                [">="] = TokenType.GreaterThanOrEqual,
-                ["&&"] = TokenType.ConditionalAnd,
-                ["||"] = TokenType.ConditionalOr,
-                ["=="] = TokenType.Equal,
-                ["!="] = TokenType.NotEqual,
-                ["<"] = TokenType.LessThan,
-                [">"] = TokenType.GreaterThan,
-                ["?"] = TokenType.Conditional,
-                ["+="] = TokenType.AddEqual,
-                ["-="] = TokenType.SubtractEqual,
-                ["*="] = TokenType.MultiplyEqual,
-                ["/="] = TokenType.DivideEqual,
-                ["%="] = TokenType.ModuloEqual,
-                ["&="] = TokenType.AmpersandEqual,
-                ["|="] = TokenType.OrEqual,
-                ["^="] = TokenType.XorEqual,
-                ["<<="] = TokenType.ShiftLeftEqual,
-                [">>="] = TokenType.ShiftRightEqual
-            };
-
         }
 
         private void InitializePunctuatorsDictionary()
