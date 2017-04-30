@@ -52,6 +52,8 @@ namespace LexerAnalyser.Automata
             if(token.Lexeme.Equals("true")) return new Token(token.Lexeme, TokenType.LiteralTrue, token.Row, token.Column);
             if(token.Lexeme.Equals("false")) return new Token(token.Lexeme, TokenType.LiteralFalse, token.Row, token.Column);
             if(token.Lexeme.Equals("null")) return new Token(token.Lexeme, TokenType.LiteralNull, token.Row, token.Column);
+            if(token.Lexeme.Equals("as")) return new Token(token.Lexeme, TokenType.OpAsType, token.Row, token.Column);
+            if(token.Lexeme.Equals("is")) return new Token(token.Lexeme, TokenType.OpIsType, token.Row, token.Column);
 
             return token;
         }

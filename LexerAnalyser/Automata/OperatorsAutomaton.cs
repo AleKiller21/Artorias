@@ -22,34 +22,34 @@ namespace LexerAnalyser.Automata
 
             switch (type)
             {
-                case TokenType.Addition:
-                    return GetCompoundOperatorToken(TokenType.Addition);
-                case TokenType.Subtract:
-                    return GetCompoundOperatorToken(TokenType.Subtract);
-;                case TokenType.Multiply:
-                    return GetCompoundOperatorToken(TokenType.Multiply);
-                case TokenType.Division:
-                    return GetCompoundOperatorToken(TokenType.Division);
-                case TokenType.LogicalAnd:
-                    return GetCompoundOperatorToken(TokenType.LogicalAnd);
-                case TokenType.LogicalOr:
-                    return GetCompoundOperatorToken(TokenType.LogicalOr);
-                case TokenType.LogicalXor:
-                    return GetCompoundOperatorToken(TokenType.LogicalXor);
-                case TokenType.LogicalNegation:
-                    return GetCompoundOperatorToken(TokenType.LogicalNegation);
-                case TokenType.Assignment:
-                    return GetCompoundOperatorToken(TokenType.Assignment);
-                case TokenType.Modulo:
-                    return GetCompoundOperatorToken(TokenType.Modulo);
-                case TokenType.LessThan:
-                    return GetCompoundOperatorToken(TokenType.LessThan);
-                case TokenType.GreaterThan:
-                    return GetCompoundOperatorToken(TokenType.GreaterThan);
-                case TokenType.Conditional:
-                    return GetCompoundOperatorToken(TokenType.Conditional);
-                case TokenType.BitwiseNegation:
-                    return GetCompoundOperatorToken(TokenType.BitwiseNegation);
+                case TokenType.OpAddition:
+                    return GetCompoundOperatorToken(TokenType.OpAddition);
+                case TokenType.OpSubtract:
+                    return GetCompoundOperatorToken(TokenType.OpSubtract);
+;                case TokenType.OpMultiply:
+                    return GetCompoundOperatorToken(TokenType.OpMultiply);
+                case TokenType.OpDivision:
+                    return GetCompoundOperatorToken(TokenType.OpDivision);
+                case TokenType.OpLogicalAnd:
+                    return GetCompoundOperatorToken(TokenType.OpLogicalAnd);
+                case TokenType.OpLogicalOr:
+                    return GetCompoundOperatorToken(TokenType.OpLogicalOr);
+                case TokenType.OpLogicalXor:
+                    return GetCompoundOperatorToken(TokenType.OpLogicalXor);
+                case TokenType.OpLogicalNegation:
+                    return GetCompoundOperatorToken(TokenType.OpLogicalNegation);
+                case TokenType.OpAssignment:
+                    return GetCompoundOperatorToken(TokenType.OpAssignment);
+                case TokenType.OpModulo:
+                    return GetCompoundOperatorToken(TokenType.OpModulo);
+                case TokenType.OpLessThan:
+                    return GetCompoundOperatorToken(TokenType.OpLessThan);
+                case TokenType.OpGreaterThan:
+                    return GetCompoundOperatorToken(TokenType.OpGreaterThan);
+                case TokenType.OpConditional:
+                    return GetCompoundOperatorToken(TokenType.OpConditional);
+                case TokenType.OpBitwiseNegation:
+                    return GetCompoundOperatorToken(TokenType.OpBitwiseNegation);
                 default:
                     return null;
             }
@@ -81,43 +81,43 @@ namespace LexerAnalyser.Automata
         {
             _operatorsDictionary = new Dictionary<string, TokenType>
             {
-                ["+"] = TokenType.Addition,
-                ["-"] = TokenType.Subtract,
-                ["*"] = TokenType.Multiply,
-                ["/"] = TokenType.Division,
-                ["&"] = TokenType.LogicalAnd,
-                ["|"] = TokenType.LogicalOr,
-                ["^"] = TokenType.LogicalXor,
-                ["!"] = TokenType.LogicalNegation,
-                ["~"] = TokenType.BitwiseNegation,
-                ["="] = TokenType.Assignment,
-                ["%"] = TokenType.Modulo,
-                ["<"] = TokenType.LessThan,
-                [">"] = TokenType.GreaterThan,
-                ["?"] = TokenType.Conditional,
-                ["<<"] = TokenType.ShiftLeft,
-                [">>"] = TokenType.ShiftRight,
-                ["++"] = TokenType.Increment,
-                ["--"] = TokenType.Decrement,
-                ["??"] = TokenType.NullCoalescing,
-                ["as"] = TokenType.AsType,
-                ["is"] = TokenType.IsType,
-                ["<="] = TokenType.LessThanOrEqual,
-                [">="] = TokenType.GreaterThanOrEqual,
-                ["&&"] = TokenType.ConditionalAnd,
-                ["||"] = TokenType.ConditionalOr,
-                ["=="] = TokenType.Equal,
-                ["!="] = TokenType.NotEqual,
-                ["+="] = TokenType.AddEqual,
-                ["-="] = TokenType.SubtractEqual,
-                ["*="] = TokenType.MultiplyEqual,
-                ["/="] = TokenType.DivideEqual,
-                ["%="] = TokenType.ModuloEqual,
-                ["&="] = TokenType.AmpersandEqual,
-                ["|="] = TokenType.OrEqual,
-                ["^="] = TokenType.XorEqual,
-                ["<<="] = TokenType.ShiftLeftEqual,
-                [">>="] = TokenType.ShiftRightEqual
+                ["+"] = TokenType.OpAddition,
+                ["-"] = TokenType.OpSubtract,
+                ["*"] = TokenType.OpMultiply,
+                ["/"] = TokenType.OpDivision,
+                ["&"] = TokenType.OpLogicalAnd,
+                ["|"] = TokenType.OpLogicalOr,
+                ["^"] = TokenType.OpLogicalXor,
+                ["!"] = TokenType.OpLogicalNegation,
+                ["~"] = TokenType.OpBitwiseNegation,
+                ["="] = TokenType.OpAssignment,
+                ["%"] = TokenType.OpModulo,
+                ["<"] = TokenType.OpLessThan,
+                [">"] = TokenType.OpGreaterThan,
+                ["?"] = TokenType.OpConditional,
+                ["<<"] = TokenType.OpShiftLeft,
+                [">>"] = TokenType.OpShiftRight,
+                ["++"] = TokenType.OpIncrement,
+                ["--"] = TokenType.OpDecrement,
+                ["??"] = TokenType.OpNullCoalescing,
+                ["as"] = TokenType.OpAsType,
+                ["is"] = TokenType.OpIsType,
+                ["<="] = TokenType.OpLessThanOrEqual,
+                [">="] = TokenType.OpGreaterThanOrEqual,
+                ["&&"] = TokenType.OpConditionalAnd,
+                ["||"] = TokenType.OpConditionalOr,
+                ["=="] = TokenType.OpEqual,
+                ["!="] = TokenType.OpNotEqual,
+                ["+="] = TokenType.OpAddEqual,
+                ["-="] = TokenType.OpSubtractEqual,
+                ["*="] = TokenType.OpMultiplyEqual,
+                ["/="] = TokenType.OpDivideEqual,
+                ["%="] = TokenType.OpModuloEqual,
+                ["&="] = TokenType.OpAmpersandEqual,
+                ["|="] = TokenType.OpOrEqual,
+                ["^="] = TokenType.OpXorEqual,
+                ["<<="] = TokenType.OpShiftLeftEqual,
+                [">>="] = TokenType.OpShiftRightEqual
             };
 
         }
