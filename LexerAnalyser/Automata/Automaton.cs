@@ -49,9 +49,9 @@ namespace LexerAnalyser.Automata
         {
             Token token = GetIdToken();
 
-            //TODO soportar null literal
             if(token.Lexeme.Equals("true")) return new Token(token.Lexeme, TokenType.LiteralTrue, token.Row, token.Column);
             if(token.Lexeme.Equals("false")) return new Token(token.Lexeme, TokenType.LiteralFalse, token.Row, token.Column);
+            if(token.Lexeme.Equals("null")) return new Token(token.Lexeme, TokenType.LiteralNull, token.Row, token.Column);
 
             return token;
         }

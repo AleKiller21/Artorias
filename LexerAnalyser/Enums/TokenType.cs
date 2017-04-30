@@ -28,6 +28,7 @@ namespace LexerAnalyser.Enums
         LiteralFalse,
         LiteralRegularString,
         LiteralVerbatimString,
+        LiteralNull,
         CurlyBraceOpen,
         CurlyBraceClose,
         SquareBracketOpen,
