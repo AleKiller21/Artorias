@@ -12,6 +12,7 @@ namespace LexerAnalyser.Automata
         private readonly IInputStream _inputStream;
         private Dictionary<string, TokenType> _operatorsDictionary;
         private Dictionary<char, TokenType> _punctuatorsDictionary;
+        private Dictionary<string, TokenType> _reservedWordsDictionary;
         private Symbol _currentSymbol;
 
         public Automaton(IInputStream inputStream)
@@ -21,6 +22,7 @@ namespace LexerAnalyser.Automata
             InitEscapeSecuenceDictionary();
             InitializePunctuatorsDictionary();
             InitializeOperatorsDictionary();
+            InitializeReservedWordsDictionary();
         }
 
         public Token GetToken()
@@ -118,6 +120,77 @@ namespace LexerAnalyser.Automata
                 [';'] = TokenType.EndStatement
             };
 
+        }
+
+        private void InitializeReservedWordsDictionary()
+        {
+            _reservedWordsDictionary = new Dictionary<string, TokenType>
+            {
+                ["abstract"] = TokenType.RwAbstract,
+                ["class"] = TokenType.RwClass,
+                ["delegate"] = TokenType.RwDelegate,
+                ["event"] = TokenType.RwEvent,
+                ["fixed"] = TokenType.RwFixed,
+                ["if"] = TokenType.RwIf,
+                ["internal"] = TokenType.RwInternal,
+                ["new"] = TokenType.RwNew,
+                ["override"] = TokenType.RwOverride,
+                ["readonly"] = TokenType.RwReadOnly,
+                ["struct"] = TokenType.RwStruct,
+                ["try"] = TokenType.RwTry,
+                ["unsafe"] = TokenType.RwUnsafe,
+                ["volatile"] = TokenType.RwVolatile,
+                ["case"] = TokenType.RwCase,
+                ["const"] = TokenType.RwConst,
+                ["do"] = TokenType.RwDo,
+                ["explicit"] = TokenType.RwExplicit,
+                ["float"] = TokenType.RwFloat,
+                ["implicit"] = TokenType.RwImplicit,
+                ["params"] = TokenType.RwParams,
+                ["ref"] = TokenType.RwRef,
+                ["sizeof"] = TokenType.RwSizeOf,
+                ["switch"] = TokenType.RwSwitch,
+                ["typeof"] = TokenType.RwTypeOf,
+                ["while"] = TokenType.RwWhile,
+                ["base"] = TokenType.RwBase,
+                ["catch"] = TokenType.RwCatch,
+                ["continue"] = TokenType.RwContinue,
+                ["extern"] = TokenType.RwExtern,
+                ["for"] = TokenType.RwFor,
+                ["in"] = TokenType.RwIn,
+                ["lock"] = TokenType.RwLock,
+                ["object"] = TokenType.RwObject,
+                ["private"] = TokenType.RwPrivate,
+                ["return"] = TokenType.RwReturn,
+                ["stackalloc"] = TokenType.RwStackalloc,
+                ["this"] = TokenType.RwThis,
+                ["using"] = TokenType.RwUsing,
+                ["bool"] = TokenType.RwBool,
+                ["char"] = TokenType.RwChar,
+                ["else"] = TokenType.RwElse,
+                ["false"] = TokenType.RwFalse,
+                ["foreach"] = TokenType.RwForEach,
+                ["int"] = TokenType.RwInt,
+                ["operator"] = TokenType.RwOperator,
+                ["protected"] = TokenType.RwProtected,
+                ["static"] = TokenType.RwStatic,
+                ["throw"] = TokenType.RwThrow,
+                ["virtual"] = TokenType.RwVirtual,
+                ["break"] = TokenType.RwBreak,
+                ["checked"] = TokenType.RwChecked,
+                ["default"] = TokenType.RwDefault,
+                ["enum"] = TokenType.RwEnum,
+                ["finally"] = TokenType.RwFinally,
+                ["goto"] = TokenType.RwGoto,
+                ["interface"] = TokenType.RwInterface,
+                ["namespace"] = TokenType.RwNameSpace,
+                ["out"] = TokenType.RwOut,
+                ["public"] = TokenType.RwPublic,
+                ["sealed"] = TokenType.RwSealed,
+                ["string"] = TokenType.RwString,
+                ["unchecked"] = TokenType.RwUnchecked,
+                ["void"] = TokenType.RwVoid
+            };
         }
     }
 }
