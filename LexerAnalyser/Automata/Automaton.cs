@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
+using LexerAnalyser.Exceptions;
 using LexerAnalyser.Interfaces;
 using LexerAnalyser.Models;
 
@@ -27,9 +28,12 @@ namespace LexerAnalyser.Automata
 
         public Token GetToken()
         {
+            //string _ = "jack";
             while (_currentSymbol.Character != '\0')
             {
-                if (Char.IsLetter(_currentSymbol.Character)) return GetOpenToken();
+                while(Char.IsWhiteSpace(_currentSymbol.Character)) _currentSymbol = _inputStream.GetNextSymbol();
+
+                if (Char.IsLetter(_currentSymbol.Character) || _currentSymbol.Character == '_') return GetOpenToken();
                 if (Char.IsDigit(_currentSymbol.Character)) return GetNumLiteralToken();
                 if (_currentSymbol.Character == '\'') return GetCharToken();
                 if (_currentSymbol.Character == '\"') return GetStringToken();
@@ -41,7 +45,7 @@ namespace LexerAnalyser.Automata
                 token = GetOperatorToken();
                 if (token != null) return token;
 
-                _currentSymbol = _inputStream.GetNextSymbol();
+                throw new LexicalException(String.Format("Unrecognized token at row {0} column {1}.", _currentSymbol.RowCount, _currentSymbol.ColCount));
             }
 
             return new Token("\0", TokenType.Eof, _currentSymbol.RowCount, _currentSymbol.ColCount);
@@ -49,29 +53,46 @@ namespace LexerAnalyser.Automata
 
         private Token GetOpenToken()
         {
-            Token token = GetIdToken();
+            var idToken = GetIdToken();
+            var openToken = GetSpecialLiteralToken(idToken);
+            if (openToken != null) return openToken;
 
-            if(token.Lexeme.Equals("true")) return new Token(token.Lexeme, TokenType.LiteralTrue, token.Row, token.Column);
-            if(token.Lexeme.Equals("false")) return new Token(token.Lexeme, TokenType.LiteralFalse, token.Row, token.Column);
-            if(token.Lexeme.Equals("null")) return new Token(token.Lexeme, TokenType.LiteralNull, token.Row, token.Column);
-            if(token.Lexeme.Equals("as")) return new Token(token.Lexeme, TokenType.OpAsType, token.Row, token.Column);
-            if(token.Lexeme.Equals("is")) return new Token(token.Lexeme, TokenType.OpIsType, token.Row, token.Column);
+            openToken = GetSpecialOperatorToken(idToken);
+            if (openToken != null) return openToken;
 
-            return token;
+            openToken = GetReservedWordToken(idToken);
+            return openToken ?? idToken;
+        }
+
+        private Token GetReservedWordToken(Token idToken)
+        {
+            try
+            {
+                TokenType type = _reservedWordsDictionary[idToken.Lexeme];
+                return new Token(idToken.Lexeme, type, idToken.Row, idToken.Column);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return null;
+            }
+        }
+
+        private Token GetSpecialLiteralToken(Token idToken)
+        {
+            if (idToken.Lexeme.Equals("true")) return new Token(idToken.Lexeme, TokenType.LiteralTrue, idToken.Row, idToken.Column);
+            if (idToken.Lexeme.Equals("false")) return new Token(idToken.Lexeme, TokenType.LiteralFalse, idToken.Row, idToken.Column);
+            return idToken.Lexeme.Equals("null") ? new Token(idToken.Lexeme, TokenType.LiteralNull, idToken.Row, idToken.Column) : null;
         }
 
         private Token GetIdToken()
         {
-            //TODO validar si el id es as o is los cuales son operadores
             //TODO Aceptar Unicode characters (opcional)
-            //TODO permitir que el id pueda empezar con _
-            //TODO validar si el id formado no es una palabra reservada.
             //BUG tirar una excepcion cuando se ingrese caracteres no permitidos como \
             var lexeme = new StringBuilder();
             var rowCount = _currentSymbol.RowCount;
             var colCount = _currentSymbol.ColCount;
             
-            while (Char.IsLetterOrDigit(_currentSymbol.Character))
+            while (Char.IsLetterOrDigit(_currentSymbol.Character) || _currentSymbol.Character == '_')
             {
                 lexeme.Append(_currentSymbol.Character);
                 _currentSymbol = _inputStream.GetNextSymbol();

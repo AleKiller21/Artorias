@@ -77,6 +77,12 @@ namespace LexerAnalyser.Automata
             }
         }
 
+        private Token GetSpecialOperatorToken(Token idToken)
+        {
+            if (idToken.Lexeme.Equals("as")) return new Token(idToken.Lexeme, TokenType.OpAsType, idToken.Row, idToken.Column);
+            return idToken.Lexeme.Equals("is") ? new Token(idToken.Lexeme, TokenType.OpIsType, idToken.Row, idToken.Column) : null;
+        }
+
         private void InitializeOperatorsDictionary()
         {
             _operatorsDictionary = new Dictionary<string, TokenType>
