@@ -19,6 +19,8 @@ namespace LexerAnalyser.Automata
             _inputStream = inputStream;
             _currentSymbol = _inputStream.GetNextSymbol();
             InitEscapeSecuenceDictionary();
+            InitializePunctuatorsDictionary();
+            InitEscapeSecuenceDictionary();
         }
 
         public Token GetToken()
@@ -30,6 +32,9 @@ namespace LexerAnalyser.Automata
                 if (_currentSymbol.Character == '\'') return GetCharToken();
                 if (_currentSymbol.Character == '\"') return GetStringToken();
                 if (_currentSymbol.Character == '@') return GetVerbatimStringToken();
+
+                var token = GetPunctuatorToken();
+                if (token != null) return token;
 
                 _currentSymbol = _inputStream.GetNextSymbol();
             }
@@ -50,6 +55,7 @@ namespace LexerAnalyser.Automata
 
         private Token GetIdToken()
         {
+            //TODO Aceptar Unicode characters (opcional)
             //TODO permitir que el id pueda empezar con _
             //TODO validar si el id formado no es una palabra reservada.
             //BUG tirar una excepcion cuando se ingrese caracteres no permitidos como \
@@ -66,6 +72,24 @@ namespace LexerAnalyser.Automata
             return new Token(lexeme.ToString(), TokenType.Id, rowCount, colCount);
         }
 
+        private Token GetPunctuatorToken()
+        {
+            try
+            {
+                var type = _punctuatorsDictionary[_currentSymbol.Character];
+                var row = _currentSymbol.RowCount;
+                var col = _currentSymbol.ColCount;
+                var lexeme = _currentSymbol.Character;
+
+                _currentSymbol = _inputStream.GetNextSymbol();
+                return new Token(lexeme.ToString(), type, row, col);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return null;
+            }
+        }
+
         private void ConsumeSymbol(StringBuilder lexeme)
         {
             lexeme.Append(_currentSymbol.Character);
@@ -74,61 +98,65 @@ namespace LexerAnalyser.Automata
 
         private void InitializeOperatorsDictionary()
         {
-            _operatorsDictionary = new Dictionary<string, TokenType>();
+            _operatorsDictionary = new Dictionary<string, TokenType>
+            {
+                ["+"] = TokenType.Addition,
+                ["-"] = TokenType.Subtract,
+                ["*"] = TokenType.Multiply,
+                ["/"] = TokenType.Division,
+                ["&"] = TokenType.LogicalAnd,
+                ["|"] = TokenType.LogicalOr,
+                ["^"] = TokenType.LogicalXor,
+                ["!"] = TokenType.LogicalNegation,
+                ["~"] = TokenType.BitwiseNegation,
+                ["<<"] = TokenType.ShiftLeft,
+                [">>"] = TokenType.ShiftRight,
+                ["++"] = TokenType.Increment,
+                ["--"] = TokenType.Decrement,
+                ["??"] = TokenType.NullCoalescing,
+                ["as"] = TokenType.AsType,
+                ["is"] = TokenType.IsType,
+                ["="] = TokenType.Assignment,
+                ["%"] = TokenType.Modulo,
+                ["<="] = TokenType.LessThanOrEqual,
+                [">="] = TokenType.GreaterThanOrEqual,
+                ["&&"] = TokenType.ConditionalAnd,
+                ["||"] = TokenType.ConditionalOr,
+                ["=="] = TokenType.Equal,
+                ["!="] = TokenType.NotEqual,
+                ["<"] = TokenType.LessThan,
+                [">"] = TokenType.GreaterThan,
+                ["?"] = TokenType.Conditional,
+                ["+="] = TokenType.AddEqual,
+                ["-="] = TokenType.SubtractEqual,
+                ["*="] = TokenType.MultiplyEqual,
+                ["/="] = TokenType.DivideEqual,
+                ["%="] = TokenType.ModuloEqual,
+                ["&="] = TokenType.AmpersandEqual,
+                ["|="] = TokenType.OrEqual,
+                ["^="] = TokenType.XorEqual,
+                ["<<="] = TokenType.ShiftLeftEqual,
+                [">>="] = TokenType.ShiftRightEqual
+            };
 
-            _operatorsDictionary["+"] = TokenType.Addition;
-            _operatorsDictionary["-"] = TokenType.Subtract;
-            _operatorsDictionary["*"] = TokenType.Multiply;
-            _operatorsDictionary["/"] = TokenType.Division;
-            _operatorsDictionary["&"] = TokenType.LogicalAnd;
-            _operatorsDictionary["|"] = TokenType.LogicalOr;
-            _operatorsDictionary["^"] = TokenType.LogicalXor;
-            _operatorsDictionary["!"] = TokenType.LogicalNegation;
-            _operatorsDictionary["~"] = TokenType.BitwiseNegation;
-            _operatorsDictionary["<<"] = TokenType.ShiftLeft;
-            _operatorsDictionary[">>"] = TokenType.ShiftRight;
-            _operatorsDictionary["++"] = TokenType.Increment;
-            _operatorsDictionary["--"] = TokenType.Decrement;
-            _operatorsDictionary["??"] = TokenType.NullCoalescing;
-            _operatorsDictionary["as"] = TokenType.AsType;
-            _operatorsDictionary["is"] = TokenType.IsType;
-            _operatorsDictionary["="] = TokenType.Assignment;
-            _operatorsDictionary["%"] = TokenType.Modulo;
-            _operatorsDictionary["<="] = TokenType.LessThanOrEqual;
-            _operatorsDictionary[">="] = TokenType.GreaterThanOrEqual;
-            _operatorsDictionary["&&"] = TokenType.ConditionalAnd;
-            _operatorsDictionary["||"] = TokenType.ConditionalOr;
-            _operatorsDictionary["=="] = TokenType.Equal;
-            _operatorsDictionary["!="] = TokenType.NotEqual;
-            _operatorsDictionary["<"] = TokenType.LessThan;
-            _operatorsDictionary[">"] = TokenType.GreaterThan;
-            _operatorsDictionary["?"] = TokenType.Conditional;
-            _operatorsDictionary["+="] = TokenType.AddEqual;
-            _operatorsDictionary["-="] = TokenType.SubtractEqual;
-            _operatorsDictionary["*="] = TokenType.MultiplyEqual;
-            _operatorsDictionary["/="] = TokenType.DivideEqual;
-            _operatorsDictionary["%="] = TokenType.ModuloEqual;
-            _operatorsDictionary["&="] = TokenType.AmpersandEqual;
-            _operatorsDictionary["|="] = TokenType.OrEqual;
-            _operatorsDictionary["^="] = TokenType.XorEqual;
-            _operatorsDictionary["<<="] = TokenType.ShiftLeftEqual;
-            _operatorsDictionary[">>="] = TokenType.ShiftRightEqual;
         }
 
         private void InitializePunctuatorsDictionary()
         {
-            _punctuatorsDictionary = new Dictionary<char, TokenType>();
+            _punctuatorsDictionary = new Dictionary<char, TokenType>
+            {
+                ['{'] = TokenType.CurlyBraceOpen,
+                ['}'] = TokenType.CurlyBraceClose,
+                ['['] = TokenType.SquareBracketOpen,
+                [']'] = TokenType.SquareBracketClose,
+                ['('] = TokenType.ParenthesisOpen,
+                [')'] = TokenType.ParenthesisClose,
+                ['.'] = TokenType.MemberAccess,
+                [','] = TokenType.Comma,
+                [':'] = TokenType.Colon,
+                [';'] = TokenType.EndStatement
+            };
 
-            _punctuatorsDictionary['{'] = TokenType.CurlyBraceOpen;
-            _punctuatorsDictionary['}'] = TokenType.CurlyBraceClose;
-            _punctuatorsDictionary['['] = TokenType.SquareBracketOpen;
-            _punctuatorsDictionary[']'] = TokenType.SquareBracketClose;
-            _punctuatorsDictionary['('] = TokenType.ParenthesisOpen;
-            _punctuatorsDictionary[')'] = TokenType.ParenthesisClose;
-            _punctuatorsDictionary['.'] = TokenType.MemberAccess;
-            _punctuatorsDictionary[','] = TokenType.Comma;
-            _punctuatorsDictionary[':'] = TokenType.Colon;
-            _punctuatorsDictionary[';'] = TokenType.EndStatement;
         }
     }
 }
