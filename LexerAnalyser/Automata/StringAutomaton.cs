@@ -38,7 +38,6 @@ namespace LexerAnalyser.Automata
 
         private Token GetRegularStringToken(StringBuilder lexeme, int row, int col)
         {
-            //var x = "\"";
             var message = String.Format("Invalid string literal at row {0} column {1}.", row, col);
             while (IsValidStringCharacter() || IsCurrentSymbolBackSlash())
             {
@@ -62,6 +61,30 @@ namespace LexerAnalyser.Automata
             return value == 9 || (value == 32 || value == 33) || 
                     (value >= 35 && value <= 91) || 
                     (value >= 93 && value <= 126);
+        }
+
+        private Token GetVerbatimStringToken()
+        {
+            var lexeme = new StringBuilder("" + _currentSymbol.Character);
+            var row = _currentSymbol.RowCount;
+            var col = _currentSymbol.ColCount;
+
+            _currentSymbol = _inputStream.GetNextSymbol();
+            if(_currentSymbol.Character != '"') throw new LexicalException(String.Format("Invalid verbatim string literal at row {0} column{1}", row, col));
+
+            do
+            {
+                ConsumeSymbol(lexeme);
+                if (_currentSymbol.Character == '"' && _inputStream.PeekNextSymbol().Character != '"') break;
+                if (_currentSymbol.Character == '"' && _inputStream.PeekNextSymbol().Character == '"')
+                {
+                    ConsumeSymbol(lexeme);
+                }
+            } while (_currentSymbol.Character != '\0');
+
+            if(_currentSymbol.Character == '\0') throw new LexicalException(String.Format("The verbatim string literal at row {0} column {1} was never closed.", row, col));
+            ConsumeSymbol(lexeme);
+            return new Token(lexeme.ToString(), TokenType.LiteralVerbatimString, row, col);
         }
     }
 }

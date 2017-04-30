@@ -26,6 +26,7 @@ namespace LexerAnalyser.Automata
                 if (Char.IsDigit(_currentSymbol.Character)) return GetNumLiteralToken();
                 if (_currentSymbol.Character == '\'') return GetCharToken();
                 if (_currentSymbol.Character == '\"') return GetStringToken();
+                if (_currentSymbol.Character == '@') return GetVerbatimStringToken();
 
                 _currentSymbol = _inputStream.GetNextSymbol();
             }
@@ -58,6 +59,12 @@ namespace LexerAnalyser.Automata
             }
 
             return new Token(lexeme.ToString(), TokenType.Id, rowCount, colCount);
+        }
+
+        private void ConsumeSymbol(StringBuilder lexeme)
+        {
+            lexeme.Append(_currentSymbol.Character);
+            _currentSymbol = _inputStream.GetNextSymbol();
         }
     }
 }

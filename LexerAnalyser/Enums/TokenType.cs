@@ -26,6 +26,7 @@ namespace LexerAnalyser.Enums
         EscapeSecuenceVerticalQuote,
         LiteralTrue,
         LiteralFalse,
-        LiteralRegularString
+        LiteralRegularString,
+        LiteralVerbatimString
     }
 }

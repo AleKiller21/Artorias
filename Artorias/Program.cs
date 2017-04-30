@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using LexerAnalyser;
 
 namespace Artorias
@@ -15,7 +16,9 @@ namespace Artorias
             {
                 Console.WriteLine(token.Lexeme + "-" + token.Row + "-" + token.Column + "-" + token.Type);
             }
-            //Console.WriteLine("hola\0jack");
+            //var x = new StringBuilder();
+            //x.Append('\'').Append('\\').Append('n').Append('\'');
+            //Console.WriteLine(x.ToString());
         }
     }
 }
