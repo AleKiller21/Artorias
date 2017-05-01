@@ -16,8 +16,11 @@ namespace LexerAnalyser.Automata
             var col = _currentSymbol.ColCount;
 
             _currentSymbol = _inputStream.GetNextSymbol();
-            if(_currentSymbol.Character == '\"')
-                return new Token(lexeme.Append(_currentSymbol.Character).ToString(), TokenType.LiteralRegularString, row, col);
+            if (_currentSymbol.Character == '\"')
+            {
+                ConsumeSymbol(lexeme);
+                return new Token(lexeme.ToString(), TokenType.LiteralRegularString, row, col);
+            }
 
             return GetRegularStringToken(lexeme, row, col);
         }
