@@ -8,7 +8,7 @@ namespace Artorias
     {
         static void Main(string[] args)
         {
-            FileInputStream stream = new FileInputStream("C:\\Users\\alefe\\Documents\\Code\\C#\\Compiler\\Artorias\\Test\\sample.txt");
+            FileInputStream stream = new FileInputStream(args[0]);
             Lexer lexer = new Lexer(stream);
 
             var tokens = lexer.GetTokens();
@@ -16,8 +16,6 @@ namespace Artorias
             {
                 Console.WriteLine(token.Lexeme + " - " + "Row " + token.Row + " - " + "Column " + token.Column + " - " + "Type " + token.Type + "\n");
             }
-
-           // var x = "\?";
         }
     }
 }
