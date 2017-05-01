@@ -69,9 +69,7 @@ namespace LexerAnalyser.Automata
 
         private bool IsValidCharacter(char symbol)
         {
-            int value = symbol;
-
-            return (value >= 32 && value <= 38) || (value >= 40 && value <= 126);
+            return symbol != '\'' && symbol != '\\' && symbol != '\n';
         }
 
         private bool IsCurrentSymbolBackSlash()

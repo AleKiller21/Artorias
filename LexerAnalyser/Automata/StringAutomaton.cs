@@ -56,11 +56,6 @@ namespace LexerAnalyser.Automata
 
         private bool IsValidStringCharacter()
         {
-            //int value = _currentSymbol.Character;
-
-            //return value == 9 || (value == 32 || value == 33) || 
-            //        (value >= 35 && value <= 91) || 
-            //        (value >= 93 && value <= 255);
             return _currentSymbol.Character != '"' && _currentSymbol.Character != '\\' && _currentSymbol.Character != '\n';
         }
 
