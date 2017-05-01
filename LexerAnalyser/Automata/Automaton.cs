@@ -30,7 +30,11 @@ namespace LexerAnalyser.Automata
         {
             while (_currentSymbol.Character != '\0')
             {
-                while(Char.IsWhiteSpace(_currentSymbol.Character)) _currentSymbol = _inputStream.GetNextSymbol();
+                if (Char.IsWhiteSpace(_currentSymbol.Character))
+                {
+                    _currentSymbol = _inputStream.GetNextSymbol();
+                    continue;
+                }
                 if(SkipComments()) continue;
 
                 if (Char.IsLetter(_currentSymbol.Character) || _currentSymbol.Character == '_') return GetOpenToken();
@@ -123,7 +127,6 @@ namespace LexerAnalyser.Automata
         private Token GetIdToken()
         {
             //TODO Aceptar Unicode characters (opcional)
-            //BUG tirar una excepcion cuando se ingrese caracteres no permitidos como \
             var lexeme = new StringBuilder();
             var rowCount = _currentSymbol.RowCount;
             var colCount = _currentSymbol.ColCount;

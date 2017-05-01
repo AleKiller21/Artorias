@@ -16,7 +16,8 @@ namespace Artorias
             {
                 Console.WriteLine(token.Lexeme + " - " + "Row " + token.Row + " - " + "Column " + token.Column + " - " + "Type " + token.Type + "\n");
             }
-            //Console.WriteLine('  ');
+            int x = 5;
+            
         }
     }
 }

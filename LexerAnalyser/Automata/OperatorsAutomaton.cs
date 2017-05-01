@@ -67,7 +67,7 @@ namespace LexerAnalyser.Automata
                 if(Char.IsWhiteSpace(_currentSymbol.Character)) continue;
                 try
                 {
-                    type = _operatorsDictionary[lexeme.ToString() + _currentSymbol.Character.ToString()];
+                    type = _operatorsDictionary[lexeme + _currentSymbol.Character.ToString()];
                     lexeme.Append(_currentSymbol.Character);
                 }
                 catch (KeyNotFoundException e)
