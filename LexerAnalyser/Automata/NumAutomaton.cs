@@ -19,11 +19,17 @@ namespace LexerAnalyser.Automata
             var lexeme = new StringBuilder();
             var rowCount = _currentSymbol.RowCount;
             var colCount = _currentSymbol.ColCount;
+            var x = 25f;
 
             while (Char.IsDigit(_currentSymbol.Character))
             {
-                lexeme.Append(_currentSymbol.Character);
-                _currentSymbol = _inputStream.GetNextSymbol();
+                //lexeme.Append(_currentSymbol.Character);
+                //_currentSymbol = _inputStream.GetNextSymbol();
+                ConsumeSymbol(lexeme);
+
+                if (_currentSymbol.Character != 'f' && _currentSymbol.Character != 'F') continue;
+                ConsumeSymbol(lexeme);
+                return new Token(lexeme.ToString(), TokenType.LiteralFloat, rowCount, colCount);
             }
 
             if (_currentSymbol.Character == '.')
