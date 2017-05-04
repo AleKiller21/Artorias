@@ -139,6 +139,19 @@ namespace LexerAnalyser.Enums
         RwSealed,
         RwString,
         RwUnchecked,
-        RwVoid
+        RwVoid,
+        RwOrIdAdd,
+        RwOrIdAsync,
+        RwOrIdAwait,
+        RwOrIdDynamic,
+        RwOrIdGet,
+        RwOrIdGlobal,
+        RwOrIdPartial,
+        RwOrIdRemove,
+        RwOrIdSet,
+        RwOrIdValue,
+        RwOrIdVar,
+        RwOrIdWhere,
+        RwOrId
     }
 }

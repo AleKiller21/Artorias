@@ -249,7 +249,20 @@ namespace LexerAnalyser.Automata
                 ["sealed"] = TokenType.RwSealed,
                 ["string"] = TokenType.RwString,
                 ["unchecked"] = TokenType.RwUnchecked,
-                ["void"] = TokenType.RwVoid
+                ["void"] = TokenType.RwVoid,
+                ["add"] = TokenType.RwOrIdAdd,
+                ["async"] = TokenType.RwOrIdAsync,
+                ["await"] = TokenType.RwOrIdAwait,
+                ["dynamic"] = TokenType.RwOrIdDynamic,
+                ["get"] = TokenType.RwOrIdGet,
+                ["global"] = TokenType.RwOrIdGlobal,
+                ["partial"] = TokenType.RwOrIdPartial,
+                ["remove"] = TokenType.RwOrIdRemove,
+                ["set"] = TokenType.RwOrIdSet,
+                ["value"] = TokenType.RwOrIdValue,
+                ["var"] = TokenType.RwOrIdVar,
+                ["where"] = TokenType.RwOrIdWhere,
+                ["yield"] = TokenType.RwOrId
             };
         }
     }

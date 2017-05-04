@@ -59,7 +59,10 @@ namespace LexerAnalyser.Automata
 
         private bool IsValidStringCharacter()
         {
-            return _currentSymbol.Character != '"' && _currentSymbol.Character != '\\' && _currentSymbol.Character != '\n';
+            return _currentSymbol.Character != '"' && 
+                _currentSymbol.Character != '\\' && 
+                _currentSymbol.Character != '\n' &&
+                _currentSymbol.Character != '\0';
         }
 
         private Token GetVerbatimStringToken()
