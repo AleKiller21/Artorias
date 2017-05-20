@@ -23,7 +23,8 @@ namespace SyntaxAnalyser.Parser
                 NamespaceDeclaration();
                 OptionalNameSpaceMemberDeclaration();
             }
-            else if(CheckTokenType(TokenType.RwPublic) || CheckTokenType(TokenType.RwPrivate) || CheckTokenType(TokenType.RwProtected))
+            else if(HasEncapsulationModifier() || (CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass))
+                || CheckTokenType(TokenType.RwInterface) || CheckTokenType(TokenType.RwEnum))
                 TypeDeclarationList();
         }
 

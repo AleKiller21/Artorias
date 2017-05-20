@@ -36,6 +36,12 @@ namespace SyntaxAnalyser.Parser
             return _token.Type == type;
         }
 
+        private bool HasEncapsulationModifier()
+        {
+            return CheckTokenType(TokenType.RwPublic) || CheckTokenType(TokenType.RwPrivate) ||
+                   CheckTokenType(TokenType.RwProtected);
+        }
+
         public void Parse()
         {
             Code();
@@ -118,8 +124,8 @@ namespace SyntaxAnalyser.Parser
 
         private void TypeDeclarationList()
         {
-            if (CheckTokenType(TokenType.RwPublic) || CheckTokenType(TokenType.RwPrivate) ||
-                CheckTokenType(TokenType.RwProtected))
+            if (HasEncapsulationModifier() || (CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass))
+                || CheckTokenType(TokenType.RwInterface) || CheckTokenType(TokenType.RwEnum))
             {
                 TypeDeclaration();
                 TypeDeclarationList();

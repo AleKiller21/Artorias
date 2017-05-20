@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LexerAnalyser", "LexerAnaly
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxAnalyser", "SyntaxAnalyser\SyntaxAnalyser.csproj", "{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserUnitTests", "ParserUnitTests\ParserUnitTests.csproj", "{E0E2C732-5B32-4808-BDB2-F17325D95478}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0E2C732-5B32-4808-BDB2-F17325D95478}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0E2C732-5B32-4808-BDB2-F17325D95478}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0E2C732-5B32-4808-BDB2-F17325D95478}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0E2C732-5B32-4808-BDB2-F17325D95478}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

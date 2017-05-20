@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>    
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TestFiles\using_keywords_and_namespaces.cs" />
+    <Compile Remove="TestFiles\using_namespace_keywords_missing_curlybraceclosed.cs" />
+    <Compile Remove="TestFiles\using_namespace_keywords_missing_endstatement.cs" />
+    <Compile Remove="TestFiles\using_namespace_keywords_missing_identifier.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.1.11" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.1.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LexerAnalyser\LexerAnalyser.csproj" />
+    <ProjectReference Include="..\SyntaxAnalyser\SyntaxAnalyser.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TestFiles\using_keywords_and_namespaces.cs" />
+    <None Include="TestFiles\using_namespace_keywords_missing_curlybraceclosed.cs" />
+    <None Include="TestFiles\using_namespace_keywords_missing_endstatement.cs" />
+    <None Include="TestFiles\using_namespace_keywords_missing_identifier.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+</Project>
