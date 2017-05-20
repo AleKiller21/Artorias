@@ -31,5 +31,10 @@ namespace LexerAnalyser
 
             return tokens;
         }
+
+        public Token GetToken()
+        {
+            return _automaton.GetToken();
+        }
     }
 }

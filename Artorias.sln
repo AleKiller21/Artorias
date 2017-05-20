@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Artorias", "Artorias\Artorias.csproj", "{F3D27D3B-FB1F-4FFD-9D00-B775B942D840}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LexerAnalyser", "LexerAnalyser\LexerAnalyser.csproj", "{C3B32013-FE1D-4345-A27F-1963E6E76E8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxAnalyser", "SyntaxAnalyser\SyntaxAnalyser.csproj", "{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{C3B32013-FE1D-4345-A27F-1963E6E76E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3B32013-FE1D-4345-A27F-1963E6E76E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3B32013-FE1D-4345-A27F-1963E6E76E8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5830540A-20F7-42E7-AAC1-B61C5DB0DD56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
