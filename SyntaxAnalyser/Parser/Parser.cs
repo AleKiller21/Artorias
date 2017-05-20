@@ -2,6 +2,7 @@
 using LexerAnalyser;
 using LexerAnalyser.Enums;
 using LexerAnalyser.Models;
+using SyntaxAnalyser.Exceptions;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -88,17 +89,17 @@ namespace SyntaxAnalyser.Parser
         private void UsingDirective()
         {
             if(!CheckTokenType(TokenType.RwUsing))
-                throw new ParserException($"using keyword expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingUsingKeywordException($"using keyword expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             _token = GetNextToken();
             if(!CheckTokenType(TokenType.Id))
-                throw new ParserException($"identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new IdTokenExpectecException($"identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             _token = GetNextToken();
             IdentifierAttribute();
 
             if(!CheckTokenType(TokenType.EndStatement))
-                throw new ParserException($"End of statement expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new EndOfStatementException($"End of statement expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             _token = GetNextToken();
             OptionalUsingDirective();
@@ -110,7 +111,7 @@ namespace SyntaxAnalyser.Parser
             {
                 _token = GetNextToken();
                 if (!CheckTokenType(TokenType.Id))
-                    throw new ParserException($"Id token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                    throw new IdTokenExpectecException($"Id token expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
                 _token = GetNextToken();
                 IdentifierAttribute();
@@ -145,6 +146,16 @@ namespace SyntaxAnalyser.Parser
         private void GroupDeclaration()
         {
             throw new NotImplementedException();
+        }
+
+        private void ClassDeclaration()
+        {
+            //TODO
+        }
+
+        private void EnumDeclaration()
+        {
+            //TODO
         }
 
         private void EncapsulationModifier()

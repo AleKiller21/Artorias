@@ -2,6 +2,7 @@ using System;
 using LexerAnalyser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SyntaxAnalyser;
+using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Parser;
 
 namespace ParserUnitTests
@@ -34,7 +35,7 @@ namespace ParserUnitTests
             var stream = new FileInputStream(path + "using_namespace_keywords_missing_endstatement.cs");
             var lexer = new Lexer(stream);
             var parser = new Parser(lexer);
-            Assert.ThrowsException<ParserException>(() => parser.Parse());
+            Assert.ThrowsException<EndOfStatementException>(() => parser.Parse());
         }
 
         [TestMethod]
@@ -43,7 +44,7 @@ namespace ParserUnitTests
             var stream = new FileInputStream(path + "using_namespace_keywords_missing_curlybraceclosed.cs");
             var lexer = new Lexer(stream);
             var parser = new Parser(lexer);
-            Assert.ThrowsException<ParserException>(() => parser.Parse());
+            Assert.ThrowsException<MissingCurlyBraceClosedException>(() => parser.Parse());
         }
 
         [TestMethod]
@@ -52,7 +53,7 @@ namespace ParserUnitTests
             var stream = new FileInputStream(path + "using_namespace_keywords_missing_identifier.cs");
             var lexer = new Lexer(stream);
             var parser = new Parser(lexer);
-            Assert.ThrowsException<ParserException>(() => parser.Parse());
+            Assert.ThrowsException<IdTokenExpectecException>(() => parser.Parse());
         }
     }
 }

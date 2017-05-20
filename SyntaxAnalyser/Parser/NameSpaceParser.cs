@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
+using SyntaxAnalyser.Exceptions;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -31,11 +31,11 @@ namespace SyntaxAnalyser.Parser
         private void NamespaceDeclaration()
         {
             if(!CheckTokenType(TokenType.RwNameSpace))
-                throw new ParserException($"namespace keyword expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingNamespaceKeywordException($"namespace keyword expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             _token = GetNextToken();
             if(!CheckTokenType(TokenType.Id))
-                throw new ParserException($"Id token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new IdTokenExpectecException($"Id token expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             _token = GetNextToken();
             IdentifierAttribute();
@@ -45,14 +45,14 @@ namespace SyntaxAnalyser.Parser
         private void NamespaceBody()
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
-                throw new ParserException($"OpenCurlyBrace token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingCurlyBraceOpenException($"OpenCurlyBrace token expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             _token = GetNextToken();
             OptionalUsingDirective();
             OptionalNameSpaceMemberDeclaration();
 
             if(!CheckTokenType(TokenType.CurlyBraceClose))
-                throw new ParserException($"CurlyBraceClosed token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingCurlyBraceClosedException($"CurlyBraceClosed token expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             _token = GetNextToken();
         }
