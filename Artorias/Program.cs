@@ -2,6 +2,7 @@
 using System.Text;
 using LexerAnalyser;
 using SyntaxAnalyser;
+using SyntaxAnalyser.Parser;
 
 namespace Artorias
 {
@@ -12,12 +13,8 @@ namespace Artorias
             var stream = new FileInputStream(args[0]);
             var lexer = new Lexer(stream);
             var parser = new Parser(lexer);
-
-            //var tokens = lexer.GetTokens();
-            //foreach (var token in tokens)
-            //{
-            //    Console.WriteLine(token.Lexeme + " - " + "Row " + token.Row + " - " + "Column " + token.Column + " - " + "Type " + token.Type + "\n");
-            //}
+            parser.Parse();
+            Console.WriteLine("SUCCESS");
         }
     }
 }
