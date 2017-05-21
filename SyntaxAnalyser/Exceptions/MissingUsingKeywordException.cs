@@ -4,7 +4,7 @@ namespace SyntaxAnalyser.Exceptions
 {
     public class MissingUsingKeywordException : Exception
     {
-        public MissingUsingKeywordException(string message) : base(message)
+        public MissingUsingKeywordException(int row, int col) : base($"using keyword expected at row {row} column {col}")
         {
         }
     }

@@ -4,7 +4,7 @@ namespace SyntaxAnalyser.Exceptions
 {
     public class IdTokenExpectecException : Exception
     {
-        public IdTokenExpectecException(string message) : base(message)
+        public IdTokenExpectecException(int row, int col) : base($"identifier token expected at rowc {row} column {col}")
         {
         }
     }

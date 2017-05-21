@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TestFiles\interfaces_working.cs" />
+    <Compile Remove="TestFiles\interface_missing_curly_brace_closed_after_interface_body.cs" />
+    <Compile Remove="TestFiles\interface_missing_end_statement_after_member.cs" />
+    <Compile Remove="TestFiles\interface_missing_id_after_comma_inheritance.cs" />
+    <Compile Remove="TestFiles\interface_missing_interface_keyword_in_namespace.cs" />
+    <Compile Remove="TestFiles\interface_missing_type_in_body.cs" />
     <Compile Remove="TestFiles\using_keywords_and_namespaces.cs" />
     <Compile Remove="TestFiles\using_namespace_keywords_missing_curlybraceclosed.cs" />
     <Compile Remove="TestFiles\using_namespace_keywords_missing_endstatement.cs" />
@@ -23,6 +29,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="TestFiles\interfaces_working.cs" />
+    <None Include="TestFiles\interface_missing_curly_brace_closed_after_interface_body.cs" />
+    <None Include="TestFiles\interface_missing_end_statement_after_member.cs" />
+    <None Include="TestFiles\interface_missing_id_after_comma_inheritance.cs" />
+    <None Include="TestFiles\interface_missing_interface_keyword_in_namespace.cs" />
+    <None Include="TestFiles\interface_missing_type_in_body.cs" />
     <None Include="TestFiles\using_keywords_and_namespaces.cs" />
     <None Include="TestFiles\using_namespace_keywords_missing_curlybraceclosed.cs" />
     <None Include="TestFiles\using_namespace_keywords_missing_endstatement.cs" />

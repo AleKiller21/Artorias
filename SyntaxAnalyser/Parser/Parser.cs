@@ -17,9 +17,9 @@ namespace SyntaxAnalyser.Parser
             _token = _lexer.GetToken();
         }
 
-        private Token GetNextToken()
+        private void NextToken()
         {
-            return _lexer.GetToken();
+            _token = _lexer.GetToken();
         }
 
         private int GetTokenRow()
@@ -43,10 +43,25 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.RwProtected);
         }
 
+        private bool IsTypeOrVoid()
+        {
+            return CheckTokenType(TokenType.RwVoid) || IsType();
+        }
+
+        private bool IsType()
+        {
+           return CheckTokenType(TokenType.RwInt) ||
+                CheckTokenType(TokenType.RwChar) ||
+                CheckTokenType(TokenType.RwString) ||
+                CheckTokenType(TokenType.RwBool) ||
+                CheckTokenType(TokenType.RwFloat) ||
+                CheckTokenType(TokenType.Id);
+        }
+
         public void Parse()
         {
             Code();
-            if(!CheckTokenType(TokenType.Eof)) throw new ParserException($"End of file expected at row {GetTokenRow()} column");
+            if(!CheckTokenType(TokenType.Eof)) throw new ParserException($"End of file expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
         private void Code()
@@ -89,19 +104,19 @@ namespace SyntaxAnalyser.Parser
         private void UsingDirective()
         {
             if(!CheckTokenType(TokenType.RwUsing))
-                throw new MissingUsingKeywordException($"using keyword expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingUsingKeywordException(GetTokenRow(), GetTokenColumn());
 
-            _token = GetNextToken();
+            NextToken();
             if(!CheckTokenType(TokenType.Id))
-                throw new IdTokenExpectecException($"identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
-            _token = GetNextToken();
+            NextToken();
             IdentifierAttribute();
 
             if(!CheckTokenType(TokenType.EndStatement))
-                throw new EndOfStatementException($"End of statement expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
-            _token = GetNextToken();
+            NextToken();
             OptionalUsingDirective();
         }
 
@@ -109,11 +124,11 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.MemberAccess))
             {
-                _token = GetNextToken();
+                NextToken();
                 if (!CheckTokenType(TokenType.Id))
-                    throw new IdTokenExpectecException($"Id token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                    throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
-                _token = GetNextToken();
+                NextToken();
                 IdentifierAttribute();
             }
 
@@ -139,13 +154,14 @@ namespace SyntaxAnalyser.Parser
 
         private void TypeDeclaration()
         {
-            EncapsulationModifier();
-            GroupDeclaration();//Pendiente
+            if(HasEncapsulationModifier()) EncapsulationModifier();
+            GroupDeclaration();
         }
 
         private void GroupDeclaration()
         {
-            throw new NotImplementedException();
+            //TODO ClassDeclaration
+            if (CheckTokenType(TokenType.RwInterface)) InterfaceDeclaration();
         }
 
         private void ClassDeclaration()
@@ -160,13 +176,98 @@ namespace SyntaxAnalyser.Parser
 
         private void EncapsulationModifier()
         {
-            if (CheckTokenType(TokenType.RwPublic)) _token = GetNextToken();
-            else if (CheckTokenType(TokenType.RwPrivate)) _token = GetNextToken();
-            else if (CheckTokenType(TokenType.RwProtected)) _token = GetNextToken();
+            if (CheckTokenType(TokenType.RwPublic)) NextToken();
+            else if (CheckTokenType(TokenType.RwPrivate)) NextToken();
+            else if (CheckTokenType(TokenType.RwProtected)) NextToken();
             else
             {
                 //Epsilon
             }
+        }
+
+        private void OptionalBodyEnd()
+        {
+            if(CheckTokenType(TokenType.EndStatement)) NextToken();
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void IdentifiersList()
+        {
+            if(!CheckTokenType(TokenType.Id))
+                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            if(CheckTokenType(TokenType.Comma)) IdentifierListPrime();
+        }
+
+        private void IdentifierListPrime()
+        {
+            if (CheckTokenType(TokenType.Comma))
+            {
+                NextToken();
+                if(!CheckTokenType(TokenType.Id)) throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+                NextToken();
+                IdentifierListPrime();
+            }
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void TypeOrVoid()
+        {
+            if (!IsTypeOrVoid()) throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+        }
+
+        private void Type()
+        {
+            if(!IsType()) throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+        }
+
+        private void FixedParameters()
+        {
+            if (IsType())
+            {
+                FixedParameter();
+                if(CheckTokenType(TokenType.Comma)) FixedParametersPrime();
+            }
+
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void FixedParametersPrime()
+        {
+            if (CheckTokenType(TokenType.Comma))
+            {
+                NextToken();
+                FixedParameter();
+                FixedParametersPrime();
+            }
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void FixedParameter()
+        {
+            Type();
+
+            if (!CheckTokenType(TokenType.Id))
+                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
         }
     }
 }

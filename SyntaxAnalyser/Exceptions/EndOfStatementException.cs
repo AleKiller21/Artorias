@@ -4,7 +4,7 @@ namespace SyntaxAnalyser.Exceptions
 {
     public class EndOfStatementException : Exception
     {
-        public EndOfStatementException(string message) : base(message)
+        public EndOfStatementException(int row, int col) : base($"End of statement expected at row {row} column {col}")
         {
         }
     }

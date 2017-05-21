@@ -9,7 +9,15 @@ namespace SyntaxAnalyser.Parser
     {
         private void OptionalNameSpaceMemberDeclaration()
         {
-            if(CheckTokenType(TokenType.RwNameSpace)) NamespaceMemberDeclaration();
+            if(CheckTokenType(TokenType.RwNameSpace) ||
+                HasEncapsulationModifier() || 
+                (CheckTokenType(TokenType.RwAbstract) ||
+                CheckTokenType(TokenType.RwClass)) || 
+                CheckTokenType(TokenType.RwInterface) || 
+                CheckTokenType(TokenType.RwEnum))
+            {
+                NamespaceMemberDeclaration();
+            }
             else
             {
                 //Epsilon
@@ -23,21 +31,27 @@ namespace SyntaxAnalyser.Parser
                 NamespaceDeclaration();
                 OptionalNameSpaceMemberDeclaration();
             }
-            else if(HasEncapsulationModifier() || (CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass))
-                || CheckTokenType(TokenType.RwInterface) || CheckTokenType(TokenType.RwEnum))
+            else if (HasEncapsulationModifier() || 
+                (CheckTokenType(TokenType.RwAbstract) ||
+                CheckTokenType(TokenType.RwClass)) ||
+                CheckTokenType(TokenType.RwInterface) ||
+                CheckTokenType(TokenType.RwEnum))
+            {
                 TypeDeclarationList();
+                OptionalNameSpaceMemberDeclaration();
+            }
         }
 
         private void NamespaceDeclaration()
         {
             if(!CheckTokenType(TokenType.RwNameSpace))
-                throw new MissingNamespaceKeywordException($"namespace keyword expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingNamespaceKeywordException(GetTokenRow(), GetTokenColumn());
 
-            _token = GetNextToken();
-            if(!CheckTokenType(TokenType.Id))
-                throw new IdTokenExpectecException($"Id token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            NextToken();
+            if (!CheckTokenType(TokenType.Id))
+                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
-            _token = GetNextToken();
+            NextToken();
             IdentifierAttribute();
             NamespaceBody();
         }
@@ -45,16 +59,16 @@ namespace SyntaxAnalyser.Parser
         private void NamespaceBody()
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
-                throw new MissingCurlyBraceOpenException($"OpenCurlyBrace token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
-            _token = GetNextToken();
+            NextToken();
             OptionalUsingDirective();
             OptionalNameSpaceMemberDeclaration();
 
             if(!CheckTokenType(TokenType.CurlyBraceClose))
-                throw new MissingCurlyBraceClosedException($"CurlyBraceClosed token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
-            _token = GetNextToken();
+            NextToken();
         }
     }
 }

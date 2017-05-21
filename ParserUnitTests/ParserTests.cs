@@ -55,5 +55,67 @@ namespace ParserUnitTests
             var parser = new Parser(lexer);
             Assert.ThrowsException<IdTokenExpectecException>(() => parser.Parse());
         }
+
+        [TestMethod]
+        public void Interfaces_working()
+        {
+            var stream = new FileInputStream(path + "interfaces_working.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            try
+            {
+                parser.Parse();
+                Assert.AreEqual("success", "success");
+            }
+            catch (ParserException e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void interface_missing_id_after_comma_inheritance()
+        {
+            var stream = new FileInputStream(path + "interface_missing_id_after_comma_inheritance.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            Assert.ThrowsException<IdTokenExpectecException>(() => parser.Parse());
+        }
+
+        [TestMethod]
+        public void interface_missing_type_in_body()
+        {
+            var stream = new FileInputStream(path + "interface_missing_type_in_body.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            Assert.ThrowsException<IdTokenExpectecException>(() => parser.Parse());
+        }
+
+        [TestMethod]
+        public void interface_missing_interface_keyword_in_namespace()
+        {
+            var stream = new FileInputStream(path + "interface_missing_interface_keyword_in_namespace.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            Assert.ThrowsException<MissingCurlyBraceClosedException>(() => parser.Parse());
+        }
+
+        [TestMethod]
+        public void interface_missing_curly_brace_closed_after_interface_body()
+        {
+            var stream = new FileInputStream(path + "interface_missing_curly_brace_closed_after_interface_body.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            Assert.ThrowsException<MissingCurlyBraceClosedException>(() => parser.Parse());
+        }
+
+        [TestMethod]
+        public void interface_missing_end_statement_after_member()
+        {
+            var stream = new FileInputStream(path + "interface_missing_end_statement_after_member.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            Assert.ThrowsException<EndOfStatementException>(() => parser.Parse());
+        }
     }
 }

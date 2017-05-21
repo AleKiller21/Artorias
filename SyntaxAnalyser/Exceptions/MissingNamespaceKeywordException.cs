@@ -4,7 +4,7 @@ namespace SyntaxAnalyser.Exceptions
 {
     public class MissingNamespaceKeywordException : Exception
     {
-        public MissingNamespaceKeywordException(string message) : base(message)
+        public MissingNamespaceKeywordException(int row, int col) : base($"namespace keyword expected at row {row} column {col}")
         {
         }
     }
