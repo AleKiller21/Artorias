@@ -58,6 +58,36 @@ namespace SyntaxAnalyser.Parser
                 CheckTokenType(TokenType.Id);
         }
 
+        private bool IsLiteralInt()
+        {
+            return CheckTokenType(TokenType.LiteralSimpleNum) || 
+                    CheckTokenType(TokenType.LiteralBinary) || 
+                    CheckTokenType(TokenType.LiteralHexadecimal);
+        }
+
+        private bool IsLiteralString()
+        {
+            return CheckTokenType(TokenType.LiteralRegularString) || CheckTokenType(TokenType.LiteralVerbatimString);
+        }
+
+        private bool IsLiteral()
+        {
+            return IsLiteralInt() ||
+                   IsLiteralString() ||
+                   CheckTokenType(TokenType.LiteralCharSimple) ||
+                   CheckTokenType(TokenType.LiteralFloat) ||
+                   CheckTokenType(TokenType.LiteralTrue) ||
+                   CheckTokenType(TokenType.LiteralFalse);
+        }
+
+        private bool HasOptionalModifier()
+        {
+            return CheckTokenType(TokenType.RwStatic) ||
+                   CheckTokenType(TokenType.RwVirtual) ||
+                   CheckTokenType(TokenType.RwOverride) ||
+                   CheckTokenType(TokenType.RwAbstract);
+        }
+
         public void Parse()
         {
             Code();
@@ -160,15 +190,11 @@ namespace SyntaxAnalyser.Parser
 
         private void GroupDeclaration()
         {
-            //TODO ClassDeclaration
-            //TODO throw exception on else clause
-            if (CheckTokenType(TokenType.RwInterface)) InterfaceDeclaration();
-            if (CheckTokenType(TokenType.RwEnum)) EnumDeclaration();
-        }
-
-        private void ClassDeclaration()
-        {
-            //TODO
+            if(CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass)) ClassDeclaration();
+            else if (CheckTokenType(TokenType.RwInterface)) InterfaceDeclaration();
+            else if (CheckTokenType(TokenType.RwEnum)) EnumDeclaration();
+            else
+                throw new ParserException($"Class, Interface or Enum identifier expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
         private void EncapsulationModifier()
@@ -193,11 +219,8 @@ namespace SyntaxAnalyser.Parser
 
         private void IdentifiersList()
         {
-            if(!CheckTokenType(TokenType.Id))
-                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
-
-            NextToken();
-            if(CheckTokenType(TokenType.Comma)) IdentifierListPrime();
+            QualifiedIdentifier();
+            IdentifierListPrime();
         }
 
         private void IdentifierListPrime()
@@ -205,14 +228,22 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                if(!CheckTokenType(TokenType.Id)) throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
-                NextToken();
+                QualifiedIdentifier();
                 IdentifierListPrime();
             }
             else
             {
                 //Epsilon
             }
+        }
+
+        private void QualifiedIdentifier()
+        {
+            if(!CheckTokenType(TokenType.Id))
+                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            IdentifierAttribute();
         }
 
         private void TypeOrVoid()
@@ -224,6 +255,7 @@ namespace SyntaxAnalyser.Parser
 
         private void Type()
         {
+            //TODO adapt to official grammar
             if(!IsType()) throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
 
             NextToken();
@@ -267,10 +299,21 @@ namespace SyntaxAnalyser.Parser
             NextToken();
         }
 
-        private void expression()
+        private void Expression()
         {
             //TODO For later
             NextToken();
+        }
+
+        private void Literal()
+        {
+            if (IsLiteral()) NextToken();
+            else throw new LiteralExpectedException(GetTokenRow(), GetTokenColumn());
+        }
+
+        private void OptionalStatementList()
+        {
+            //TODO For later
         }
     }
 }

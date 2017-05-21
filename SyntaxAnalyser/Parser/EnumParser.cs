@@ -54,7 +54,7 @@ namespace SyntaxAnalyser.Parser
             else if (CheckTokenType(TokenType.OpAssignment))
             {
                 NextToken();
-                expression();
+                Expression();
                 if (CheckTokenType(TokenType.Comma)) OptionalAssignableIdentifiersListPrime();
             }
 

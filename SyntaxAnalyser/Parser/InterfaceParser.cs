@@ -74,11 +74,16 @@ namespace SyntaxAnalyser.Parser
 
         private void InheritanceBase()
         {
-            if (!CheckTokenType(TokenType.Colon))
-                throw new ColonExpectedException(GetTokenRow(), GetTokenColumn());
+            if (CheckTokenType(TokenType.Colon))
+            {
+                NextToken();
+                IdentifiersList();
+            }
 
-            NextToken();
-            IdentifiersList();
+            else
+            {
+                //Epsilon
+            }
         }
     }
 }
