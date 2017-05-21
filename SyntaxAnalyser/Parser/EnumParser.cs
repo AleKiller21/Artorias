@@ -19,6 +19,7 @@ namespace SyntaxAnalyser.Parser
 
             NextToken();
             EnumBody();
+            OptionalBodyEnd();
         }
 
         private void EnumBody()
@@ -27,8 +28,8 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            if (CheckTokenType(TokenType.Id)) OptionalAssignableIdentifiersList();
-            if(!CheckTokenType(TokenType.CurlyBraceClose))
+            OptionalAssignableIdentifiersList();
+            if (!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
@@ -39,8 +40,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.Id))
             {
                 NextToken();
-                if (CheckTokenType(TokenType.Comma) || CheckTokenType(TokenType.OpAssignment))
-                    AssignmentOptions();
+                AssignmentOptions();
             }
             else
             {
@@ -54,8 +54,9 @@ namespace SyntaxAnalyser.Parser
             else if (CheckTokenType(TokenType.OpAssignment))
             {
                 NextToken();
+                //TODO Implement expression production
                 Expression();
-                if (CheckTokenType(TokenType.Comma)) OptionalAssignableIdentifiersListPrime();
+                OptionalAssignableIdentifiersListPrime();
             }
 
             else
@@ -69,7 +70,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                if (CheckTokenType(TokenType.Id)) OptionalAssignableIdentifiersList();
+                OptionalAssignableIdentifiersList();
             }
             else
             {

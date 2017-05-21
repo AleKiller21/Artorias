@@ -133,6 +133,13 @@ namespace SyntaxAnalyser.Parser
         private void ArgumentList()
         {
             //TODO after expression implementation
+            throw new NotImplementedException();
+        }
+
+        private void ArgumentListPrime()
+        {
+            //TODO after expression implementation
+            throw new NotImplementedException();
         }
 
         private void OptionalModifier()
@@ -201,6 +208,16 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+        }
+
+        private void OptionalArrayInitializer()
+        {
+            if(CheckTokenType(TokenType.CurlyBraceOpen))
+                ArrayInitializer();
+            else
+            {
+                //Epsilon
+            }
         }
 
         private void OptionalVariableInitializerList()

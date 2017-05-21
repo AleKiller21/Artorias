@@ -114,7 +114,7 @@ namespace SyntaxAnalyser.Parser
 
             else
             {
-                throw new ParserException($"using keyword or namespace keyword expected at row {GetTokenRow()} column {GetTokenColumn()}");
+                //Epsilon
             }
         }
 
@@ -137,11 +137,7 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingUsingKeywordException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            if(!CheckTokenType(TokenType.Id))
-                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
-
-            NextToken();
-            IdentifierAttribute();
+            QualifiedIdentifier();
 
             if(!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
@@ -184,7 +180,7 @@ namespace SyntaxAnalyser.Parser
 
         private void TypeDeclaration()
         {
-            if(HasEncapsulationModifier()) EncapsulationModifier();
+            EncapsulationModifier();
             GroupDeclaration();
         }
 
@@ -246,19 +242,58 @@ namespace SyntaxAnalyser.Parser
             IdentifierAttribute();
         }
 
+        private bool IsBuiltInType()
+        {
+            return CheckTokenType(TokenType.RwInt) ||
+                   CheckTokenType(TokenType.RwChar) ||
+                   CheckTokenType(TokenType.RwString) ||
+                   CheckTokenType(TokenType.RwBool) ||
+                   CheckTokenType(TokenType.RwFloat);
+        }
+
+        private void BuiltInType()
+        {
+            if(IsBuiltInType()) NextToken();
+            else throw new BuiltInDataTypeException(GetTokenRow(), GetTokenColumn());
+        }
+
         private void TypeOrVoid()
         {
-            if (!IsTypeOrVoid()) throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+            if (IsType()) Type();
+            else if(CheckTokenType(TokenType.RwVoid)) NextToken();
 
-            NextToken();
+            else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+        }
+
+        private void TypeOrVar()
+        {
+            if(IsType()) Type();
+            else if(CheckTokenType(TokenType.RwOrIdVar)) NextToken();
+            else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
         }
 
         private void Type()
         {
-            //TODO adapt to official grammar
-            if(!IsType()) throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+            if (IsBuiltInType())
+            {
+                BuiltInType();
+                OptionalRankSpecifierList();
+            }
 
-            NextToken();
+            else if (CheckTokenType(TokenType.Id))
+            {
+                QualifiedIdentifier();
+                OptionalRankSpecifierList();
+            }
+
+            else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+        }
+
+        private void OptionalRankSpecifierList()
+        {
+            //TODO Implement function
+            //NextToken();
+            throw new NotImplementedException();
         }
 
         private void FixedParameters()
@@ -266,7 +301,7 @@ namespace SyntaxAnalyser.Parser
             if (IsType())
             {
                 FixedParameter();
-                if(CheckTokenType(TokenType.Comma)) FixedParametersPrime();
+                FixedParametersPrime();
             }
 
             else
@@ -302,7 +337,8 @@ namespace SyntaxAnalyser.Parser
         private void Expression()
         {
             //TODO For later
-            NextToken();
+            //NextToken();
+            throw new NotImplementedException();
         }
 
         private void Literal()
@@ -314,6 +350,7 @@ namespace SyntaxAnalyser.Parser
         private void OptionalStatementList()
         {
             //TODO For later
+            throw new NotImplementedException();
         }
     }
 }

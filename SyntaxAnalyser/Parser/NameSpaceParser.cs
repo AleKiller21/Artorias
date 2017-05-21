@@ -48,11 +48,7 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingNamespaceKeywordException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            if (!CheckTokenType(TokenType.Id))
-                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
-
-            NextToken();
-            IdentifierAttribute();
+            QualifiedIdentifier();
             NamespaceBody();
         }
 

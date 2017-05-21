@@ -17,9 +17,9 @@ namespace SyntaxAnalyser.Parser
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            if (CheckTokenType(TokenType.Colon)) InheritanceBase();
-            if (CheckTokenType(TokenType.CurlyBraceOpen)) InterfaceBody();
-            if (CheckTokenType(TokenType.EndStatement)) OptionalBodyEnd();
+            InheritanceBase();
+            InterfaceBody();
+            OptionalBodyEnd();
         }
 
         private void InterfaceBody()
@@ -28,7 +28,7 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            if (IsTypeOrVoid()) InterfaceMethodDeclarationList();
+            InterfaceMethodDeclarationList();
             if(!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
@@ -64,7 +64,7 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            if(IsType()) FixedParameters();
+            FixedParameters();
 
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
