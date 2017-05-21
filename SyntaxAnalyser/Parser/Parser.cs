@@ -161,15 +161,12 @@ namespace SyntaxAnalyser.Parser
         private void GroupDeclaration()
         {
             //TODO ClassDeclaration
+            //TODO throw exception on else clause
             if (CheckTokenType(TokenType.RwInterface)) InterfaceDeclaration();
+            if (CheckTokenType(TokenType.RwEnum)) EnumDeclaration();
         }
 
         private void ClassDeclaration()
-        {
-            //TODO
-        }
-
-        private void EnumDeclaration()
         {
             //TODO
         }
@@ -267,6 +264,12 @@ namespace SyntaxAnalyser.Parser
             if (!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            NextToken();
+        }
+
+        private void expression()
+        {
+            //TODO For later
             NextToken();
         }
     }

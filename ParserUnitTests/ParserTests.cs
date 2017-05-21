@@ -117,5 +117,58 @@ namespace ParserUnitTests
             var parser = new Parser(lexer);
             Assert.ThrowsException<EndOfStatementException>(() => parser.Parse());
         }
+
+        [TestMethod]
+        public void enums_working()
+        {
+            var stream = new FileInputStream(path + "enums_working.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            try
+            {
+                parser.Parse();
+                Assert.AreEqual("success", "success");
+            }
+            catch (ParserException e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void enums_missing_identifier_after_enum_keyword()
+        {
+            var stream = new FileInputStream(path + "enums_missing_identifier_after_enum_keyword.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            Assert.ThrowsException<IdTokenExpectecException>(() => parser.Parse());
+        }
+
+        [TestMethod]
+        public void enums_missing_open_curly_brace()
+        {
+            var stream = new FileInputStream(path + "enums_missing_open_curly_brace.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            Assert.ThrowsException<MissingCurlyBraceOpenException>(() => parser.Parse());
+        }
+
+        [TestMethod]
+        public void enum_trailing_comma_after_members()
+        {
+            //It works
+            var stream = new FileInputStream(path + "enum_trailing_comma_after_members.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            try
+            {
+                parser.Parse();
+                Assert.AreEqual("success", "success");
+            }
+            catch (ParserException e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
     }
 }

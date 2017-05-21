@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TestFiles\enums_missing_identifier_after_enum_keyword.cs" />
+    <Compile Remove="TestFiles\enums_missing_open_curly_brace.cs" />
+    <Compile Remove="TestFiles\enums_working.cs" />
+    <Compile Remove="TestFiles\enum_trailing_comma_after_members.cs" />
     <Compile Remove="TestFiles\interfaces_working.cs" />
     <Compile Remove="TestFiles\interface_missing_curly_brace_closed_after_interface_body.cs" />
     <Compile Remove="TestFiles\interface_missing_end_statement_after_member.cs" />
@@ -29,6 +33,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="TestFiles\enums_missing_identifier_after_enum_keyword.cs" />
+    <None Include="TestFiles\enums_missing_open_curly_brace.cs" />
+    <None Include="TestFiles\enums_working.cs" />
+    <None Include="TestFiles\enum_trailing_comma_after_members.cs" />
     <None Include="TestFiles\interfaces_working.cs" />
     <None Include="TestFiles\interface_missing_curly_brace_closed_after_interface_body.cs" />
     <None Include="TestFiles\interface_missing_end_statement_after_member.cs" />
