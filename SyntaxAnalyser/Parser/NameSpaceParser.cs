@@ -10,11 +10,7 @@ namespace SyntaxAnalyser.Parser
         private void OptionalNameSpaceMemberDeclaration()
         {
             if(CheckTokenType(TokenType.RwNameSpace) ||
-                HasEncapsulationModifier() || 
-                (CheckTokenType(TokenType.RwAbstract) ||
-                CheckTokenType(TokenType.RwClass)) || 
-                CheckTokenType(TokenType.RwInterface) || 
-                CheckTokenType(TokenType.RwEnum))
+                HasEncapsulationModifier() || IsGroupDeclaration())
             {
                 NamespaceMemberDeclaration();
             }
@@ -31,14 +27,14 @@ namespace SyntaxAnalyser.Parser
                 NamespaceDeclaration();
                 OptionalNameSpaceMemberDeclaration();
             }
-            else if (HasEncapsulationModifier() || 
-                (CheckTokenType(TokenType.RwAbstract) ||
-                CheckTokenType(TokenType.RwClass)) ||
-                CheckTokenType(TokenType.RwInterface) ||
-                CheckTokenType(TokenType.RwEnum))
+            else if (HasEncapsulationModifier() || IsGroupDeclaration())
             {
                 TypeDeclarationList();
                 OptionalNameSpaceMemberDeclaration();
+            }
+            else
+            {
+                throw new ParserException($"'namespace' keyword or EncapsulationModifier or GroupDeclaration token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
             }
         }
 

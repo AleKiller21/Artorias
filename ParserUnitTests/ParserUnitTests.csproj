@@ -15,6 +15,8 @@
     <Compile Remove="TestFiles\interface_missing_id_after_comma_inheritance.cs" />
     <Compile Remove="TestFiles\interface_missing_interface_keyword_in_namespace.cs" />
     <Compile Remove="TestFiles\interface_missing_type_in_body.cs" />
+    <Compile Remove="TestFiles\program_working.cs" />
+    <Compile Remove="TestFiles\Unity_working.cs" />
     <Compile Remove="TestFiles\using_keywords_and_namespaces.cs" />
     <Compile Remove="TestFiles\using_namespace_keywords_missing_curlybraceclosed.cs" />
     <Compile Remove="TestFiles\using_namespace_keywords_missing_endstatement.cs" />
@@ -43,6 +45,8 @@
     <None Include="TestFiles\interface_missing_id_after_comma_inheritance.cs" />
     <None Include="TestFiles\interface_missing_interface_keyword_in_namespace.cs" />
     <None Include="TestFiles\interface_missing_type_in_body.cs" />
+    <None Include="TestFiles\program_working.cs" />
+    <None Include="TestFiles\Unity_working.cs" />
     <None Include="TestFiles\using_keywords_and_namespaces.cs" />
     <None Include="TestFiles\using_namespace_keywords_missing_curlybraceclosed.cs" />
     <None Include="TestFiles\using_namespace_keywords_missing_endstatement.cs" />

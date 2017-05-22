@@ -81,7 +81,6 @@ namespace SyntaxAnalyser.Parser
 
         private void StatementIdentifierOptions2()
         {
-            //TODO factorizar ambas producciones empiezan con '['
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
                 NextToken();
@@ -114,7 +113,7 @@ namespace SyntaxAnalyser.Parser
         }
         private void StatementIdentifierOptions3()
         {
-            if (CheckTokenType(TokenType.Comma))
+            if (CheckTokenType(TokenType.Comma) || CheckTokenType(TokenType.SquareBracketClose))
             {
                 OptionalCommaList();
                 if(!CheckTokenType(TokenType.SquareBracketClose))
@@ -221,7 +220,6 @@ namespace SyntaxAnalyser.Parser
 
         private void EmbeddedStatement()
         {
-            //BUG ';' al entrar a jump statement
             if(IsEmptyBlock()) MaybeEmptyBlock();
             else if (IsSelectionStatement()) SelectionStatement();
             else if(IsIterationStatement()) IterationStatement();
@@ -374,7 +372,6 @@ namespace SyntaxAnalyser.Parser
 
         private void OptionalExpression()
         {
-            //TODO Revisar bien todo el camino que debe tomar para saber si puede irse por Expression
             if (IsUnaryExpression())
             {
                 Expression();

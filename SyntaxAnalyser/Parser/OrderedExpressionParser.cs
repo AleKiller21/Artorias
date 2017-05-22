@@ -182,7 +182,7 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsExpressionRelationalOperator())
             {
-                IsExpressionRelationalOperator();
+                ExpressionRelationalOperator();
                 ShiftExpression();
                 RelationalExpressionPrime();
             }

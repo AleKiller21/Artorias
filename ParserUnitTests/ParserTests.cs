@@ -170,5 +170,41 @@ namespace ParserUnitTests
                 Assert.Fail(e.Message);
             }
         }
+
+        [TestMethod]
+        public void UnityWorking()
+        {
+            //It works
+            var stream = new FileInputStream(path + "Unity_working.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            try
+            {
+                parser.Parse();
+                Assert.AreEqual("success", "success");
+            }
+            catch (ParserException e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void ProgramWorking()
+        {
+            //It works
+            var stream = new FileInputStream(path + "program_working.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            try
+            {
+                parser.Parse();
+                Assert.AreEqual("success", "success");
+            }
+            catch (ParserException e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
     }
 }

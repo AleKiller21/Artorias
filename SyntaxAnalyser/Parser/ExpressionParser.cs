@@ -107,7 +107,7 @@ namespace SyntaxAnalyser.Parser
                 OptionalArrayInitializer();
             }
 
-            else if (CheckTokenType(TokenType.Comma))
+            else if (CheckTokenType(TokenType.Comma) || CheckTokenType(TokenType.SquareBracketClose))
             {
                 OptionalCommaList();
                 if (!CheckTokenType(TokenType.SquareBracketClose))

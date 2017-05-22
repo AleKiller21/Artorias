@@ -88,6 +88,12 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.RwAbstract);
         }
 
+        private bool IsGroupDeclaration()
+        {
+            return CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass) ||
+                   CheckTokenType(TokenType.RwInterface) || CheckTokenType(TokenType.RwEnum);
+        }
+
         public void Parse()
         {
             Code();
@@ -107,7 +113,7 @@ namespace SyntaxAnalyser.Parser
                 OptionalNameSpaceMemberDeclaration();
             }
 
-            else if (CheckTokenType(TokenType.RwNameSpace))
+            else if (CheckTokenType(TokenType.RwNameSpace) || HasEncapsulationModifier() || IsGroupDeclaration())
             {
                 OptionalNameSpaceMemberDeclaration();
             }
