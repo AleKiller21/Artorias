@@ -181,9 +181,7 @@ namespace SyntaxAnalyser.Parser
 
         private void Expression()
         {
-            //TODO For later
-            //NextToken();
-            throw new NotImplementedException();
+            ConditionalExpression();
         }
     }
 }
