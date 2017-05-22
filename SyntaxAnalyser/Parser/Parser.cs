@@ -328,11 +328,5 @@ namespace SyntaxAnalyser.Parser
             if (IsLiteral()) NextToken();
             else throw new LiteralExpectedException(GetTokenRow(), GetTokenColumn());
         }
-
-        private void OptionalStatementList()
-        {
-            //TODO For later
-            throw new NotImplementedException();
-        }
     }
 }

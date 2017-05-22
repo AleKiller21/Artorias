@@ -8,6 +8,11 @@ namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
+        private bool IsPrimaryExpressionPrime()
+        {
+            return CheckTokenType(TokenType.ParenthesisOpen) || CheckTokenType(TokenType.SquareBracketOpen) ||
+                   CheckTokenType(TokenType.MemberAccess) || IsIncrementDecrementOperator();
+        }
         private void UnaryExpression()
         {
             if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator())
@@ -16,10 +21,7 @@ namespace SyntaxAnalyser.Parser
                 UnaryExpression();
             }
 
-            else if (CheckTokenType(TokenType.RwNew) ||
-                     IsBuiltInType() ||
-                     CheckTokenType(TokenType.ParenthesisOpen) ||
-                     IsLiteral() || CheckTokenType(TokenType.RwThis) || CheckTokenType(TokenType.Id))
+            else if (IsPrimaryExpression() || CheckTokenType(TokenType.Id))
             {
                 PrimaryExpressionOrIdentifier();
             }
@@ -33,16 +35,17 @@ namespace SyntaxAnalyser.Parser
             PrimaryExpressionPrime();
         }
 
+        private bool IsPrimaryExpression()
+        {
+            return CheckTokenType(TokenType.RwNew) ||
+                    IsBuiltInType() ||
+                    CheckTokenType(TokenType.ParenthesisOpen) ||
+                    IsLiteral() || CheckTokenType(TokenType.RwThis);
+        }
+
         private void PrimaryExpressionOrIdentifier()
         {
-            if (CheckTokenType(TokenType.RwNew) ||
-                IsBuiltInType() ||
-                CheckTokenType(TokenType.ParenthesisOpen) ||
-                IsLiteral() || CheckTokenType(TokenType.RwThis))
-            {
-                PrimaryExpression();
-            }
-
+            if (IsPrimaryExpression()) PrimaryExpression();
             else if (CheckTokenType(TokenType.Id))
             {
                 NextToken();
