@@ -48,19 +48,8 @@ namespace SyntaxAnalyser.Parser
 
         private void ArrayType()
         {
-            if (IsBuiltInType())
-            {
-                BuiltInType();
-                RankSpecifierList();
-            }
-
-            else if (CheckTokenType(TokenType.Id))
-            {
-                QualifiedIdentifier();
-                RankSpecifierList();
-            }
-
-            else throw new ParserException($"BuiltInType or identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            NonArrayType();
+            RankSpecifierList();
         }
 
         private void RankSpecifierList()

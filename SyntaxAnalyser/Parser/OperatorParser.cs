@@ -122,11 +122,17 @@ namespace SyntaxAnalyser.Parser
         private void ExpressionUnaryOperator()
         {
             if (IsExpressionUnaryOperator()) NextToken();
-            else if (IsIncrementDecrementOperator()) IncrementDecrementOperator();
             else throw new ExpressionUnaryOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void IncrementDecrementOperator()
+        private void ExpressionUnaryOperatorOrIncrementDecrement()
+        {
+            if (IsExpressionUnaryOperator()) ExpressionUnaryOperator();
+            else if (IsIncrementDecrementOperator()) IncrementDecrement();
+            else throw new ParserException($"Unary operator or increment-decrement operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+
+        private void IncrementDecrement()
         {
             if (IsIncrementDecrementOperator()) NextToken();
             else throw new IncrementDecrementOperatorExpectedException(GetTokenRow(), GetTokenColumn());

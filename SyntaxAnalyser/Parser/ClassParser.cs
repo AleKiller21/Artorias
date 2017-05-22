@@ -138,8 +138,16 @@ namespace SyntaxAnalyser.Parser
 
         private void ArgumentListPrime()
         {
-            //TODO after expression implementation
-            throw new NotImplementedException();
+            if (CheckTokenType(TokenType.Comma))
+            {
+                NextToken();
+                Expression();
+                ArgumentListPrime();
+            }
+            else
+            {
+                //Epsilon
+            }
         }
 
         private void OptionalModifier()
@@ -192,8 +200,9 @@ namespace SyntaxAnalyser.Parser
         {
             //TODO if () {expression}
             //TODO Hacer la de abajo else if (CheckTokenType(TokenType.CurlyBraceOpen))
-            if (CheckTokenType(TokenType.CurlyBraceOpen)) ArrayInitializer();
-            else throw new ParserException($"OpenCurlyBrace token or expression expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            //if (CheckTokenType(TokenType.CurlyBraceOpen)) ArrayInitializer();
+            //else throw new ParserException($"OpenCurlyBrace token or expression expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            throw new NotImplementedException();
         }
 
         private void ArrayInitializer()
@@ -223,15 +232,16 @@ namespace SyntaxAnalyser.Parser
         private void OptionalVariableInitializerList()
         {
             //TODO if (CheckTokenType(TokenType.CurlyBraceOpen) || expression)
-            if (CheckTokenType(TokenType.CurlyBraceOpen))
-            {
-                VariableInitializerList();
-            }
+            //if (CheckTokenType(TokenType.CurlyBraceOpen))
+            //{
+            //    VariableInitializerList();
+            //}
 
-            else
-            {
-                //Epsilon
-            }
+            //else
+            //{
+            //    //Epsilon
+            //}
+            throw new NotImplementedException();
         }
 
         private void VariableInitializerList()

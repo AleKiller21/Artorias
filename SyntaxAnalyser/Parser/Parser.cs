@@ -274,18 +274,14 @@ namespace SyntaxAnalyser.Parser
 
         private void Type()
         {
-            if (IsBuiltInType())
-            {
-                BuiltInType();
-                OptionalRankSpecifierList();
-            }
+            NonArrayType();
+            OptionalRankSpecifierList();
+        }
 
-            else if (CheckTokenType(TokenType.Id))
-            {
-                QualifiedIdentifier();
-                OptionalRankSpecifierList();
-            }
-
+        private void NonArrayType()
+        {
+            if(CheckTokenType(TokenType.Id)) QualifiedIdentifier();
+            else if(IsBuiltInType()) BuiltInType();
             else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
         }
 
