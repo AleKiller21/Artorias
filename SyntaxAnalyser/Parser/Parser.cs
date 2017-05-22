@@ -289,13 +289,6 @@ namespace SyntaxAnalyser.Parser
             else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
         }
 
-        private void OptionalRankSpecifierList()
-        {
-            //TODO Implement function
-            //NextToken();
-            throw new NotImplementedException();
-        }
-
         private void FixedParameters()
         {
             if (IsType())
@@ -350,6 +343,11 @@ namespace SyntaxAnalyser.Parser
         private void OptionalStatementList()
         {
             //TODO For later
+            throw new NotImplementedException();
+        }
+
+        private void ExpressionList()
+        {
             throw new NotImplementedException();
         }
     }
