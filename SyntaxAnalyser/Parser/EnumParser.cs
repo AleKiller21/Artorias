@@ -54,7 +54,6 @@ namespace SyntaxAnalyser.Parser
             else if (CheckTokenType(TokenType.OpAssignment))
             {
                 NextToken();
-                //TODO Implement expression production
                 Expression();
                 OptionalAssignableIdentifiersListPrime();
             }

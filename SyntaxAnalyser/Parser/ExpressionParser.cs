@@ -100,12 +100,36 @@ namespace SyntaxAnalyser.Parser
 
                 NextToken();
             }
+            else
+            {
+                throw new ParserException($"'[' or '(' expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            }
         }
 
         private void InstanceOptions2()
         {
-            //TODO needs expression implementation
-            throw new NotImplementedException();
+            if (IsUnaryExpression())
+            {
+                ExpressionList();
+                if (!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                OptionalRankSpecifierList();
+                OptionalArrayInitializer();
+            }
+
+            else if (CheckTokenType(TokenType.Comma))
+            {
+                OptionalCommaList();
+                if (!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                OptionalRankSpecifierList();
+                ArrayInitializer();
+            }
+            else throw new ParserException($"Unary expression or comma token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private void PrimaryExpressionPrime()

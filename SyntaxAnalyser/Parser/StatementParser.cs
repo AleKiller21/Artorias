@@ -8,6 +8,12 @@ namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
+        private bool IsUnaryExpression()
+        {
+            return IsExpressionUnaryOperator() || IsIncrementDecrementOperator() ||
+                   IsPrimaryExpression() || CheckTokenType(TokenType.Id);
+        }
+
         private bool IsEmptyBlock()
         {
             return (CheckTokenType(TokenType.CurlyBraceOpen) || CheckTokenType(TokenType.EndStatement));
@@ -309,8 +315,7 @@ namespace SyntaxAnalyser.Parser
         private void OptionalExpression()
         {
             //TODO Revisar bien todo el camino que debe tomar para saber si puede irse por Expression
-            if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator() ||
-                IsPrimaryExpression() || CheckTokenType(TokenType.Id))
+            if (IsUnaryExpression())
             {
                 Expression();
             }
