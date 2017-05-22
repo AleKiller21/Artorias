@@ -323,13 +323,6 @@ namespace SyntaxAnalyser.Parser
             NextToken();
         }
 
-        private void Expression()
-        {
-            //TODO For later
-            //NextToken();
-            throw new NotImplementedException();
-        }
-
         private void Literal()
         {
             if (IsLiteral()) NextToken();
@@ -339,11 +332,6 @@ namespace SyntaxAnalyser.Parser
         private void OptionalStatementList()
         {
             //TODO For later
-            throw new NotImplementedException();
-        }
-
-        private void ExpressionList()
-        {
             throw new NotImplementedException();
         }
     }

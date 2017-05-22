@@ -8,6 +8,14 @@ namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
+        private void Statement()
+        {
+            //if(IsBuiltInType() || 
+            //    CheckTokenType(TokenType.RwOrIdVar)) ||
+            //    CheckTokenType(TokenType.Id) ||
+            //    Is
+        }
+
         private void IterationStatement()
         {
             if (CheckTokenType(TokenType.RwWhile)) WhileStatement();
