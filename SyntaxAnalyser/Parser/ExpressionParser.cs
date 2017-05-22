@@ -64,19 +64,7 @@ namespace SyntaxAnalyser.Parser
                 InstanceOptions();
             }
 
-            else if (IsBuiltInType())
-            {
-                BuiltInType();
-                if(!CheckTokenType(TokenType.MemberAccess))
-                    throw new ParserException($"Member access operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-
-                NextToken();
-                if(!CheckTokenType(TokenType.Id))
-                    throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-            }
-
+            else if (IsBuiltInType()) BuiltInType();
             else if (CheckTokenType(TokenType.ParenthesisOpen)) CastOrParenthesizedExpression();
             else if(IsLiteral()) Literal();
             else if(CheckTokenType(TokenType.RwThis)) NextToken();
@@ -185,6 +173,7 @@ namespace SyntaxAnalyser.Parser
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            OptionalExpression();
         }
 
         private void ExpressionList()

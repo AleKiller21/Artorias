@@ -84,16 +84,80 @@ namespace SyntaxAnalyser.Parser
             //TODO factorizar ambas producciones empiezan con '['
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
+                NextToken();
+                StatementIdentifierOptions3();
+            }
+            else if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
+            else if (IsAssignmentOperator())
+            {
+                VariableAssigner();
+                VariableDeclaratorListPrime();
+            }
+            else if (CheckTokenType(TokenType.MemberAccess))
+            {
+                IdentifierAttribute();
+                PrimaryExpressionPrime();
+                StatementExpressionPrimaryExpressionOptions();
+            }
+            else if (CheckTokenType(TokenType.ParenthesisOpen))
+            {
+                NextToken();
+                ArgumentList();
+                if(!CheckTokenType(TokenType.ParenthesisClose))
+                    throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                StatementIdentifierOptions5();
+            }
+
+            else throw new ParserException($"'[', assignment operator, '.', '(', or identifier tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+        private void StatementIdentifierOptions3()
+        {
+            if (CheckTokenType(TokenType.Comma))
+            {
+                OptionalCommaList();
+                if(!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
                 OptionalRankSpecifierList();
                 VariableDeclaratorList();
             }
-            else if (IsPrimaryExpressionPrime())
+            else if (IsUnaryExpression())
+            {
+                ExpressionList();
+                if(!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                StatementIdentifierOptions4();
+            }
+            else throw new ParserException($"Unary expression or ',' expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+
+        private void StatementIdentifierOptions4()
+        {
+            if (IsAssignmentOperator())
+            {
+                VariableAssigner();
+                VariableDeclaratorListPrime();
+            }
+            else if(IsPrimaryExpressionPrime()) PrimaryExpressionPrime();
+            else throw new ParserException($"Assignment operator, '(', '[', '.', '++', or '--' tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+
+        private void StatementIdentifierOptions5()
+        {
+            if (IsPrimaryExpressionPrime())
             {
                 PrimaryExpressionPrime();
                 StatementExpressionPrimaryExpressionOptions();
             }
-
-            else throw new ParserException($"'[', '(', '[', '.', '++', or '--' tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            else
+            {
+                //Epsilon
+            }
         }
 
         private void StatementStatementExpression()
@@ -303,10 +367,6 @@ namespace SyntaxAnalyser.Parser
             {
                 NextToken();
                 OptionalExpression();
-                if (!CheckTokenType(TokenType.EndStatement))
-                    throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
             }
 
             else throw new ParserException($"'break', 'continue', or 'return' statements expected at row {GetTokenRow()} column {GetTokenColumn()}");

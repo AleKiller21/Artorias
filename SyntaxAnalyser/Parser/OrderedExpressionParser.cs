@@ -190,7 +190,6 @@ namespace SyntaxAnalyser.Parser
             else if (Is_IsAsOperator())
             {
                 IsAsOperator();
-                Type();
                 ShiftExpression();
                 RelationalExpressionPrime();
             }
