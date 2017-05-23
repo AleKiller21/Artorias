@@ -219,7 +219,7 @@ namespace LexerAnalyser.Automata
                 ["for"] = TokenType.RwFor,
                 ["in"] = TokenType.RwIn,
                 ["lock"] = TokenType.RwLock,
-                ["object"] = TokenType.RwObject,
+                //["object"] = TokenType.RwObject,
                 ["private"] = TokenType.RwPrivate,
                 ["return"] = TokenType.RwReturn,
                 ["stackalloc"] = TokenType.RwStackalloc,

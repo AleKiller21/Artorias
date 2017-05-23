@@ -88,9 +88,47 @@ namespace SyntaxAnalyser.Parser
 
                 NextToken();
             }
+
+            else if (CheckTokenType(TokenType.OpLessThan))
+            {
+                Generic();
+            }
+
             else
             {
                 throw new ParserException($"'[' or '(' expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            }
+        }
+
+        private void Generic()
+        {
+            if(!CheckTokenType(TokenType.OpLessThan))
+                throw new ParserException($"'<' token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+
+            NextToken();
+            TypeList();
+            if(!CheckTokenType(TokenType.OpGreaterThan))
+                throw new ParserException($"'>' token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            NextToken();
+        }
+
+        private void TypeList()
+        {
+            Type();
+            TypeListPrime();
+        }
+
+        private void TypeListPrime()
+        {
+            if (CheckTokenType(TokenType.Comma))
+            {
+                NextToken();
+                Type();
+                TypeListPrime();
+            }
+            else
+            {
+                //Epsilon
             }
         }
 

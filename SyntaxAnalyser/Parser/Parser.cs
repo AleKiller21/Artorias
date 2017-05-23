@@ -281,7 +281,17 @@ namespace SyntaxAnalyser.Parser
         private void Type()
         {
             NonArrayType();
+            OptionalGeneric();
             OptionalRankSpecifierList();
+        }
+
+        private void OptionalGeneric()
+        {
+            if(CheckTokenType(TokenType.OpLessThan)) Generic();
+            else
+            {
+                //Epsilon
+            }
         }
 
         private void NonArrayType()

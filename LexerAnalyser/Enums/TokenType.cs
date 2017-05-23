@@ -109,7 +109,7 @@ namespace LexerAnalyser.Enums
         RwFor,
         RwIn,
         RwLock,
-        RwObject,
+        //RwObject,
         RwPrivate,
         RwReturn,
         RwStackalloc,

@@ -41,7 +41,7 @@ namespace SyntaxAnalyser.Parser
             if (IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar) ||
                 CheckTokenType(TokenType.Id) ||
                 IsExpressionUnaryOperator() || IsIncrementDecrementOperator() ||
-                IsPrimaryExpression())
+                CheckTokenType(TokenType.RwThis))
             {
                 StatementOptions();
                 if(!CheckTokenType(TokenType.EndStatement))
@@ -67,10 +67,10 @@ namespace SyntaxAnalyser.Parser
             else if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator()) StatementStatementExpression();
             
             //Esta produccion no esta en los ultimos updates. Trayendola de vuelta se arregla el problema del this.
-            else if (IsPrimaryExpression())
+            else if (CheckTokenType(TokenType.RwThis))
             {
-                PrimaryExpression();
-                StatementExpressionPrimaryExpressionOptions();
+                PrimaryExpressionPrime();
+                VariableAssigner();
             }
             else throw new ParserException($"Primary expression, expression unary operator, ++ or --, identifer, builtin type or var keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
@@ -87,6 +87,11 @@ namespace SyntaxAnalyser.Parser
             {
                 NextToken();
                 StatementIdentifierOptions3();
+            }
+            else if (CheckTokenType(TokenType.OpLessThan))
+            {
+                Generic();
+                VariableDeclaratorList();
             }
             else if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
             else if (IsAssignmentOperator())
@@ -210,7 +215,7 @@ namespace SyntaxAnalyser.Parser
             if (IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar) ||
                 CheckTokenType(TokenType.Id) ||
                 IsExpressionUnaryOperator() || IsIncrementDecrementOperator() ||
-                IsPrimaryExpression() || IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() ||
+                CheckTokenType(TokenType.RwThis) || IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() ||
                 IsJumpStatement())
             {
                 StatementList();
@@ -390,7 +395,7 @@ namespace SyntaxAnalyser.Parser
         {
             //BUG Ambiguedad con identifier en local-variable-declaration y statement-expression-list
             if (IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar) || CheckTokenType(TokenType.Id) ||
-                IsExpressionUnaryOperator() || IsIncrementDecrementOperator())
+                IsExpressionUnaryOperator() || IsIncrementDecrementOperator() || CheckTokenType(TokenType.RwThis))
             {
                 StatementOptions();
                 StatementOptionsList();
