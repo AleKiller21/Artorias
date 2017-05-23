@@ -65,11 +65,6 @@ namespace SyntaxAnalyser.Parser
                 StatementIdentifierOptions();
             }
             else if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator()) StatementStatementExpression();
-            else if (IsPrimaryExpression())
-            {
-                PrimaryExpression();
-                StatementExpressionPrimaryExpressionOptions();
-            }
             else throw new ParserException($"Primary expression, expression unary operator, ++ or --, identifer, builtin type or var keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
@@ -108,6 +103,7 @@ namespace SyntaxAnalyser.Parser
                 NextToken();
                 StatementIdentifierOptions5();
             }
+            else if(IsIncrementDecrementOperator()) IncrementDecrement();
 
             else throw new ParserException($"'[', assignment operator, '.', '(', or identifier tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
@@ -172,7 +168,7 @@ namespace SyntaxAnalyser.Parser
             else if (IsIncrementDecrementOperator())
             {
                 IncrementDecrement();
-                PrimaryExpression();
+                PrimaryExpressionOrIdentifier();
             }
 
             else throw new ParserException($"Unary operator or '++', '--' expected at row {GetTokenRow()} column {GetTokenColumn()}.");
@@ -386,11 +382,25 @@ namespace SyntaxAnalyser.Parser
         private void OptionalForInitializer()
         {
             //BUG Ambiguedad con identifier en local-variable-declaration y statement-expression-list
-            if (IsType() || CheckTokenType(TokenType.RwOrIdVar)) LocalVariableDeclaration();
-
-            else if (IsPrimaryExpression() || CheckTokenType(TokenType.Id) || IsExpressionUnaryOperator() || IsIncrementDecrementOperator())
+            if (IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar) || CheckTokenType(TokenType.Id) ||
+                IsExpressionUnaryOperator() || IsIncrementDecrementOperator())
             {
-                StatementExpressionList();
+                StatementOptions();
+                StatementOptionsList();
+            }
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void StatementOptionsList()
+        {
+            if (CheckTokenType(TokenType.Comma))
+            {
+                NextToken();
+                StatementOptions();
+                StatementOptionsList();
             }
             else
             {
@@ -546,7 +556,7 @@ namespace SyntaxAnalyser.Parser
             else if (IsIncrementDecrementOperator())
             {
                 IncrementDecrement();
-                PrimaryExpression();
+                PrimaryExpressionOrIdentifier();
             }
             else throw new ParserException($"StatementExpression error at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
