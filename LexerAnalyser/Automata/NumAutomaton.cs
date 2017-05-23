@@ -19,7 +19,6 @@ namespace LexerAnalyser.Automata
             var lexeme = new StringBuilder();
             var rowCount = _currentSymbol.RowCount;
             var colCount = _currentSymbol.ColCount;
-            var x = 25f;
 
             while (Char.IsDigit(_currentSymbol.Character))
             {
@@ -63,8 +62,9 @@ namespace LexerAnalyser.Automata
             var colCount = _currentSymbol.ColCount;
             var symbol = _inputStream.GetNextSymbol();
 
-            if (Char.IsDigit(symbol.Character))
+            if (Char.IsDigit(symbol.Character) || '.'.Equals(symbol.Character))
             {
+                //TODO Esto devolvera todo float que empieze con 0 sin el 0. Ejemplo, 0.5f lo devolvera como .5f
                 _currentSymbol = symbol;
 
                 //BUG Eliminar todos los leading zeros dejando solo el num o id token final
