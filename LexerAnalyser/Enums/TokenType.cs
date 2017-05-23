@@ -149,7 +149,7 @@ namespace LexerAnalyser.Enums
         RwOrIdPartial,
         RwOrIdRemove,
         RwOrIdSet,
-        RwOrIdValue,
+        //RwOrIdValue,
         RwOrIdVar,
         RwOrIdWhere,
         RwOrId

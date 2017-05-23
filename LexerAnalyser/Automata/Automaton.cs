@@ -259,7 +259,7 @@ namespace LexerAnalyser.Automata
                 ["partial"] = TokenType.RwOrIdPartial,
                 ["remove"] = TokenType.RwOrIdRemove,
                 ["set"] = TokenType.RwOrIdSet,
-                ["value"] = TokenType.RwOrIdValue,
+                //["value"] = TokenType.RwOrIdValue,
                 ["var"] = TokenType.RwOrIdVar,
                 ["where"] = TokenType.RwOrIdWhere,
                 ["yield"] = TokenType.RwOrId
