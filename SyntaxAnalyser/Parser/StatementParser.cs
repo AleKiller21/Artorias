@@ -65,6 +65,13 @@ namespace SyntaxAnalyser.Parser
                 StatementIdentifierOptions();
             }
             else if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator()) StatementStatementExpression();
+            
+            //Esta produccion no esta en los ultimos updates. Trayendola de vuelta se arregla el problema del this.
+            else if (IsPrimaryExpression())
+            {
+                PrimaryExpression();
+                StatementExpressionPrimaryExpressionOptions();
+            }
             else throw new ParserException($"Primary expression, expression unary operator, ++ or --, identifer, builtin type or var keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
@@ -579,7 +586,11 @@ namespace SyntaxAnalyser.Parser
                 AssignmentOperator();
                 Expression();
             }
-            else throw new ParserException($"'(', '++', '--', or assignment operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            else
+            {
+                //Epsilon
+            }
+            //else throw new ParserException($"'(', '++', '--', or assignment operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private void StatementExpressionList()
