@@ -206,5 +206,23 @@ namespace ParserUnitTests
                 Assert.Fail(e.Message);
             }
         }
+
+        [TestMethod]
+        public void RevisionParser()
+        {
+            //It works
+            var stream = new FileInputStream(path + "Ejemplo_Parse.cs");
+            var lexer = new Lexer(stream);
+            var parser = new Parser(lexer);
+            try
+            {
+                parser.Parse();
+                Assert.AreEqual("success", "success");
+            }
+            catch (ParserException e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
     }
 }

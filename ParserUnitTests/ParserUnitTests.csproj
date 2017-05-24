@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TestFiles\Ejemplo_Parse.cs" />
     <Compile Remove="TestFiles\enums_missing_identifier_after_enum_keyword.cs" />
     <Compile Remove="TestFiles\enums_missing_open_curly_brace.cs" />
     <Compile Remove="TestFiles\enums_working.cs" />
@@ -35,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="TestFiles\Ejemplo_Parse.cs" />
     <None Include="TestFiles\enums_missing_identifier_after_enum_keyword.cs" />
     <None Include="TestFiles\enums_missing_open_curly_brace.cs" />
     <None Include="TestFiles\enums_working.cs" />
