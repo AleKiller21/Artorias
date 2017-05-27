@@ -74,13 +74,13 @@ namespace SyntaxAnalyser.Parser
             {
                 NextToken();
                 PrimaryExpressionPrime();
-                VariableAssigner();
+                OptionalAssignment();
             }
             else if (CheckTokenType(TokenType.RwBase))
             {
                 NextToken();
                 PrimaryExpressionPrime();
-                VariableAssigner();
+                OptionalAssignment();
             }
             else if (CheckTokenType(TokenType.ParenthesisOpen))
             {
@@ -88,6 +88,19 @@ namespace SyntaxAnalyser.Parser
                 PrimaryExpressionPrime();
             }
             else throw new ParserException($"Primary expression, expression unary operator, ++ or --, identifer, builtin type or var keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+
+        private void OptionalAssignment()
+        {
+            if (IsAssignmentOperator())
+            {
+                AssignmentOperator();
+                VariableInitializer();
+            }
+            else
+            {
+                //Epsilon
+            }
         }
 
         private void StatementIdentifierOptions()
@@ -111,8 +124,8 @@ namespace SyntaxAnalyser.Parser
             else if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
             else if (IsAssignmentOperator())
             {
-                VariableAssigner();
-                VariableDeclaratorListPrime();
+                AssignmentOperator();
+                VariableInitializer();
             }
             else if (CheckTokenType(TokenType.MemberAccess))
             {
@@ -554,26 +567,12 @@ namespace SyntaxAnalyser.Parser
             EmbeddedStatementOrStatementExpression();
         }
 
-        private void LocalVariableDeclaration()
-        {
-            TypeOrVar();
-            VariableDeclaratorList();
-        }
-
         private void StatementExpression()
         {
             if (IsPrimaryExpression() || CheckTokenType(TokenType.Id))
             {
                 PrimaryExpressionOrIdentifier();
                 StatementExpressionPrimaryExpressionOptions();
-            }
-
-            else if (IsExpressionUnaryOperator())
-            {
-                ExpressionUnaryOperator();
-                UnaryExpression();
-                AssignmentOperator();
-                Expression();
             }
 
             else if (IsIncrementDecrementOperator())

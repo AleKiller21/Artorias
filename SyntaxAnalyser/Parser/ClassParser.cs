@@ -191,9 +191,9 @@ namespace SyntaxAnalyser.Parser
 
         private void VariableAssigner()
         {
-            if (IsAssignmentOperator())
+            if (CheckTokenType(TokenType.OpAssignment))
             {
-                AssignmentOperator();
+                NextToken();
                 VariableInitializer();
             }
 

@@ -186,13 +186,6 @@ namespace SyntaxAnalyser.Parser
                 ShiftExpression();
                 RelationalExpressionPrime();
             }
-            
-            else if (Is_IsAsOperator())
-            {
-                IsAsOperator();
-                ShiftExpression();
-                RelationalExpressionPrime();
-            }
             else
             {
                 //Epsilon

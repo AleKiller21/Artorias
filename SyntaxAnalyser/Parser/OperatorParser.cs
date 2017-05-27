@@ -28,7 +28,8 @@ namespace SyntaxAnalyser.Parser
             return CheckTokenType(TokenType.OpLessThan) ||
                    CheckTokenType(TokenType.OpGreaterThan) ||
                    CheckTokenType(TokenType.OpLessThanOrEqual) ||
-                   CheckTokenType(TokenType.OpGreaterThanOrEqual);
+                   CheckTokenType(TokenType.OpGreaterThanOrEqual) ||
+                   CheckTokenType(TokenType.OpIsType) || CheckTokenType(TokenType.OpAsType);
         }
 
         private bool IsExpressionEqualityOperator()
@@ -54,12 +55,6 @@ namespace SyntaxAnalyser.Parser
             return CheckTokenType(TokenType.OpMultiply) ||
                    CheckTokenType(TokenType.OpDivision) ||
                    CheckTokenType(TokenType.OpModulo);
-        }
-
-        private bool Is_IsAsOperator()
-        {
-            return CheckTokenType(TokenType.OpIsType) ||
-                   CheckTokenType(TokenType.OpAsType);
         }
 
         private bool IsExpressionUnaryOperator()
@@ -111,12 +106,6 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsMultiplicativeOperator()) NextToken();
             else throw new MultiplicativeOperatorExpectedException(GetTokenRow(), GetTokenColumn());
-        }
-
-        private void IsAsOperator()
-        {
-            if (Is_IsAsOperator()) NextToken();
-            else throw new IsAsOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
         private void ExpressionUnaryOperator()

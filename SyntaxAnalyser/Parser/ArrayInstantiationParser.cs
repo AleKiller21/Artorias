@@ -46,21 +46,13 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void ArrayType()
-        {
-            NonArrayType();
-            RankSpecifierList();
-        }
-
-        private void RankSpecifierList()
-        {
-            RankSpecifier();
-            OptionalRankSpecifierList();
-        }
-
         private void OptionalRankSpecifierList()
         {
-            if(CheckTokenType(TokenType.SquareBracketOpen)) RankSpecifierList();
+            if (CheckTokenType(TokenType.SquareBracketOpen))
+            {
+                RankSpecifier();
+                OptionalRankSpecifierList();
+            }
             else
             {
                 //Epsilon
