@@ -8,5 +8,10 @@
         {
             Identifier = identifier;
         }
+
+        public UsingNamespaceDeclaration()
+        {
+            
+        }
     }
 }

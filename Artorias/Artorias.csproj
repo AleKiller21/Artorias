@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LexerAnalyser\LexerAnalyser.csproj" />
     <ProjectReference Include="..\SyntaxAnalyser\SyntaxAnalyser.csproj" />
   </ItemGroup>
