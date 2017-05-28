@@ -4,11 +4,10 @@ using System.Text;
 
 namespace SyntaxAnalyser.Nodes
 {
-    public class MethodDeclaration
+    public class EnumMember
     {
-        public AccessModifier Modifier;
-        public DataType Type;
         public string Identifier;
-        public List<FixedParameter> Params;
+        //TODO El tipo de Value sera de tipo Expression
+        //public int Value;
     }
 }

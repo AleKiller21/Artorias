@@ -214,12 +214,7 @@ namespace SyntaxAnalyser.Parser
                 return null;
             }
             if (CheckTokenType(TokenType.RwInterface)) return InterfaceDeclaration();
-            else if (CheckTokenType(TokenType.RwEnum))
-            {
-                EnumDeclaration();
-                //TODO retornar tipo enum
-                return null;
-            }
+            if (CheckTokenType(TokenType.RwEnum)) return EnumDeclaration();
 
             throw new ParserException($"Class, Interface or Enum identifier expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }

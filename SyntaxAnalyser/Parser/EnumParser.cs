@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes;
 
 namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
-        private void EnumDeclaration()
+        private EnumDeclaration EnumDeclaration()
         {
+            var enumDeclaration = new EnumDeclaration();
+
             if (!CheckTokenType(TokenType.RwEnum))
                 throw new MissingEnumKeywordException(GetTokenRow(), GetTokenColumn());
 
@@ -17,63 +20,79 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            enumDeclaration.Identifier = _token.Lexeme;
             NextToken();
-            EnumBody();
+            enumDeclaration.Members = EnumBody();
             OptionalBodyEnd();
+
+            return enumDeclaration;
         }
 
-        private void EnumBody()
+        private List<EnumMember> EnumBody()
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalAssignableIdentifiersList();
+            var enumMembers = OptionalAssignableIdentifiersList();
             if (!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            return enumMembers;
         }
 
-        private void OptionalAssignableIdentifiersList()
+        private List<EnumMember> OptionalAssignableIdentifiersList()
         {
             if (CheckTokenType(TokenType.Id))
             {
+                var enumMember = new EnumMember {Identifier = _token.Lexeme};
                 NextToken();
-                AssignmentOptions();
+                return AssignmentOptions(enumMember);
             }
             else
             {
-                //Epsilon
+                return new List<EnumMember>();
             }
         }
 
-        private void AssignmentOptions()
+        private List<EnumMember> AssignmentOptions(EnumMember enumMember)
         {
-            if (CheckTokenType(TokenType.Comma)) OptionalAssignableIdentifiersListPrime();
-            else if (CheckTokenType(TokenType.OpAssignment))
+            if (CheckTokenType(TokenType.Comma))
+            {
+                //TODO Asignarle a enumMember.value un tipo Expression con un valor secuencial
+                var enumMemberList = OptionalAssignableIdentifiersListPrime();
+                enumMemberList.Insert(0, enumMember);
+
+                return enumMemberList;
+            }
+            if (CheckTokenType(TokenType.OpAssignment))
             {
                 NextToken();
+                //TODO enumMember.value = Expression()
                 Expression();
-                OptionalAssignableIdentifiersListPrime();
+                var enumMemberList = OptionalAssignableIdentifiersListPrime();
+                enumMemberList.Insert(0, enumMember);
+
+                return enumMemberList;
             }
 
             else
             {
-                //Epsilon
+                return new List<EnumMember> {enumMember};
             }
         }
 
-        private void OptionalAssignableIdentifiersListPrime()
+        private List<EnumMember> OptionalAssignableIdentifiersListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                OptionalAssignableIdentifiersList();
+                return OptionalAssignableIdentifiersList();
             }
             else
             {
-                //Epsilon
+                return new List<EnumMember>();
             }
         }
     }

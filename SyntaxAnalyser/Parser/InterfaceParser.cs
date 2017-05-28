@@ -84,7 +84,7 @@ namespace SyntaxAnalyser.Parser
 
             NextToken();
 
-            methodDeclaration.modifier = AccessModifier.Public;
+            methodDeclaration.Modifier = AccessModifier.Public;
             return methodDeclaration;
         }
 
