@@ -3,6 +3,7 @@ using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
+using SyntaxAnalyser.Nodes.Interfaces;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -28,7 +29,7 @@ namespace SyntaxAnalyser.Parser
             return interfaceDeclaration;
         }
 
-        private List<MethodDeclaration> InterfaceBody()
+        private List<InterfaceMethodDeclaration> InterfaceBody()
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
@@ -42,7 +43,7 @@ namespace SyntaxAnalyser.Parser
             return methods;
         }
 
-        private List<MethodDeclaration> InterfaceMethodDeclarationList()
+        private List<InterfaceMethodDeclaration> InterfaceMethodDeclarationList()
         {
             if (IsTypeOrVoid())
             {
@@ -59,13 +60,13 @@ namespace SyntaxAnalyser.Parser
 
             else
             {
-                return new List<MethodDeclaration>();
+                return new List<InterfaceMethodDeclaration>();
             }
         }
 
-        private MethodDeclaration InterfaceMethodHeader()
+        private InterfaceMethodDeclaration InterfaceMethodHeader()
         {
-            var methodDeclaration = new MethodDeclaration();
+            var methodDeclaration = new InterfaceMethodDeclaration();
             methodDeclaration.Type = TypeOrVoid();
 
             if(!CheckTokenType(TokenType.Id))

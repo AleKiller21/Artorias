@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Nodes
 {
-    public class MethodDeclaration
+    public abstract class MethodDeclaration
     {
         public AccessModifier Modifier;
         public DataType Type;

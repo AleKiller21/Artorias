@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace SyntaxAnalyser.Nodes
+namespace SyntaxAnalyser.Nodes.Namespaces
 {
     public class NamesapceDeclaration
     {

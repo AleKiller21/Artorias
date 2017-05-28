@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SyntaxAnalyser.Nodes
+﻿namespace SyntaxAnalyser.Nodes.Types
 {
     public enum BuiltInDataType
     {

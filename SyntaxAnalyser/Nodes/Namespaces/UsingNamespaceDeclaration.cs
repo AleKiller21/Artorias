@@ -1,4 +1,4 @@
-﻿namespace SyntaxAnalyser.Nodes
+﻿namespace SyntaxAnalyser.Nodes.Namespaces
 {
     public class UsingNamespaceDeclaration
     {
