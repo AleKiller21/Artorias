@@ -2,12 +2,13 @@
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes;
 
 namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
-        private void InterfaceDeclaration()
+        private TypeDeclaration InterfaceDeclaration()
         {
             if (!CheckTokenType(TokenType.RwInterface))
                 throw new MissingInterfaceKeywordException(GetTokenRow(), GetTokenColumn());
@@ -16,73 +17,88 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            var interfaceDeclaration = new InterfaceDeclaration();
+            interfaceDeclaration.Identifier = _token.Lexeme;
+
             NextToken();
-            InheritanceBase();
-            InterfaceBody();
+            interfaceDeclaration.Parents = InheritanceBase();
+            interfaceDeclaration.Methods = InterfaceBody();
             OptionalBodyEnd();
+
+            return interfaceDeclaration;
         }
 
-        private void InterfaceBody()
+        private List<MethodDeclaration> InterfaceBody()
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            InterfaceMethodDeclarationList();
+            var methods = InterfaceMethodDeclarationList();
             if(!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            return methods;
         }
 
-        private void InterfaceMethodDeclarationList()
+        private List<MethodDeclaration> InterfaceMethodDeclarationList()
         {
             if (IsTypeOrVoid())
             {
-                InterfaceMethodHeader();
+                var methodDeclaration = InterfaceMethodHeader();
                 if(!CheckTokenType(TokenType.EndStatement))
                     throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                InterfaceMethodDeclarationList();
+                var methodDeclarationList = InterfaceMethodDeclarationList();
+
+                methodDeclarationList.Insert(0, methodDeclaration);
+                return methodDeclarationList;
             }
 
             else
             {
-                //Epsilon
+                return new List<MethodDeclaration>();
             }
         }
 
-        private void InterfaceMethodHeader()
+        private MethodDeclaration InterfaceMethodHeader()
         {
-            TypeOrVoid();
+            var methodDeclaration = new MethodDeclaration();
+            methodDeclaration.Type = TypeOrVoid();
+
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            methodDeclaration.Identifier = _token.Lexeme;
             NextToken();
             if (!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            FixedParameters();
+            methodDeclaration.Params = FixedParameters();
 
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+
+            methodDeclaration.modifier = AccessModifier.Public;
+            return methodDeclaration;
         }
 
-        private void InheritanceBase()
+        private List<QualifiedIdentifier> InheritanceBase()
         {
             if (CheckTokenType(TokenType.Colon))
             {
                 NextToken();
-                IdentifiersList();
+                return IdentifiersList();
             }
 
             else
             {
-                //Epsilon
+                return new List<QualifiedIdentifier>();
             }
         }
     }

@@ -179,44 +179,70 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void TypeDeclarationList()
+        private List<TypeDeclaration> TypeDeclarationList()
         {
             if (HasEncapsulationModifier() || (CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass))
                 || CheckTokenType(TokenType.RwInterface) || CheckTokenType(TokenType.RwEnum))
             {
-                TypeDeclaration();
-                TypeDeclarationList();
+                var typeDeclaration = TypeDeclaration();
+                var typeDeclarationList = TypeDeclarationList();
+
+                typeDeclarationList.Insert(0, typeDeclaration);
+                return typeDeclarationList;
             }
             else
             {
-                //Epsilon
+                return new List<TypeDeclaration>();
             }
         }
 
-        private void TypeDeclaration()
+        private TypeDeclaration TypeDeclaration()
         {
-            EncapsulationModifier();
-            GroupDeclaration();
+            var modifier = EncapsulationModifier();
+            var @type = GroupDeclaration();
+
+            @type.Modifier = modifier;
+            return @type;
         }
 
-        private void GroupDeclaration()
+        private TypeDeclaration GroupDeclaration()
         {
-            if(CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass)) ClassDeclaration();
-            else if (CheckTokenType(TokenType.RwInterface)) InterfaceDeclaration();
-            else if (CheckTokenType(TokenType.RwEnum)) EnumDeclaration();
-            else
-                throw new ParserException($"Class, Interface or Enum identifier expected at row {GetTokenRow()} column {GetTokenColumn()}");
-        }
-
-        private void EncapsulationModifier()
-        {
-            if (CheckTokenType(TokenType.RwPublic)) NextToken();
-            else if (CheckTokenType(TokenType.RwPrivate)) NextToken();
-            else if (CheckTokenType(TokenType.RwProtected)) NextToken();
-            else
+            if (CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass))
             {
-                //Epsilon
+                ClassDeclaration();
+                //TODO retornar nueva class
+                return null;
             }
+            if (CheckTokenType(TokenType.RwInterface)) return InterfaceDeclaration();
+            else if (CheckTokenType(TokenType.RwEnum))
+            {
+                EnumDeclaration();
+                //TODO retornar tipo enum
+                return null;
+            }
+
+            throw new ParserException($"Class, Interface or Enum identifier expected at row {GetTokenRow()} column {GetTokenColumn()}");
+        }
+
+        private AccessModifier EncapsulationModifier()
+        {
+            if (CheckTokenType(TokenType.RwPublic))
+            {
+                NextToken();
+                return AccessModifier.Public;
+            }
+            if (CheckTokenType(TokenType.RwPrivate))
+            {
+                NextToken();
+                return AccessModifier.Private;
+            }
+            if (CheckTokenType(TokenType.RwProtected))
+            {
+                NextToken();
+                return AccessModifier.Protected;
+            }
+
+            return AccessModifier.None;
         }
 
         private void OptionalBodyEnd()
@@ -228,23 +254,29 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void IdentifiersList()
+        private List<QualifiedIdentifier> IdentifiersList()
         {
-            QualifiedIdentifier();
-            IdentifierListPrime();
+            var qualifiedIdentifier = QualifiedIdentifier();
+            var identifierList = IdentifierListPrime();
+
+            identifierList.Insert(0, qualifiedIdentifier);
+            return identifierList;
         }
 
-        private void IdentifierListPrime()
+        private List<QualifiedIdentifier> IdentifierListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                QualifiedIdentifier();
-                IdentifierListPrime();
+                var qualifiedIdentifier = QualifiedIdentifier();
+                var identifierList = IdentifierListPrime();
+                identifierList.Insert(0, qualifiedIdentifier);
+
+                return identifierList;
             }
             else
             {
-                //Epsilon
+                return new List<QualifiedIdentifier>();
             }
         }
 
@@ -271,86 +303,141 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.RwFloat);
         }
 
-        private void BuiltInType()
+        private BuiltInDataType BuiltInType()
         {
-            if(IsBuiltInType()) NextToken();
-            else throw new BuiltInDataTypeException(GetTokenRow(), GetTokenColumn());
+            if (CheckTokenType(TokenType.RwInt))
+            {
+                NextToken();
+                return BuiltInDataType.Int;
+            }
+            if (CheckTokenType(TokenType.RwChar))
+            {
+                NextToken();
+                return BuiltInDataType.Char;
+            }
+            if (CheckTokenType(TokenType.RwString))
+            {
+                NextToken();
+                return BuiltInDataType.String;
+            }
+            if (CheckTokenType(TokenType.RwBool))
+            {
+                NextToken();
+                return BuiltInDataType.Bool;
+            }
+            if (CheckTokenType(TokenType.RwFloat))
+            {
+                NextToken();
+                return BuiltInDataType.Float;
+            }
+
+            throw new BuiltInDataTypeException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void TypeOrVoid()
+        private DataType TypeOrVoid()
         {
-            if (IsType()) Type();
-            else if(CheckTokenType(TokenType.RwVoid)) NextToken();
+            if (IsType()) return Type();
+            if (CheckTokenType(TokenType.RwVoid))
+            {
+                NextToken();
+                return new DataType {Type = BuiltInDataType.Void};
+            }
 
-            else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+            throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
         }
 
-        private void TypeOrVar()
+        private DataType TypeOrVar()
         {
-            if(IsType()) Type();
-            else if(CheckTokenType(TokenType.RwOrIdVar)) NextToken();
-            else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
+            if(IsType()) return Type();
+            if (CheckTokenType(TokenType.RwOrIdVar))
+            {
+                NextToken();
+                return new DataType {Type = BuiltInDataType.Var};
+            }
+
+            throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
         }
 
-        private void Type()
+        private DataType Type()
         {
-            NonArrayType();
-            OptionalGeneric();
-            OptionalRankSpecifierList();
+            var type = new DataType();
+
+            NonArrayType(type);
+            type.GenericTypes = OptionalGeneric();
+            type.RankSpecifiers = OptionalRankSpecifierList();
+
+            return type;
         }
 
-        private void OptionalGeneric()
+        private List<DataType> OptionalGeneric()
         {
-            if(CheckTokenType(TokenType.OpLessThan)) Generic();
+            if(CheckTokenType(TokenType.OpLessThan)) return Generic();
             else
             {
-                //Epsilon
+                return new List<DataType>();
             }
         }
 
-        private void NonArrayType()
+        private void NonArrayType(DataType type)
         {
-            if(CheckTokenType(TokenType.Id)) QualifiedIdentifier();
-            else if(IsBuiltInType()) BuiltInType();
+            if (CheckTokenType(TokenType.Id))
+            {
+                type.Name = QualifiedIdentifier();
+                type.Type = BuiltInDataType.None;
+            }
+            else if (IsBuiltInType())
+            {
+                type.Type = BuiltInType();
+            }
             else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
         }
 
-        private void FixedParameters()
+        private List<FixedParameter> FixedParameters()
         {
             if (IsType())
             {
-                FixedParameter();
-                FixedParametersPrime();
+                var parameter = FixedParameter();
+                var parameters = FixedParametersPrime();
+
+                parameters.Insert(0, parameter);
+                return parameters;
             }
 
             else
             {
-                //Epsilon
+                return new List<FixedParameter>();
             }
         }
 
-        private void FixedParametersPrime()
+        private List<FixedParameter> FixedParametersPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                FixedParameter();
-                FixedParametersPrime();
+                var parameter = FixedParameter();
+                var parameters = FixedParametersPrime();
+
+                parameters.Insert(0, parameter);
+                return parameters;
             }
             else
             {
-                //Epsilon
+                return new List<FixedParameter>();
             }
         }
 
-        private void FixedParameter()
+        private FixedParameter FixedParameter()
         {
-            Type();
+            var parameter = new FixedParameter();
+            parameter.Type = Type();
 
             if (!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            parameter.Identifier = _token.Lexeme;
             NextToken();
+
+            return parameter;
         }
 
         private void Literal()

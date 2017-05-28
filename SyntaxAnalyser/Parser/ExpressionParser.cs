@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -60,7 +61,8 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.RwNew))
             {
                 NextToken();
-                NonArrayType();
+                //TODO Reemplazar 'new Datatype()' con argumento de PrimaryExpressionBase
+                NonArrayType(new DataType());
                 InstanceOptions();
             }
 
@@ -100,35 +102,43 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void Generic()
+        private List<DataType> Generic()
         {
             if(!CheckTokenType(TokenType.OpLessThan))
                 throw new ParserException($"'<' token expected at row {GetTokenRow()} column {GetTokenColumn()}");
 
             NextToken();
-            TypeList();
+            var genericTypes = TypeList();
             if(!CheckTokenType(TokenType.OpGreaterThan))
                 throw new ParserException($"'>' token expected at row {GetTokenRow()} column {GetTokenColumn()}");
             NextToken();
+
+            return genericTypes;
         }
 
-        private void TypeList()
+        private List<DataType> TypeList()
         {
-            Type();
-            TypeListPrime();
+            var type = Type();
+            var typeList = TypeListPrime();
+
+            typeList.Insert(0, type);
+            return typeList;
         }
 
-        private void TypeListPrime()
+        private List<DataType> TypeListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                Type();
-                TypeListPrime();
+                var type = Type();
+                var typeList = TypeListPrime();
+
+                typeList.Insert(0, type);
+                return typeList;
             }
             else
             {
-                //Epsilon
+                return new List<DataType>();
             }
         }
 

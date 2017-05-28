@@ -6,9 +6,9 @@ namespace SyntaxAnalyser.Nodes
 {
     public class NamesapceDeclaration
     {
+        public QualifiedIdentifier Identifier;
         public List<UsingNamespaceDeclaration> UsingNamespaces;
         public List<TypeDeclaration> Types;
-        public QualifiedIdentifier Identifier;
         public List<NamesapceDeclaration> Declarations;
 
         public NamesapceDeclaration()

@@ -46,49 +46,59 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void OptionalRankSpecifierList()
+        private List<int> OptionalRankSpecifierList()
         {
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
-                RankSpecifier();
-                OptionalRankSpecifierList();
+                var commas = RankSpecifier();
+                var rankSpecifierCommas = OptionalRankSpecifierList();
+
+                rankSpecifierCommas.Insert(0, commas);
+                return rankSpecifierCommas;
             }
             else
             {
-                //Epsilon
+                return new List<int>();
             }
         }
 
-        private void RankSpecifier()
+        private int RankSpecifier()
         {
             if(!CheckTokenType(TokenType.SquareBracketOpen))
                 throw new SquareBracketOpenExpectedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalCommaList();
+            var commas = OptionalCommaList();
 
             if(!CheckTokenType(TokenType.SquareBracketClose))
                 throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+
+            return commas;
         }
 
-        private void OptionalCommaList()
+        private int OptionalCommaList()
         {
-            if (CheckTokenType(TokenType.Comma)) CommaList();
+            if (CheckTokenType(TokenType.Comma)) return CommaList();
             else
             {
-                //Epsilon
+                return 0;
             }
         }
 
-        private void CommaList()
+        private int CommaList()
         {
+            var commas = 0;
+
             if (!CheckTokenType(TokenType.Comma))
                 throw new CommaExpectedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalCommaList();
+            commas++;
+            commas += OptionalCommaList();
+
+            return commas;
         }
     }
 }

@@ -30,7 +30,7 @@ namespace SyntaxAnalyser.Parser
             }
             else if (HasEncapsulationModifier() || IsGroupDeclaration())
             {
-                TypeDeclarationList();
+                Namespace.Types = TypeDeclarationList();
                 OptionalNameSpaceMemberDeclaration(Namespace);
             }
             else
