@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using LexerAnalyser;
 using LexerAnalyser.Enums;
 using LexerAnalyser.Models;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -94,65 +96,68 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.RwInterface) || CheckTokenType(TokenType.RwEnum);
         }
 
-        public void Parse()
+        public Code Parse()
         {
-            Code();
+            var code = Code();
             if(!CheckTokenType(TokenType.Eof)) throw new ParserException($"End of file expected at row {GetTokenRow()} column {GetTokenColumn()}");
+
+            return code;
         }
 
-        private void Code()
+        private Code Code()
         {
-            CompilationUnit();
+            var code = new Code();
+
+            if (CheckTokenType(TokenType.RwUsing))
+            {
+                code.GlobalNamespace.UsingNamespaces = UsingDirective();
+                OptionalNameSpaceMemberDeclaration(code.GlobalNamespace);
+
+                return code;
+            }
+
+            if (CheckTokenType(TokenType.RwNameSpace) || HasEncapsulationModifier() || IsGroupDeclaration())
+            {
+                NamespaceMemberDeclaration(code.GlobalNamespace);
+
+                return code;
+            }
+
+            return code;
         }
 
-        private void CompilationUnit()
+        private List<UsingNamespaceDeclaration> OptionalUsingDirective()
         {
             if (CheckTokenType(TokenType.RwUsing))
             {
-                OptionalUsingDirective();
-                OptionalNameSpaceMemberDeclaration();
-            }
-
-            else if (CheckTokenType(TokenType.RwNameSpace) || HasEncapsulationModifier() || IsGroupDeclaration())
-            {
-                OptionalNameSpaceMemberDeclaration();
+                return UsingDirective();
             }
 
             else
             {
-                //Epsilon
+                return new List<UsingNamespaceDeclaration>();
             }
         }
 
-        private void OptionalUsingDirective()
-        {
-            if (CheckTokenType(TokenType.RwUsing))
-            {
-                UsingDirective();
-            }
-
-            else
-            {
-                //Epsilon
-            }
-        }
-
-        private void UsingDirective()
+        private List<UsingNamespaceDeclaration> UsingDirective()
         {
             if(!CheckTokenType(TokenType.RwUsing))
                 throw new MissingUsingKeywordException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            QualifiedIdentifier();
+            var usingNamespace = new UsingNamespaceDeclaration(QualifiedIdentifier());
 
             if(!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalUsingDirective();
+            var usingNamespaceList = OptionalUsingDirective();
+            usingNamespaceList.Insert(0,  usingNamespace);
+
+            return usingNamespaceList;
         }
 
-        private void IdentifierAttribute()
+        private List<string> IdentifierAttribute()
         {
             if (CheckTokenType(TokenType.MemberAccess))
             {
@@ -160,13 +165,17 @@ namespace SyntaxAnalyser.Parser
                 if (!CheckTokenType(TokenType.Id))
                     throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+                var identifier = _token.Lexeme;
                 NextToken();
-                IdentifierAttribute();
+                var identifiers = IdentifierAttribute();
+                identifiers.Insert(0, identifier);
+
+                return identifiers;
             }
 
             else
             {
-                //Epsilon
+                return new List<string>();
             }
         }
 
@@ -239,13 +248,18 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void QualifiedIdentifier()
+        private QualifiedIdentifier QualifiedIdentifier()
         {
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            var identifier = _token.Lexeme;
             NextToken();
-            IdentifierAttribute();
+            var identifiers = IdentifierAttribute();
+            identifiers.Insert(0, identifier);
+
+            var qualifiedIdentifier = new QualifiedIdentifier {Identifiers = identifiers};
+            return qualifiedIdentifier;
         }
 
         private bool IsBuiltInType()

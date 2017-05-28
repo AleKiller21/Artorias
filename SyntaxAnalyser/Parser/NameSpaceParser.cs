@@ -2,17 +2,18 @@
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes;
 
 namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
-        private void OptionalNameSpaceMemberDeclaration()
+        private void OptionalNameSpaceMemberDeclaration(NamesapceDeclaration Namespace)
         {
             if(CheckTokenType(TokenType.RwNameSpace) ||
                 HasEncapsulationModifier() || IsGroupDeclaration())
             {
-                NamespaceMemberDeclaration();
+                NamespaceMemberDeclaration(Namespace);
             }
             else
             {
@@ -20,17 +21,17 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void NamespaceMemberDeclaration()
+        private void NamespaceMemberDeclaration(NamesapceDeclaration Namespace)
         {
             if (CheckTokenType(TokenType.RwNameSpace))
             {
-                NamespaceDeclaration();
-                OptionalNameSpaceMemberDeclaration();
+                NamespaceDeclaration(Namespace);
+                OptionalNameSpaceMemberDeclaration(Namespace);
             }
             else if (HasEncapsulationModifier() || IsGroupDeclaration())
             {
                 TypeDeclarationList();
-                OptionalNameSpaceMemberDeclaration();
+                OptionalNameSpaceMemberDeclaration(Namespace);
             }
             else
             {
@@ -38,24 +39,25 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void NamespaceDeclaration()
+        private void NamespaceDeclaration(NamesapceDeclaration Namespace)
         {
             if(!CheckTokenType(TokenType.RwNameSpace))
                 throw new MissingNamespaceKeywordException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            QualifiedIdentifier();
-            NamespaceBody();
+            var newNamespace = new NamesapceDeclaration {Identifier = QualifiedIdentifier()};
+            NamespaceBody(newNamespace);
+            Namespace.Declarations.Add(newNamespace);
         }
 
-        private void NamespaceBody()
+        private void NamespaceBody(NamesapceDeclaration Namespace)
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalUsingDirective();
-            OptionalNameSpaceMemberDeclaration();
+            Namespace.UsingNamespaces = OptionalUsingDirective();
+            OptionalNameSpaceMemberDeclaration(Namespace);
 
             if(!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
