@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes.Expressions.Binary.Additive;
+using SyntaxAnalyser.Nodes.Expressions.Binary.Assignment;
+using SyntaxAnalyser.Nodes.Expressions.Binary.Equality;
+using SyntaxAnalyser.Nodes.Expressions.Binary.Multiplicative;
+using SyntaxAnalyser.Nodes.Expressions.Binary.Relational;
+using SyntaxAnalyser.Nodes.Expressions.Binary.Shift;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -72,40 +78,112 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.OpDecrement);
         }
 
-        private void AssignmentOperator()
+        private AssignmentOperator AssignmentOperator()
         {
-            if(IsAssignmentOperator()) NextToken();
-            else throw new AssignmentOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsAssignmentOperator())
+            {
+                AssignmentOperator Operator;
+                if(CheckTokenType(TokenType.OpAddEqual)) Operator = new PlusEqualOperator();
+                else if(CheckTokenType(TokenType.OpSubtractEqual)) Operator = new MinusEqualOperator();
+                else if (CheckTokenType(TokenType.OpAssignment)) Operator = new AssignOperator();
+                else if (CheckTokenType(TokenType.OpMultiplyEqual)) Operator = new MultiplicationEqualOperator();
+                else if (CheckTokenType(TokenType.OpDivideEqual)) Operator = new DivideEqualOperator();
+                else if (CheckTokenType(TokenType.OpModuloEqual)) Operator = new ModuloEqualOperator();
+                else if (CheckTokenType(TokenType.OpAmpersandEqual)) Operator = new AndEqualOperator();
+                else if (CheckTokenType(TokenType.OpOrEqual)) Operator = new OrEqualOperator();
+                else if (CheckTokenType(TokenType.OpXorEqual)) Operator = new ExclusiveOrEqualOperator();
+                else if (CheckTokenType(TokenType.OpShiftLeftEqual)) Operator = new LeftShiftEqualOperator();
+                else Operator = new RightShiftEqualOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new AssignmentOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void ExpressionRelationalOperator()
+        private RelationalOperator ExpressionRelationalOperator()
         {
-            if (IsExpressionRelationalOperator()) NextToken();
-            else throw new ExpressionRelationalOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsExpressionRelationalOperator())
+            {
+                RelationalOperator Operator;
+
+                if(CheckTokenType(TokenType.OpLessThan)) Operator = new LessThanOperator();
+                else if(CheckTokenType(TokenType.OpGreaterThan)) Operator = new GreaterThanOperator();
+                else if (CheckTokenType(TokenType.OpLessThanOrEqual)) Operator = new LessThanOrEqualOperator();
+                else if (CheckTokenType(TokenType.OpGreaterThanOrEqual)) Operator = new GreaterThanOrEqualOperator();
+                else if (CheckTokenType(TokenType.OpIsType)) Operator = new IsOperator();
+                else Operator = new AsOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new ExpressionRelationalOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void ExpressionEqualityOperator()
+        private EqualityOperator ExpressionEqualityOperator()
         {
-            if (IsExpressionEqualityOperator()) NextToken();
-            else throw new ExpressionEqualityOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsExpressionEqualityOperator())
+            {
+                EqualityOperator Operator;
+
+                if (CheckTokenType(TokenType.OpEqual)) Operator = new EqualOperator();
+                else Operator = new NotEqualOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new ExpressionEqualityOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void ExpressionShiftOperator()
+        private ShiftOperator ExpressionShiftOperator()
         {
-            if(IsExpressionShiftOperator()) NextToken();
-            else throw new ExpressionShiftOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsExpressionShiftOperator())
+            {
+                ShiftOperator Operator;
+
+                if(CheckTokenType(TokenType.OpShiftLeft)) Operator = new LeftShiftOperator();
+                else Operator = new RightShiftOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new ExpressionShiftOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void AdditiveOperator()
+        private AdditiveOperator AdditiveOperator()
         {
-            if (IsAdditiveOperator()) NextToken();
-            else throw new AdditiveOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsAdditiveOperator())
+            {
+                AdditiveOperator Operator;
+
+                if(CheckTokenType(TokenType.OpAddition)) Operator = new SumOperator();
+                else Operator = new MinusOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new AdditiveOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void MultiplicativeOperator()
+        private MultiplicativeOperator MultiplicativeOperator()
         {
-            if (IsMultiplicativeOperator()) NextToken();
-            else throw new MultiplicativeOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsMultiplicativeOperator())
+            {
+                MultiplicativeOperator Operator;
+                if(CheckTokenType(TokenType.OpMultiply)) Operator = new MultiplicationOperator();
+                else if(CheckTokenType(TokenType.OpDivision)) Operator = new DivisionOperator();
+                else Operator = new ModuloOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new MultiplicativeOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
         private void ExpressionUnaryOperator()

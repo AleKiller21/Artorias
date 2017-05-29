@@ -3,269 +3,284 @@ using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes.Expressions;
+using SyntaxAnalyser.Nodes.Expressions.Binary;
+using SyntaxAnalyser.Nodes.Expressions.Ternary;
 
 namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
-        private void ConditionalExpression()
+        private Expression ConditionalExpression()
         {
-            NullCoalescingExpression();
-            ConditionalExpressionPrime();
+            return ConditionalExpressionPrime(NullCoalescingExpression());
         }
 
-        private void ConditionalExpressionPrime()
+        private Expression ConditionalExpressionPrime(Expression leftOperand)
         {
             if (CheckTokenType(TokenType.OpConditional))
             {
+                var conditionalOperator = new ConditionalOperator{LeftOperand = leftOperand};
+
                 NextToken();
-                Expression();
+                conditionalOperator.FirstRightOperand = Expression();
                 if(!CheckTokenType(TokenType.Colon))
                     throw new ColonExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                Expression();
+                conditionalOperator.SecondRightOperand = Expression();
+
+                return conditionalOperator;
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return leftOperand;
         }
 
-        private void NullCoalescingExpression()
+        private Expression NullCoalescingExpression()
         {
-            ConditionalOrExpression();
-            NullCoalescingExpressionPrime();
+            return NullCoalescingExpressionPrime(ConditionalOrExpression());
         }
 
-        private void NullCoalescingExpressionPrime()
+        private Expression NullCoalescingExpressionPrime(Expression leftOperand)
         {
             if (CheckTokenType(TokenType.OpNullCoalescing))
             {
+                var expression = new NullCoalescingOperator{LeftOperand = leftOperand};
                 NextToken();
-                ConditionalOrExpression();
-                NullCoalescingExpressionPrime();
+                expression.RightOperand = ConditionalOrExpression();
+                NullCoalescingExpressionPrime(expression);
             }
-            else
-            {
-                //Epsilon   
-            }
+
+            return leftOperand;
         }
 
-        private void ConditionalOrExpression()
+        private Expression ConditionalOrExpression()
         {
-            ConditionalAndExpression();
-            ConditionalOrExpressionPrime();
+            return ConditionalOrExpressionPrime(ConditionalAndExpression());
         }
 
-        private void ConditionalOrExpressionPrime()
+        private Expression ConditionalOrExpressionPrime(Expression leftOperand)
         {
             if (CheckTokenType(TokenType.OpConditionalOr))
             {
                 NextToken();
-                ConditionalAndExpression();
-                ConditionalOrExpressionPrime();
+                var expression = new ConditionalOrOperator
+                {
+                    LeftOperand = leftOperand,
+                    RightOperand = ConditionalAndExpression()
+                };
+
+                return ConditionalOrExpressionPrime(expression);
             }
             else
             {
-                //Epsilon
+                return leftOperand;
             }
         }
 
-        private void ConditionalAndExpression()
+        private Expression ConditionalAndExpression()
         {
-            InclusiveOrExpression();
-            ConditionalAndExpressionPrime();
+            return ConditionalAndExpressionPrime(InclusiveOrExpression());
         }
 
-        private void ConditionalAndExpressionPrime()
+        private Expression ConditionalAndExpressionPrime(Expression leftOperand)
         {
             if (CheckTokenType(TokenType.OpConditionalAnd))
             {
                 NextToken();
-                InclusiveOrExpression();
-                ConditionalAndExpressionPrime();
+                var expression = new ConditionalAndOperator
+                {
+                    LeftOperand = leftOperand,
+                    RightOperand = InclusiveOrExpression()
+                };
+                
+                return ConditionalAndExpressionPrime(expression);
             }
             else
             {
-                //Epsilon
+                return leftOperand;
             }
         }
 
-        private void InclusiveOrExpression()
+        private Expression InclusiveOrExpression()
         {
-            ExclusiveOrExpression();
-            InclusiveOrExpressionPrime();
+            return InclusiveOrExpressionPrime(ExclusiveOrExpression());
         }
 
-        private void InclusiveOrExpressionPrime()
+        private Expression InclusiveOrExpressionPrime(Expression leftOperand)
         {
             if (CheckTokenType(TokenType.OpLogicalOr))
             {
                 NextToken();
-                ExclusiveOrExpression();
-                InclusiveOrExpressionPrime();
+                var expression = new InclusiveOrOperator()
+                {
+                    LeftOperand = leftOperand,
+                    RightOperand = ExclusiveOrExpression()
+                };
+
+                return InclusiveOrExpressionPrime(expression);
             }
             else
             {
-                //Epsilon
+                return leftOperand;
             }
         }
 
-        private void ExclusiveOrExpression()
+        private Expression ExclusiveOrExpression()
         {
-            AndExpression();
-            ExclusiveOrExpressionPrime();
+            return ExclusiveOrExpressionPrime(AndExpression());
         }
 
-        private void ExclusiveOrExpressionPrime()
+        private Expression ExclusiveOrExpressionPrime(Expression leftOperand)
         {
             if (CheckTokenType(TokenType.OpLogicalXor))
             {
                 NextToken();
-                AndExpression();
-                ExclusiveOrExpressionPrime();
+                var expression = new ExclusiveOrOperator
+                {
+                    LeftOperand = leftOperand,
+                    RightOperand = AndExpression()
+                };
+
+                return ExclusiveOrExpressionPrime(expression);
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return leftOperand;
         }
 
-        private void AndExpression()
+        private Expression AndExpression()
         {
-            EqualityExpression();
-            AndExpressionPrime();
+            return AndExpressionPrime(EqualityExpression());
         }
 
-        private void AndExpressionPrime()
+        private Expression AndExpressionPrime(Expression leftOperand)
         {
             if (CheckTokenType(TokenType.OpLogicalAnd))
             {
                 NextToken();
-                EqualityExpression();
-                AndExpressionPrime();   
+                var expression = new AndOperator
+                {
+                    LeftOperand = leftOperand,
+                    RightOperand = EqualityExpression()
+                };
+
+                return AndExpressionPrime(expression);   
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return leftOperand;
         }
 
-        private void EqualityExpression()
+        private Expression EqualityExpression()
         {
-            RelationalExpression();
-            EqualityExpressionPrime();
+            return EqualityExpressionPrime(RelationalExpression());
         }
 
-        private void EqualityExpressionPrime()
+        private Expression EqualityExpressionPrime(Expression leftOperand)
         {
             if (IsExpressionEqualityOperator())
             {
-                ExpressionEqualityOperator();
-                RelationalExpression();
-                EqualityExpressionPrime();
+                var expression = ExpressionEqualityOperator();
+                expression.LeftOperand = leftOperand;
+                expression.RightOperand = RelationalExpression();
+
+                return EqualityExpressionPrime(expression);
             }
             else
             {
-                //Epsilon
+                return leftOperand;
             }
         }
 
-        private void RelationalExpression()
+        private Expression RelationalExpression()
         {
-            ShiftExpression();
-            RelationalExpressionPrime();
+            return RelationalExpressionPrime(ShiftExpression());
         }
 
-        private void RelationalExpressionPrime()
+        private Expression RelationalExpressionPrime(Expression leftOperand)
         {
             if (IsExpressionRelationalOperator())
             {
-                ExpressionRelationalOperator();
-                ShiftExpression();
-                RelationalExpressionPrime();
+                var expression = ExpressionRelationalOperator();
+                expression.LeftOperand = leftOperand;
+                expression.RightOperand = ShiftExpression();
+
+                return RelationalExpressionPrime(expression);
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return leftOperand;
         }
 
-        private void ShiftExpression()
+        private Expression ShiftExpression()
         {
-            AdditiveExpression();
-            ShiftExpressionPrime();
+            return ShiftExpressionPrime(AdditiveExpression());
         }
 
-        private void ShiftExpressionPrime()
+        private Expression ShiftExpressionPrime(Expression leftOperand)
         {
             if (IsExpressionShiftOperator())
             {
-                ExpressionShiftOperator();
-                AdditiveExpression();
-                ShiftExpressionPrime();
+                var expression = ExpressionShiftOperator();
+                expression.LeftOperand = leftOperand;
+                expression.RightOperand = AdditiveExpression();
+
+                return ShiftExpressionPrime(expression);
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return leftOperand;
         }
 
-        private void AdditiveExpression()
+        private Expression AdditiveExpression()
         {
-            MultiplicativeExpression();
-            AdditiveExpressionPrime();
+            return AdditiveExpressionPrime(MultiplicativeExpression());
         }
 
-        private void AdditiveExpressionPrime()
+        private Expression AdditiveExpressionPrime(Expression leftOperand)
         {
             if (IsAdditiveOperator())
             {
-                AdditiveOperator();
-                MultiplicativeExpression();
-                AdditiveExpressionPrime();
+                var expression = AdditiveOperator();
+                expression.LeftOperand = leftOperand;
+                expression.RightOperand = MultiplicativeExpression();
+
+                return AdditiveExpressionPrime(expression);
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return leftOperand;
         }
 
-        private void MultiplicativeExpression()
+        private Expression MultiplicativeExpression()
         {
-            UnaryExpression();
-            MultiplicativeExpressionFactorized();
+            return MultiplicativeExpressionFactorized(UnaryExpression());
         }
 
-        private void MultiplicativeExpressionFactorized()
+        private Expression MultiplicativeExpressionFactorized(Expression leftOperand)
         {
             if (IsAssignmentOperator())
             {
-                AssignmentOperator();
-                Expression();
-                MultiplicativeExpressionPrime();
+                var expression = AssignmentOperator();
+                expression.LeftOperand = leftOperand;
+                expression.RightOperand = Expression();
+
+                return MultiplicativeExpressionPrime(expression);
             }
 
-            else if(IsMultiplicativeOperator()) MultiplicativeExpressionPrime();
-            else
-            {
-                //Epsilon
-            }
+            if(IsMultiplicativeOperator()) MultiplicativeExpressionPrime(leftOperand);
+
+            return leftOperand;
         }
 
-        private void MultiplicativeExpressionPrime()
+        private Expression MultiplicativeExpressionPrime(Expression leftOperand)
         {
             if (IsMultiplicativeOperator())
             {
-                MultiplicativeOperator();
-                UnaryExpression();
-                MultiplicativeExpressionPrime();
+                var expression = MultiplicativeOperator();
+                expression.LeftOperand = leftOperand;
+                expression.RightOperand = UnaryExpression();
+
+                return MultiplicativeExpressionPrime(expression);
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return leftOperand;
         }
     }
 }

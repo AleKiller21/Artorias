@@ -64,7 +64,6 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.Comma))
             {
-                //enumMember.Value = new IntLiteral(_enumCounter++);
                 var enumMemberList = OptionalAssignableIdentifiersListPrime();
                 enumMemberList.Insert(0, enumMember);
 

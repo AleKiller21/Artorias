@@ -4,6 +4,7 @@ using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
+using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Parser
@@ -15,7 +16,7 @@ namespace SyntaxAnalyser.Parser
             return CheckTokenType(TokenType.ParenthesisOpen) || CheckTokenType(TokenType.SquareBracketOpen) ||
                    CheckTokenType(TokenType.MemberAccess) || IsIncrementDecrementOperator();
         }
-        private void UnaryExpression()
+        private Expression UnaryExpression()
         {
             if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator())
             {
@@ -244,9 +245,9 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void Expression()
+        private Expression Expression()
         {
-            ConditionalExpression();
+            return ConditionalExpression();
         }
     }
 }
