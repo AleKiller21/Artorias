@@ -6,5 +6,6 @@ namespace SyntaxAnalyser.Nodes.Classes
     {
         public bool IsAbstract;
         public List<QualifiedIdentifier> Parents;
+        public List<ClassMemberDeclaration> Members;
     }
 }

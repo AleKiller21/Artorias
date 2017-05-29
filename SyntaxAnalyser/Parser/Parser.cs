@@ -209,12 +209,7 @@ namespace SyntaxAnalyser.Parser
 
         private TypeDeclaration GroupDeclaration()
         {
-            if (CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass))
-            {
-                ClassDeclaration();
-                //TODO retornar nueva class
-                return null;
-            }
+            if (CheckTokenType(TokenType.RwAbstract) || CheckTokenType(TokenType.RwClass)) return ClassDeclaration();
             if (CheckTokenType(TokenType.RwInterface)) return InterfaceDeclaration();
             if (CheckTokenType(TokenType.RwEnum)) return EnumDeclaration();
 

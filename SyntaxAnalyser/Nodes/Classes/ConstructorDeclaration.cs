@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using SyntaxAnalyser.Nodes.Statements;
-using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Nodes.Classes
 {
-    public class ClassMethodDeclaration : ClassMemberDeclaration
+    public class ConstructorDeclaration : ClassMemberDeclaration
     {
-        public string Identifier;
+        public bool IsStatic;
         public List<FixedParameter> Params;
         public List<Statement> Statements;
     }

@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes.Classes;
+using SyntaxAnalyser.Nodes.Statements;
 
 namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
-        private void ClassDeclaration()
+        private ClassDeclaration ClassDeclaration()
         {
-            ClassModifier();
+            var classDeclaration = new ClassDeclaration();
+
+            classDeclaration.IsAbstract = ClassModifier();
             if (!CheckTokenType(TokenType.RwClass))
                 throw new ClassKeywordExpectedException(GetTokenRow(), GetTokenColumn());
 
@@ -19,90 +21,123 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            classDeclaration.Identifier = _token.Lexeme;
             NextToken();
-            InheritanceBase();
-            ClassBody();
+            classDeclaration.Parents = InheritanceBase();
+            classDeclaration.Members = ClassBody();
             OptionalBodyEnd();
+
+            return classDeclaration;
         }
 
-        private void ClassBody()
+        private List<ClassMemberDeclaration> ClassBody()
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalClassMemberDeclarationList();
+            var memberList = OptionalClassMemberDeclarationList();
 
             if (!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            return memberList;
         }
 
-        private void OptionalClassMemberDeclarationList()
+        private List<ClassMemberDeclaration> OptionalClassMemberDeclarationList()
         {
             if (HasEncapsulationModifier() || HasOptionalModifier() || IsTypeOrVoid())
             {
-                ClassMemberDeclaration();
-                OptionalClassMemberDeclarationList();
+                var memberDeclarations = new List<ClassMemberDeclaration>();
+                var memberDeclaration = ClassMemberDeclaration();
+                
+                memberDeclarations.Add(memberDeclaration);
+                var declaration = memberDeclaration as FieldDeclaration;
+                if (declaration != null)
+                {
+                    foreach (var field in declaration.Declarators)
+                    {
+                        field.AccessModifier = memberDeclaration.AccessModifier;
+                        field.OptionalModifier = memberDeclaration.OptionalModifier;
+                        field.Type = memberDeclaration.Type;
+                    }
+                    memberDeclarations.AddRange(declaration.Declarators);
+                    declaration.Declarators.Clear();
+                }
+
+                memberDeclarations.AddRange(OptionalClassMemberDeclarationList());
+                return memberDeclarations;
             }
 
             else
             {
-                //Epsilon
+                return new List<ClassMemberDeclaration>();
             }
         }
 
-        private void ClassMemberDeclaration()
+        private ClassMemberDeclaration ClassMemberDeclaration()
         {
-            EncapsulationModifier();
-            ClassMemberDeclarationOptions();
+            var accessModifier = EncapsulationModifier();
+            var memberDeclaration = ClassMemberDeclarationOptions();
+
+            memberDeclaration.AccessModifier = accessModifier;
+            return memberDeclaration;
         }
 
-        private void ClassMemberDeclarationOptions()
+        private ClassMemberDeclaration ClassMemberDeclarationOptions()
         {
-            OptionalModifier();
-            TypeOrVoid();
-            ClassMemberDeclarationOptionsPrime();
+            var optionalModifier = OptionalModifier();
+            var type = TypeOrVoid();
+            var memberDeclaration = ClassMemberDeclarationOptionsPrime();
+
+            memberDeclaration.OptionalModifier = optionalModifier;
+            memberDeclaration.Type = type;
+
+            return memberDeclaration;
         }
 
-        private void ClassMemberDeclarationOptionsPrime()
+        private ClassMemberDeclaration ClassMemberDeclarationOptionsPrime()
         {
             if (CheckTokenType(TokenType.Id))
             {
+                var identifier = _token.Lexeme;
                 NextToken();
-                FieldOrMethodDeclaration();
+                return FieldOrMethodDeclaration(identifier);
             }
+            if (CheckTokenType(TokenType.ParenthesisOpen)) return ConstructorDeclaration();
 
-            else if (CheckTokenType(TokenType.ParenthesisOpen))
-                ConstructorDeclaration();
-
-            else throw new ParserException($"OpenParenthesis or identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            throw new ParserException($"OpenParenthesis or identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
-        private void ConstructorDeclaration()
+        private ConstructorDeclaration ConstructorDeclaration()
         {
-            ConstructorDeclarator();
-            MaybeEmptyBlock();
+            var constructor = ConstructorDeclarator();
+            constructor.Statements = MaybeEmptyBlock();
+
+            return constructor;
         }
 
-        private void ConstructorDeclarator()
+        private ConstructorDeclaration ConstructorDeclarator()
         {
             if(!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            FixedParameters();
+            var constructor = new ConstructorDeclaration { Params = FixedParameters() };
 
-            if(!CheckTokenType(TokenType.ParenthesisClose))
+            if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
             ConstructorInitializer();
+
+            return constructor;
         }
 
         private void ConstructorInitializer()
         {
+            //TODO Tratar con las llamadas a la clase padre
             if (CheckTokenType(TokenType.Colon))
             {
                 NextToken();
@@ -157,57 +192,99 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void OptionalModifier()
+        private OptionalModifier OptionalModifier()
         {
-            if (HasOptionalModifier()) NextToken();
-            else
+            if (CheckTokenType(TokenType.RwStatic))
             {
-                //Epsilon
+                NextToken();
+                return Nodes.Classes.OptionalModifier.Static;
             }
+            if (CheckTokenType(TokenType.RwVirtual))
+            {
+                NextToken();
+                return Nodes.Classes.OptionalModifier.Virtual;
+            }
+            if (CheckTokenType(TokenType.RwOverride))
+            {
+                NextToken();
+                return Nodes.Classes.OptionalModifier.Override;
+            }
+            if (CheckTokenType(TokenType.RwAbstract))
+            {
+                NextToken();
+                return Nodes.Classes.OptionalModifier.Abstract;
+            }
+            
+            return Nodes.Classes.OptionalModifier.None;
         }
 
-        private void FieldOrMethodDeclaration()
+        private ClassMemberDeclaration FieldOrMethodDeclaration(string identifier)
         {
             if (CheckTokenType(TokenType.OpAssignment) || CheckTokenType(TokenType.Comma) ||
                 CheckTokenType(TokenType.EndStatement))
-                FieldDeclaration();
+            {
+                var fieldDeclaration = FieldDeclaration();
+                fieldDeclaration.Identifier = identifier;
 
-            else if (CheckTokenType(TokenType.ParenthesisOpen))
-                MethodDeclaration();
+                return fieldDeclaration;
+            }
 
-            else throw new ParserException($"Field or method declaration expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            if (CheckTokenType(TokenType.ParenthesisOpen))
+            {
+                var methodDeclaration = MethodDeclaration();
+                methodDeclaration.Identifier = identifier;
+                return methodDeclaration;
+            }
+
+            throw new ParserException($"Field or method declaration expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
-        private void FieldDeclaration()
+        private FieldDeclaration FieldDeclaration()
         {
-            VariableAssigner();
-            VariableDeclaratorListPrime();
+            var fieldDeclaration = new FieldDeclaration();
+
+            fieldDeclaration.Value = VariableAssigner();
+            fieldDeclaration.Declarators = VariableDeclaratorListPrime();
 
             if(!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+
+            return fieldDeclaration;
         }
 
-        private void VariableAssigner()
+        private VariableInitializer VariableAssigner()
         {
             if (CheckTokenType(TokenType.OpAssignment))
             {
                 NextToken();
-                VariableInitializer();
+                return VariableInitializer();
             }
 
             else
             {
-                //Epsilon
+                return new VariableInitializer();
             }
         }
 
-        private void VariableInitializer()
+        private VariableInitializer VariableInitializer()
         {
-            if (IsUnaryExpression()) Expression();
-            else if (CheckTokenType(TokenType.CurlyBraceOpen)) ArrayInitializer();
-            else throw new ParserException($"OpenCurlyBrace token or expression expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            var variableInitializer = new VariableInitializer();
+            if (IsUnaryExpression())
+            {
+                //TODO variableInitializer.Expression = Expression();
+                Expression();
+                return null;
+            }
+            if (CheckTokenType(TokenType.CurlyBraceOpen))
+            {
+                //TODO Tratar array initializers
+                ArrayInitializer();
+                return null;
+            }
+
+            throw new ParserException($"OpenCurlyBrace token or expression expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
         private void ArrayInitializer()
@@ -239,13 +316,13 @@ namespace SyntaxAnalyser.Parser
             if (IsUnaryExpression() || CheckTokenType(TokenType.CurlyBraceOpen)) VariableInitializerList();
             else
             {
-                //Epsilon
+                //return new List<ArrayInitializer>();
             }
         }
 
         private void VariableInitializerList()
         {
-            VariableInitializer();
+            var initializer = VariableInitializer();
             VariableInitializerListPrime();
         }
 
@@ -259,35 +336,39 @@ namespace SyntaxAnalyser.Parser
 
             else
             {
-                //Epsilon
+                //return new List<VariableInitializer>();
             }
         }
 
-        private void VariableDeclaratorListPrime()
+        private List<FieldDeclaration> VariableDeclaratorListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                VariableDeclaratorList();
+                return VariableDeclaratorList();
             }
 
             else
             {
-                //Epsilon
+                return new List<FieldDeclaration>();
             }
         }
 
-        private void VariableDeclaratorList()
+        private List<FieldDeclaration> VariableDeclaratorList()
         {
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            var field = new FieldDeclaration{Identifier = _token.Lexeme};
             NextToken();
-            VariableAssigner();
-            VariableDeclaratorListPrime();
+            field.Value = VariableAssigner();
+            var declarators = VariableDeclaratorListPrime();
+
+            declarators.Insert(0, field);
+            return declarators;
         }
 
-        private void MethodDeclaration()
+        private ClassMethodDeclaration MethodDeclaration()
         {
             //TODO Semantic: validar que si la clase es abstract, el metodo no debe llevar cuerpo.
             //TODO Semantic: validar que si el metodo no es abstracto, entonces no puede terminar en ';'
@@ -295,38 +376,50 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            FixedParameters();
+            //FixedParameters();
+            var methodDeclaration = new ClassMethodDeclaration {Params = FixedParameters()};
 
             if(!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            MaybeEmptyBlock();
+            methodDeclaration.Statements = MaybeEmptyBlock();
+
+            return methodDeclaration;
         }
 
-        private void MaybeEmptyBlock()
+        private List<Statement> MaybeEmptyBlock()
         {
             if (CheckTokenType(TokenType.CurlyBraceOpen))
             {
                 NextToken();
+                //TODO statements = OptionalStatementList();
                 OptionalStatementList();
                 if(!CheckTokenType(TokenType.CurlyBraceClose))
                     throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
+                return null;
             }
-
-            else if(CheckTokenType(TokenType.EndStatement)) NextToken();
-            else
-                throw new ParserException($"CurlyBraceOpen or EndOfStatement token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            if (CheckTokenType(TokenType.EndStatement))
+            {
+                NextToken();
+                return new List<Statement>();
+            }
+            
+            throw new ParserException($"CurlyBraceOpen or EndOfStatement token expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
-        private void ClassModifier()
+        private bool ClassModifier()
         {
-            if(CheckTokenType(TokenType.RwAbstract)) NextToken();
+            if (CheckTokenType(TokenType.RwAbstract))
+            {
+                NextToken();
+                return true;
+            }
             else
             {
-                //Epsilon
+                return false;
             }
         }
     }
