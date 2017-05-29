@@ -1,6 +1,6 @@
 ﻿namespace SyntaxAnalyser.Nodes.Expressions
 {
-    public class Expression
+    public abstract class Expression
     {
     }
 }
