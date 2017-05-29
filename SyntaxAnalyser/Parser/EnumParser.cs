@@ -5,11 +5,14 @@ using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
 using SyntaxAnalyser.Nodes.Enums;
+using SyntaxAnalyser.Nodes.Expressions.Literal;
 
 namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
+        private int _enumCounter = 0;
+
         private EnumDeclaration EnumDeclaration()
         {
             var enumDeclaration = new EnumDeclaration();
@@ -47,7 +50,7 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.Id))
             {
-                var enumMember = new EnumMember {Identifier = _token.Lexeme};
+                var enumMember = new EnumMember {Identifier = _token.Lexeme, Value = new IntLiteral(_enumCounter++)};
                 NextToken();
                 return AssignmentOptions(enumMember);
             }
@@ -61,7 +64,7 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.Comma))
             {
-                //TODO Asignarle a enumMember.value un tipo Expression con un valor secuencial
+                //enumMember.Value = new IntLiteral(_enumCounter++);
                 var enumMemberList = OptionalAssignableIdentifiersListPrime();
                 enumMemberList.Insert(0, enumMember);
 
@@ -70,7 +73,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.OpAssignment))
             {
                 NextToken();
-                //TODO enumMember.value = Expression()
+                //TODO enumMember.value = Expression(); _enumCounter = enumMember.value
                 Expression();
                 var enumMemberList = OptionalAssignableIdentifiersListPrime();
                 enumMemberList.Insert(0, enumMember);
