@@ -6,6 +6,7 @@ using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
 using SyntaxAnalyser.Nodes.Enums;
 using SyntaxAnalyser.Nodes.Expressions.Literal;
+using SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -72,8 +73,9 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.OpAssignment))
             {
                 NextToken();
-                //TODO enumMember.value = Expression(); _enumCounter = enumMember.value
-                Expression();
+                enumMember.Value = Expression();
+                _enumCounter = ((enumMember.Value as PrimaryExpression).Base as IntLiteral).Value;
+                _enumCounter++;
                 var enumMemberList = OptionalAssignableIdentifiersListPrime();
                 enumMemberList.Insert(0, enumMember);
 

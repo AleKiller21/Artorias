@@ -9,6 +9,7 @@ using SyntaxAnalyser.Nodes.Expressions.Binary.Equality;
 using SyntaxAnalyser.Nodes.Expressions.Binary.Multiplicative;
 using SyntaxAnalyser.Nodes.Expressions.Binary.Relational;
 using SyntaxAnalyser.Nodes.Expressions.Binary.Shift;
+using SyntaxAnalyser.Nodes.Expressions.Unary;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -186,23 +187,48 @@ namespace SyntaxAnalyser.Parser
             throw new MultiplicativeOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void ExpressionUnaryOperator()
+        private UnaryOperator ExpressionUnaryOperator()
         {
-            if (IsExpressionUnaryOperator()) NextToken();
-            else throw new ExpressionUnaryOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsExpressionUnaryOperator())
+            {
+                UnaryOperator Operator;
+
+                if(CheckTokenType(TokenType.OpAddition)) Operator = new PositiveOperator();
+                else if(CheckTokenType(TokenType.OpSubtract)) Operator = new NegativeOperator();
+                else if (CheckTokenType(TokenType.OpLogicalNegation)) Operator = new NegationOperator();
+                else if (CheckTokenType(TokenType.OpBitwiseNegation)) Operator = new BitwiseNegationOperator();
+                else Operator = new PointerOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new ExpressionUnaryOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void ExpressionUnaryOperatorOrIncrementDecrement()
+        private UnaryOperator ExpressionUnaryOperatorOrIncrementDecrement()
         {
-            if (IsExpressionUnaryOperator()) ExpressionUnaryOperator();
-            else if (IsIncrementDecrementOperator()) IncrementDecrement();
-            else throw new ParserException($"Unary operator or increment-decrement operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            if (IsExpressionUnaryOperator()) return ExpressionUnaryOperator();
+            if (IsIncrementDecrementOperator()) return IncrementDecrement();
+
+            throw new ParserException($"Unary operator or increment-decrement operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void IncrementDecrement()
+        private UnaryOperator IncrementDecrement()
         {
-            if (IsIncrementDecrementOperator()) NextToken();
-            else throw new IncrementDecrementOperatorExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsIncrementDecrementOperator())
+            {
+                UnaryOperator Operator;
+
+                //TODO Determinar si es Post o Pre
+                if(CheckTokenType(TokenType.OpIncrement)) Operator = new PostIncrementOperator();
+                else Operator = new PostDecrementOperator();
+
+                NextToken();
+                return Operator;
+            }
+
+            throw new IncrementDecrementOperatorExpectedException(GetTokenRow(), GetTokenColumn());
         }
     }
 }

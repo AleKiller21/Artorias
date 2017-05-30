@@ -2,6 +2,7 @@
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes.Classes;
+using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Statements;
 
 namespace SyntaxAnalyser.Parser
@@ -165,31 +166,33 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void ArgumentList()
+        private List<Expression> ArgumentList()
         {
             if (IsUnaryExpression())
             {
-                Expression();
-                ArgumentListPrime();
+                var expression = Expression();
+                var expressionList = ArgumentListPrime();
+
+                expressionList.Insert(0, expression);
+                return expressionList;
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return new List<Expression>();
         }
 
-        private void ArgumentListPrime()
+        private List<Expression> ArgumentListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                Expression();
-                ArgumentListPrime();
+                var expression = Expression();
+                var expressionList = ArgumentListPrime();
+
+                expressionList.Insert(0, expression);
+                return expressionList;
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return new List<Expression>();
         }
 
         private OptionalModifier OptionalModifier()
@@ -273,9 +276,9 @@ namespace SyntaxAnalyser.Parser
             var variableInitializer = new VariableInitializer();
             if (IsUnaryExpression())
             {
-                //TODO variableInitializer.Expression = Expression();
-                Expression();
-                return null;
+                variableInitializer.Expression = Expression();
+
+                return variableInitializer;
             }
             if (CheckTokenType(TokenType.CurlyBraceOpen))
             {
@@ -311,32 +314,33 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void OptionalVariableInitializerList()
+        private List<VariableInitializer> OptionalVariableInitializerList()
         {
-            if (IsUnaryExpression() || CheckTokenType(TokenType.CurlyBraceOpen)) VariableInitializerList();
-            else
-            {
-                //return new List<ArrayInitializer>();
-            }
+            if (IsUnaryExpression() || CheckTokenType(TokenType.CurlyBraceOpen)) return VariableInitializerList();
+
+            return new List<VariableInitializer>();
         }
 
-        private void VariableInitializerList()
+        private List<VariableInitializer> VariableInitializerList()
         {
             var initializer = VariableInitializer();
-            VariableInitializerListPrime();
+            var initializerList = VariableInitializerListPrime();
+
+            initializerList.Insert(0, initializer);
+            return initializerList;
         }
 
-        private void VariableInitializerListPrime()
+        private List<VariableInitializer> VariableInitializerListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                VariableInitializerList();
+                return VariableInitializerList();
             }
 
             else
             {
-                //return new List<VariableInitializer>();
+                return new List<VariableInitializer>();
             }
         }
 

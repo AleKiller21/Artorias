@@ -5,6 +5,7 @@ using LexerAnalyser.Enums;
 using LexerAnalyser.Models;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
+using SyntaxAnalyser.Nodes.Expressions.Literal;
 using SyntaxAnalyser.Nodes.Namespaces;
 using SyntaxAnalyser.Nodes.Types;
 
@@ -175,10 +176,7 @@ namespace SyntaxAnalyser.Parser
                 return identifiers;
             }
 
-            else
-            {
-                return new List<string>();
-            }
+            return new List<string>();
         }
 
         private List<TypeDeclaration> TypeDeclarationList()
@@ -432,10 +430,24 @@ namespace SyntaxAnalyser.Parser
             return parameter;
         }
 
-        private void Literal()
+        private LiteralExpression Literal()
         {
-            if (IsLiteral()) NextToken();
-            else throw new LiteralExpectedException(GetTokenRow(), GetTokenColumn());
+            if (IsLiteral())
+            {
+                LiteralExpression literal;
+
+                if(IsLiteralInt()) literal = new IntLiteral(int.Parse(_token.Lexeme));
+                else if(IsLiteralString()) literal = new StringLiteral(_token.Lexeme);
+                else if(CheckTokenType(TokenType.LiteralCharSimple)) literal = new CharLiteral(_token.Lexeme.ToCharArray()[0]);
+                else if(CheckTokenType(TokenType.LiteralFloat)) literal = new FloatLiteral(float.Parse(_token.Lexeme.Substring(0, _token.Lexeme.Length-1)));
+                else if(CheckTokenType(TokenType.LiteralTrue)) literal = new BooleanLiteral(true);
+                else literal = new BooleanLiteral(false);
+
+                NextToken();
+                return literal;
+            }
+
+            throw new LiteralExpectedException(GetTokenRow(), GetTokenColumn());
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes.Expressions;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -403,17 +404,14 @@ namespace SyntaxAnalyser.Parser
             else throw new ParserException($"'break', 'continue', or 'return' statements expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
-        private void OptionalExpression()
+        private Expression OptionalExpression()
         {
             if (IsUnaryExpression())
             {
-                Expression();
+                return Expression();
             }
 
-            else
-            {
-                //Epsilon
-            }
+            return null;
         }
 
         private void OptionalForInitializer()
