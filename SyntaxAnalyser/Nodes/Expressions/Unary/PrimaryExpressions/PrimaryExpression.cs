@@ -5,9 +5,9 @@ using SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions.InstanceExpressi
 
 namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions
 {
-    public class PrimaryExpression : PrimaryExpressionOrIdentifier
+    public class PrimaryExpression : Expression
     {
-        public Expression Base;
-        
+        public Expression PrimaryExpressionPrimePrime;
+        public List<PrimaryExpressionPrime> PrimaryExpressionPrime;
     }
 }

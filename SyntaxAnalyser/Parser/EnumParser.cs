@@ -74,7 +74,7 @@ namespace SyntaxAnalyser.Parser
             {
                 NextToken();
                 enumMember.Value = Expression();
-                _enumCounter = ((enumMember.Value as PrimaryExpression).Base as IntLiteral).Value;
+                _enumCounter = ((enumMember.Value as PrimaryExpression).PrimaryExpressionPrimePrime as IntLiteral).Value;
                 _enumCounter++;
                 var enumMemberList = OptionalAssignableIdentifiersListPrime();
                 enumMemberList.Insert(0, enumMember);

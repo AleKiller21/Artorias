@@ -4,8 +4,8 @@ namespace SyntaxAnalyser.Nodes.Types
 {
     public class DataType
     {
-        public BuiltInDataType Type;
-        public QualifiedIdentifier Name;
+        public BuiltInDataType BuiltInDataType;
+        public QualifiedIdentifier CustomTypeName;
         public List<DataType> GenericTypes;
         public List<int> RankSpecifiers;
 

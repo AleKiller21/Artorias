@@ -330,7 +330,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.RwVoid))
             {
                 NextToken();
-                return new DataType {Type = BuiltInDataType.Void};
+                return new DataType {BuiltInDataType = BuiltInDataType.Void};
             }
 
             throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
@@ -342,7 +342,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.RwOrIdVar))
             {
                 NextToken();
-                return new DataType {Type = BuiltInDataType.Var};
+                return new DataType {BuiltInDataType = BuiltInDataType.Var};
             }
 
             throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
@@ -372,12 +372,12 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.Id))
             {
-                type.Name = QualifiedIdentifier();
-                type.Type = BuiltInDataType.None;
+                type.CustomTypeName = QualifiedIdentifier();
+                type.BuiltInDataType = BuiltInDataType.None;
             }
             else if (IsBuiltInType())
             {
-                type.Type = BuiltInType();
+                type.BuiltInDataType = BuiltInType();
             }
             else throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
         }

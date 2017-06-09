@@ -18,6 +18,15 @@ namespace SyntaxAnalyser.Parser
             return CheckTokenType(TokenType.ParenthesisOpen) || CheckTokenType(TokenType.SquareBracketOpen) ||
                    CheckTokenType(TokenType.MemberAccess) || IsIncrementDecrementOperator();
         }
+
+        private bool IsPrimaryExpression()
+        {
+            return CheckTokenType(TokenType.RwNew) || CheckTokenType(TokenType.RwBase) ||
+                   CheckTokenType(TokenType.RwThis) ||
+                   CheckTokenType(TokenType.ParenthesisOpen) || CheckTokenType(TokenType.Id) || IsLiteral() ||
+                   IsBuiltInType();
+        }
+
         private Expression UnaryExpression()
         {
             if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator())
@@ -27,46 +36,20 @@ namespace SyntaxAnalyser.Parser
                 return expression;
             }
 
-            if (IsPrimaryExpression() || CheckTokenType(TokenType.Id))
-            {
-                return PrimaryExpressionOrIdentifier();
-            }
+            if (IsPrimaryExpression()) return PrimaryExpression();
 
             throw new ParserException($"Unary expression token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private bool IsPrimaryExpression()
-        {
-            return CheckTokenType(TokenType.RwNew) ||
-                    IsBuiltInType() ||
-                    CheckTokenType(TokenType.ParenthesisOpen) ||
-                    IsLiteral() || CheckTokenType(TokenType.RwThis);
-        }
-
-        private PrimaryExpressionOrIdentifier PrimaryExpressionOrIdentifier()
-        {
-            if (IsPrimaryExpression()) return PrimaryExpression();
-            if (CheckTokenType(TokenType.Id))
-            {
-                var primaryExpressionIdentifier = new PrimaryExpressionIdentifier(_token.Lexeme);
-                NextToken();
-                primaryExpressionIdentifier.PrimeExpression = PrimaryExpressionPrime();
-
-                return primaryExpressionIdentifier;
-            }
-
-            else throw new ParserException($"Primary expression or identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-        }
-
         private PrimaryExpression PrimaryExpression()
         {
-            var expression = PrimaryExpressionBase();
-            expression.PrimeExpression = PrimaryExpressionPrime();
+            var expression = PrimaryExpressionPrimePrime();
+            expression.PrimaryExpressionPrime = PrimaryExpressionPrime();
 
             return expression;
         }
 
-        private PrimaryExpression PrimaryExpressionBase()
+        private PrimaryExpression PrimaryExpressionPrimePrime()
         {
             if (CheckTokenType(TokenType.RwNew))
             {
@@ -75,29 +58,167 @@ namespace SyntaxAnalyser.Parser
                 NonArrayType(instance.InstanceType);
                 instance.Options = InstanceOptions();
 
-                return instance;
+                return new PrimaryExpression { PrimaryExpressionPrimePrime = instance };
             }
 
-            if (IsBuiltInType())
+            if (CheckTokenType(TokenType.RwBase))
             {
-                return new PrimaryExpression{Base = new BuiltInTypeExpression(BuiltInType()) };
+                NextToken();
+                return new PrimaryExpression { PrimaryExpressionPrimePrime = BaseAccess() };
             }
-            if (CheckTokenType(TokenType.ParenthesisOpen))
-            {
-                return new PrimaryExpression { Base = CastOrParenthesizedExpression() };
-            }
-            if (IsLiteral())
-            {
-                return new PrimaryExpression { Base = Literal() };
-            }
+
             if (CheckTokenType(TokenType.RwThis))
             {
                 NextToken();
-                return new PrimaryExpression { Base = new ThisExpression() };
+                return new PrimaryExpression { PrimaryExpressionPrimePrime = new ThisExpression() };
             }
-            
-            throw new ParserException($"Primary expression base token expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            if (CheckTokenType(TokenType.ParenthesisOpen))
+            {
+                return new PrimaryExpression { PrimaryExpressionPrimePrime = CastOrParenthesizedExpression() };
+            }
+            if (CheckTokenType(TokenType.Id))
+            {
+                var idExpression = new IdExpression{Identifier = _token.Lexeme};
+                NextToken();
+                return new PrimaryExpression{PrimaryExpressionPrimePrime = idExpression};
+            }
+            if (IsLiteral())
+            {
+                return new PrimaryExpression { PrimaryExpressionPrimePrime = Literal() };
+            }
+            if (IsBuiltInType())
+            {
+                //return new PrimaryExpression { Base = new BuiltInTypeExpression(BuiltInType()) };
+                //TODO return
+                BuiltInTypeAccess(BuiltInType());
+            }
+
+            throw new ParserException($"Primary expression token expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
+
+        private void BuiltInTypeAccess(BuiltInDataType type)
+        {
+            if (CheckTokenType(TokenType.MemberAccess))
+            {
+                //TODO return
+                NextToken();
+                if(!CheckTokenType(TokenType.Id))
+                    throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                CallAccess();
+            }
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private List<PrimaryExpressionPrime> PrimaryExpressionPrime()
+        {
+            if (CheckTokenType(TokenType.ParenthesisOpen))
+            {
+                NextToken();
+                var primeExpression = new PrimaryExpressionPrime { ArgumentList = ArgumentList() };
+                if (!CheckTokenType(TokenType.ParenthesisClose))
+                    throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                var primeExpressions = PrimaryExpressionPrime();
+
+                primeExpressions.Insert(0, primeExpression);
+                return primeExpressions;
+            }
+
+            if (CheckTokenType(TokenType.SquareBracketOpen))
+            {
+                NextToken();
+                var primeExpression = new PrimaryExpressionPrime { ExpressionList = ExpressionList() };
+                if (!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                var primeExpressions = PrimaryExpressionPrime();
+
+                primeExpressions.Insert(0, primeExpression);
+                return primeExpressions;
+            }
+
+            if (CheckTokenType(TokenType.MemberAccess))
+            {
+                NextToken();
+                if(!CheckTokenType(TokenType.Id))
+                    throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+
+                var primeExpression = new PrimaryExpressionPrime
+                {
+                    IdentifierAttribute = new QualifiedIdentifier { Identifiers = new List<string>{ _token.Lexeme } }
+                };
+
+                NextToken();
+                var primeExpressions = PrimaryExpressionPrime();
+
+                primeExpressions.Insert(0, primeExpression);
+                return primeExpressions;
+            }
+
+            if (IsIncrementDecrementOperator())
+            {
+                var primeExpression = new PrimaryExpressionPrime { Operator = IncrementDecrement() };
+                var primeExpressions = PrimaryExpressionPrime();
+
+                primeExpressions.Insert(0, primeExpression);
+                return primeExpressions;
+            }
+
+            return new List<PrimaryExpressionPrime>();
+        }
+
+        private BaseAccessExpression BaseAccess()
+        {
+            if (CheckTokenType(TokenType.MemberAccess))
+            {
+                NextToken();
+                if(!CheckTokenType(TokenType.Id))
+                    throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+
+                var baseExpression = new BaseAccessExpression{Identifier = _token.Lexeme};
+                NextToken();
+                return baseExpression;
+            }
+            if (CheckTokenType(TokenType.SquareBracketOpen))
+            {
+                NextToken();
+                var expressionList = ExpressionList();
+                if(!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                return new BaseAccessExpression{ExpressionList = expressionList};
+            }
+
+            throw new ParserException($"'.' or '[' token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+
+        private void CallAccess()
+        {
+            throw new NotImplementedException();
+        }
+
+        //private PrimaryExpressionOrIdentifier PrimaryExpressionOrIdentifier()
+        //{
+        //    if (IsPrimaryExpression()) return PrimaryExpression();
+        //    if (CheckTokenType(TokenType.Id))
+        //    {
+        //        var primaryExpressionIdentifier = new PrimaryExpressionIdentifier(_token.Lexeme);
+        //        NextToken();
+        //        primaryExpressionIdentifier.PrimeExpression = PrimaryExpressionPrime();
+
+        //        return primaryExpressionIdentifier;
+        //    }
+
+        //    else throw new ParserException($"Primary expression or identifier token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        //}
 
         private InstanceOptions InstanceOptions()
         {
@@ -161,10 +282,8 @@ namespace SyntaxAnalyser.Parser
                 typeList.Insert(0, type);
                 return typeList;
             }
-            else
-            {
-                return new List<DataType>();
-            }
+
+            return new List<DataType>();
         }
 
         private InstanceOptions InstanceOptions2()
@@ -198,62 +317,7 @@ namespace SyntaxAnalyser.Parser
             throw new ParserException($"Unary expression or comma token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private List<PrimaryExpressionPrime> PrimaryExpressionPrime()
-        {
-            if (CheckTokenType(TokenType.ParenthesisOpen))
-            {
-                NextToken();
-                var primeExpression = new PrimaryExpressionPrime{ ArgumentList = ArgumentList() };
-                if(!CheckTokenType(TokenType.ParenthesisClose))
-                    throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-                var primeExpressions = PrimaryExpressionPrime();
-
-                primeExpressions.Insert(0, primeExpression);
-                return primeExpressions;
-            }
-
-            if (CheckTokenType(TokenType.SquareBracketOpen))
-            {
-                NextToken();
-                var primeExpression = new PrimaryExpressionPrime { ExpressionList = ExpressionList() };
-                if(!CheckTokenType(TokenType.SquareBracketClose))
-                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-                var primeExpressions = PrimaryExpressionPrime();
-
-                primeExpressions.Insert(0, primeExpression);
-                return primeExpressions;
-            }
-
-            if (CheckTokenType(TokenType.MemberAccess))
-            {
-                var primeExpression = new PrimaryExpressionPrime
-                {
-                    IdentifierAttribute = new QualifiedIdentifier{ Identifiers = IdentifierAttribute() }
-                };
-
-                var primeExpressions = PrimaryExpressionPrime();
-
-                primeExpressions.Insert(0, primeExpression);
-                return primeExpressions;
-            }
-
-            if (IsIncrementDecrementOperator())
-            {
-                var primeExpression = new PrimaryExpressionPrime { Operator = IncrementDecrement() };
-                var primeExpressions = PrimaryExpressionPrime();
-
-                primeExpressions.Insert(0, primeExpression);
-                return primeExpressions;
-            }
-
-            return new List<PrimaryExpressionPrime>();
-        }
-
-        private Expression CastOrParenthesizedExpression()
+        private CastOrParenthesizedExpression CastOrParenthesizedExpression()
         {
             if(!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());

@@ -80,11 +80,7 @@ namespace SyntaxAnalyser.Parser
 
         private int OptionalCommaList()
         {
-            if (CheckTokenType(TokenType.Comma)) return CommaList();
-            else
-            {
-                return 0;
-            }
+            return CheckTokenType(TokenType.Comma) ? CommaList() : 0;
         }
 
         private int CommaList()

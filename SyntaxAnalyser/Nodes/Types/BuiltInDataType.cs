@@ -5,6 +5,7 @@
         Int,
         Char,
         String,
+        Object,
         Bool,
         Float,
         Var,
