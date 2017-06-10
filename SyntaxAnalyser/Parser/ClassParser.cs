@@ -392,23 +392,23 @@ namespace SyntaxAnalyser.Parser
             return methodDeclaration;
         }
 
-        private List<Statement> MaybeEmptyBlock()
+        private StatementBlock MaybeEmptyBlock()
         {
             if (CheckTokenType(TokenType.CurlyBraceOpen))
             {
                 NextToken();
-                //TODO statements = OptionalStatementList();
-                OptionalStatementList();
-                if(!CheckTokenType(TokenType.CurlyBraceClose))
+
+                var block = new StatementBlock{StatementList = OptionalStatementList() };
+                if (!CheckTokenType(TokenType.CurlyBraceClose))
                     throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                return null;
+                return block;
             }
             if (CheckTokenType(TokenType.EndStatement))
             {
                 NextToken();
-                return new List<Statement>();
+                return new StatementBlock();
             }
             
             throw new ParserException($"CurlyBraceOpen or EndOfStatement token expected at row {GetTokenRow()} column {GetTokenColumn()}");

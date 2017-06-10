@@ -101,11 +101,11 @@ namespace SyntaxAnalyser.Parser
 
         private Statement Statement()
         {
-            if (IsEmptyBlock()) MaybeEmptyBlock();//TODO
-            else if (IsSelectionStatement()) return SelectionStatement();
-            else if (IsIterationStatement()) return IterationStatement();
-            else if (IsJumpStatement()) return JumpStatement();
-            else if (IsStatementExpression())
+            if (IsEmptyBlock()) return MaybeEmptyBlock();
+            if (IsSelectionStatement()) return SelectionStatement();
+            if (IsIterationStatement()) return IterationStatement();
+            if (IsJumpStatement()) return JumpStatement();
+            if (IsStatementExpression())
             {
                 StatementExpression();
                 if(!CheckTokenType(TokenType.EndStatement))
@@ -613,17 +613,15 @@ namespace SyntaxAnalyser.Parser
             return new List<SwitchSection>();
         }
 
-        private void OptionalStatementList()
+        private List<Statement> OptionalStatementList()
         {
             if (IsStatementExpression() || IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() ||
                 IsJumpStatement())
             {
-                StatementList();
+                return StatementList();
             }
-            else
-            {
-                //Epsilon
-            }
+            
+            return new List<Statement>();
         }
 
         private List<Statement> StatementList()
