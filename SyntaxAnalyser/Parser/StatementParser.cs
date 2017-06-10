@@ -12,7 +12,7 @@ namespace SyntaxAnalyser.Parser
         private bool IsUnaryExpression()
         {
             return IsExpressionUnaryOperator() || IsIncrementDecrementOperator() ||
-                   IsPrimaryExpression() || CheckTokenType(TokenType.Id);
+                   IsPrimaryExpression();
         }
 
         private bool IsEmptyBlock()
@@ -31,72 +31,191 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.RwFor) || CheckTokenType(TokenType.RwForEach);
         }
 
+        private bool IsStatementExpression()
+        {
+            return IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar) || CheckTokenType(TokenType.Id) ||
+                   IsExpressionUnaryOperator() || IsIncrementDecrementOperator() ||
+                   CheckTokenType(TokenType.RwThis) || CheckTokenType(TokenType.RwBase) ||
+                   CheckTokenType(TokenType.ParenthesisOpen) || CheckTokenType(TokenType.RwNew);
+        }
+
         private bool IsJumpStatement()
         {
             return CheckTokenType(TokenType.RwBreak) || CheckTokenType(TokenType.RwContinue) ||
                    CheckTokenType(TokenType.RwReturn);
         }
 
+        private void JumpStatement()
+        {
+            JumpStatementPrime();
+            if (!CheckTokenType(TokenType.EndStatement))
+                throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+        }
+
+        private void JumpStatementPrime()
+        {
+            if (CheckTokenType(TokenType.RwBreak) || CheckTokenType(TokenType.RwContinue)) NextToken();
+            else if (CheckTokenType(TokenType.RwReturn))
+            {
+                NextToken();
+                OptionalExpression();
+            }
+
+            else throw new ParserException($"'break', 'continue', or 'return' statements expected at row {GetTokenRow()} column {GetTokenColumn()}");
+        }
+
+        private Expression OptionalExpression()
+        {
+            if (IsUnaryExpression())
+            {
+                return Expression();
+            }
+
+            return null;
+        }
+
         private void Statement()
         {
-            if (IsStatementOptions())
+            if (IsEmptyBlock()) MaybeEmptyBlock();
+            else if (IsSelectionStatement()) SelectionStatement();
+            else if (IsIterationStatement()) IterationStatement();
+            else if (IsJumpStatement()) JumpStatement();
+            else if (IsStatementExpression())
             {
-                StatementOptions();
+                StatementExpression();
                 if(!CheckTokenType(TokenType.EndStatement))
                     throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
             }
 
-            else if(IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() || IsJumpStatement())
-                EmbeddedStatement();
-
             else throw new ParserException($"Begin of statement expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private bool IsStatementOptions()
+        private void StatementExpression()
         {
-            return IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar) || CheckTokenType(TokenType.Id) ||
-                   IsExpressionUnaryOperator() || IsIncrementDecrementOperator() ||
-                   CheckTokenType(TokenType.RwThis) || CheckTokenType(TokenType.RwBase) ||
-                   CheckTokenType(TokenType.ParenthesisOpen);
-        }
+            if (CheckTokenType(TokenType.RwThis)) ThisStatementExpression();
+            else if (CheckTokenType(TokenType.RwBase)) BaseStatementExpression();
+            else if (CheckTokenType(TokenType.Id)) QualifiedIdentifierStatementExpression();
+            else if (IsIncrementDecrementOperator()) IncrementDecrementStatementExpression();
+            else if (CheckTokenType(TokenType.RwNew)) NewObjectStatementExpression();
+            else if (CheckTokenType(TokenType.ParenthesisOpen)) ParenthesizedStatementExpression();
+            else if (IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar)) BuiltInDeclaration();
 
-        private void StatementOptions()
-        {
-            if (IsBuiltInType() || CheckTokenType(TokenType.RwOrIdVar)) StatementLocalVariableDeclaration();
-            else if (CheckTokenType(TokenType.Id))
-            {
-                NextToken();
-                StatementIdentifierOptions();
-            }
-            else if (IsExpressionUnaryOperator() || IsIncrementDecrementOperator()) StatementStatementExpression();
-            else if (CheckTokenType(TokenType.RwThis))
-            {
-                NextToken();
-                PrimaryExpressionPrime();
-                OptionalAssignment();
-            }
-            else if (CheckTokenType(TokenType.RwBase))
-            {
-                NextToken();
-                PrimaryExpressionPrime();
-                OptionalAssignment();
-            }
-            else if (CheckTokenType(TokenType.ParenthesisOpen))
-            {
-                CastOrParenthesizedExpression();
-                PrimaryExpressionPrime();
-            }
             else throw new ParserException($"Primary expression, expression unary operator, ++ or --, identifer, builtin type or var keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void OptionalAssignment()
+        private void ParenthesizedStatementExpression()
         {
-            if (IsAssignmentOperator())
+            if(!CheckTokenType(TokenType.ParenthesisOpen))
+                throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            Expression();
+
+            if(!CheckTokenType(TokenType.ParenthesisClose))
+                throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            OptionalExpression();
+            ArrayAccess();
+
+            if(!CheckTokenType(TokenType.MemberAccess))
+                throw new MemberAccessExpectedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            QualifiedIdentifier();
+
+            if(!CheckTokenType(TokenType.ParenthesisOpen))
+                throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            ArgumentList();
+            if(!CheckTokenType(TokenType.ParenthesisClose))
+                throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            CallAccess();
+        }
+
+        private void BaseStatementExpression()
+        {
+            if(!CheckTokenType(TokenType.RwBase))
+                throw new BaseKeywordExpectedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            if (!CheckTokenType(TokenType.MemberAccess))
+                throw new MemberAccessExpectedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            if(!CheckTokenType(TokenType.Id))
+                throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            if(!CheckTokenType(TokenType.ParenthesisOpen))
+                throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            ArgumentList();
+            if(!CheckTokenType(TokenType.ParenthesisClose))
+                throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            CallAccess();
+        }
+
+        private void BuiltInDeclaration()
+        {
+            BuiltInDeclarationPrime();
+            OptionalRankSpecifierList();
+            VariableDeclaratorList();
+        }
+
+        private void BuiltInDeclarationPrime()
+        {
+            if(IsBuiltInType()) BuiltInType();
+            else if(CheckTokenType(TokenType.RwOrIdVar)) NextToken();
+            else throw new ParserException($"Builtin type or 'var' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+
+        private void NewObjectStatementExpression()
+        {
+            if (!CheckTokenType(TokenType.RwNew))
+                throw new NewKeywordExpectedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            Type();
+            if(!CheckTokenType(TokenType.ParenthesisOpen))
+                throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            ArgumentList();
+            if(!CheckTokenType(TokenType.ParenthesisClose))
+                throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            CallAccess();
+        }
+
+        private void CallAccess()
+        {
+            if (!CheckTokenType(TokenType.MemberAccess))
             {
-                AssignmentOperator();
-                VariableInitializer();
+                NextToken();
+                QualifiedIdentifier();
+                if (!CheckTokenType(TokenType.ParenthesisOpen))
+                    throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                ArgumentList();
+
+                if (!CheckTokenType(TokenType.ParenthesisClose))
+                    throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                CallAccess();
             }
             else
             {
@@ -104,56 +223,85 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void StatementIdentifierOptions()
+        private void IncrementDecrementStatementExpression()
         {
-            IdentifierAttribute();
-            StatementIdentifierOptions2();
+            IncrementDecrement();
+            IncrementDecrementStatementExpressionPrime();
         }
 
-        private void StatementIdentifierOptions2()
+        private void IncrementDecrementStatementExpressionPrime()
         {
-            if (CheckTokenType(TokenType.SquareBracketOpen))
+            if (CheckTokenType(TokenType.RwThis))
             {
                 NextToken();
-                StatementIdentifierOptions3();
+                if(!CheckTokenType(TokenType.MemberAccess))
+                    throw new MemberAccessExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                QualifiedIdentifier();
+                ArrayAccess();
             }
-            else if (CheckTokenType(TokenType.OpLessThan))
+            else if (CheckTokenType(TokenType.Id))
             {
-                Generic();
-                VariableDeclaratorList();
+                QualifiedIdentifier();
+                ArrayAccess();
             }
-            else if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
-            else if (IsAssignmentOperator())
-            {
-                AssignmentOperator();
-                VariableInitializer();
-            }
-            else if (CheckTokenType(TokenType.MemberAccess))
-            {
-                IdentifierAttribute();
-                PrimaryExpressionPrime();
-                StatementExpressionPrimaryExpressionOptions();
-            }
-            else if (CheckTokenType(TokenType.ParenthesisOpen))
+            else throw new ParserException($"'this' keyword or id token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+        }
+
+        private void ThisStatementExpression()
+        {
+            if (!CheckTokenType(TokenType.RwThis))
+                throw new ThisKeywordExpectedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            if(!CheckTokenType(TokenType.MemberAccess))
+                throw new MemberAccessExpectedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            QualifiedIdentifierStatementExpression();
+        }
+
+        private void QualifiedIdentifierStatementExpression()
+        {
+            QualifiedIdentifier();
+            QualifiedIdentifierStatementExpressionPrime();
+        }
+
+        private void QualifiedIdentifierStatementExpressionPrime()
+        {
+            if (CheckTokenType(TokenType.ParenthesisOpen))
             {
                 NextToken();
                 ArgumentList();
-                if(!CheckTokenType(TokenType.ParenthesisClose))
+                if (!CheckTokenType(TokenType.ParenthesisClose))
                     throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                StatementIdentifierOptions5();
+                CallAccess();
             }
-            else if(IsIncrementDecrementOperator()) IncrementDecrement();
+            else if (IsIncrementDecrementOperator()) IncrementDecrement();
+            else if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
+            else if (CheckTokenType(TokenType.SquareBracketOpen))
+            {
+                NextToken();
+                QualifiedIdentifierStatementExpressionPrimePrime();
+            }
+            else if (IsAssignmentOperator())
+            {
+                AssignmentOperator();
+                Expression();
+            }
 
-            else throw new ParserException($"'[', assignment operator, '.', '(', or identifier tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            else throw new ParserException($"'[', assignment operator, increment/decrement operator, '(', or identifier tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
-        private void StatementIdentifierOptions3()
+
+        private void QualifiedIdentifierStatementExpressionPrimePrime()
         {
             if (CheckTokenType(TokenType.Comma) || CheckTokenType(TokenType.SquareBracketClose))
             {
                 OptionalCommaList();
-                if(!CheckTokenType(TokenType.SquareBracketClose))
+                if (!CheckTokenType(TokenType.SquareBracketClose))
                     throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
@@ -163,125 +311,48 @@ namespace SyntaxAnalyser.Parser
             else if (IsUnaryExpression())
             {
                 ExpressionList();
-                if(!CheckTokenType(TokenType.SquareBracketClose))
+                if (!CheckTokenType(TokenType.SquareBracketClose))
                     throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                StatementIdentifierOptions4();
+                ArrayAccess();
+                QualifiedIdentifierStatementExpressionPrimePrimePrime();
             }
             else throw new ParserException($"Unary expression or ',' expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void StatementIdentifierOptions4()
+        private void QualifiedIdentifierStatementExpressionPrimePrimePrime()
         {
-            if (IsAssignmentOperator())
-            {
-                VariableAssigner();
-                VariableDeclaratorListPrime();
-            }
-            else if(IsPrimaryExpressionPrime()) PrimaryExpressionPrime();
-            else throw new ParserException($"Assignment operator, '(', '[', '.', '++', or '--' tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-        }
+            //Array access increment-decrement
+            if (IsIncrementDecrementOperator()) IncrementDecrement();
 
-        private void StatementIdentifierOptions5()
-        {
-            if (IsPrimaryExpressionPrime())
+            //Array access assignment
+            else if (IsAssignmentOperator())
             {
-                PrimaryExpressionPrime();
-                StatementExpressionPrimaryExpressionOptions();
-            }
-            else
-            {
-                //Epsilon
-            }
-        }
-
-        private void StatementStatementExpression()
-        {
-            if (IsExpressionUnaryOperator())
-            {
-                ExpressionUnaryOperator();
-                UnaryExpression();
                 AssignmentOperator();
                 Expression();
             }
 
-            else if (IsIncrementDecrementOperator())
-            {
-                IncrementDecrement();
-                PrimaryExpressionOrIdentifier();
-            }
-
-            else throw new ParserException($"Unary operator or '++', '--' expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            else throw new ParserException($"increment/decrement or assignment operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void StatementLocalVariableDeclaration()
+        private void ArrayAccess()
         {
-            if (IsBuiltInType())
-            {
-                BuiltInType();
-                OptionalRankSpecifierList();
-                VariableDeclaratorList();
-            }
-
-            else if (CheckTokenType(TokenType.RwOrIdVar))
+            if (CheckTokenType(TokenType.SquareBracketOpen))
             {
                 NextToken();
-                VariableDeclaratorList();
+                ExpressionList();
+                if(!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                ArrayAccess();
             }
 
-            else throw new ParserException($"Builtin type or var keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-        }
-
-        private void StatementList()
-        {
-            Statement();
-            OptionalStatementList();
-        }
-
-        private void OptionalStatementList()
-        {
-            if (IsStatementOptions() || IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() ||
-                IsJumpStatement())
-            {
-                StatementList();
-            }
             else
             {
                 //Epsilon
             }
-        }
-
-        private void EmbeddedStatement()
-        {
-            if(IsEmptyBlock()) MaybeEmptyBlock();
-            else if (IsSelectionStatement()) SelectionStatement();
-            else if(IsIterationStatement()) IterationStatement();
-            else if (IsJumpStatement())
-            {
-                JumpStatement();
-                if(!CheckTokenType(TokenType.EndStatement))
-                    throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-            }
-            else throw new ParserException($"Curly brace opened, ';', selection statement, iteration statement or jump statement expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-        }
-
-        private void EmbeddedStatementOrStatementExpression()
-        {
-            //BUG posiblemente otro bug con ';'. Examinar mejor
-            if(IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() || IsJumpStatement()) EmbeddedStatement();
-            else if (IsPrimaryExpression() || CheckTokenType(TokenType.Id) ||
-                     IsExpressionUnaryOperator() || IsIncrementDecrementOperator())
-            {
-                StatementExpression();
-                if(!CheckTokenType(TokenType.EndStatement))
-                    throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-            }
-            else throw new ParserException($"EmbeddedStatementOrStatementExpression error at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private void IterationStatement()
@@ -317,7 +388,7 @@ namespace SyntaxAnalyser.Parser
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            EmbeddedStatementOrStatementExpression();
+            Statement();
         }
 
         private void ForStatement()
@@ -330,7 +401,7 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalForInitializer();
+            ForInitializer();
             if (!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
@@ -340,12 +411,51 @@ namespace SyntaxAnalyser.Parser
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalStatementExpressionList();
+            ForStatementExpressionList();
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            EmbeddedStatementOrStatementExpression();
+            Statement();
+        }
+
+        //Can declare variables here
+        private void ForInitializer()
+        {
+            if (IsStatementExpression()) StatementExpressionList();
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        //Can't declare variables here
+        private void ForStatementExpressionList()
+        {
+            if(IsStatementExpression()) StatementExpressionList();
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void StatementExpressionList()
+        {
+            StatementExpression();
+            StatementExpressionListPrime();
+        }
+
+        private void StatementExpressionListPrime()
+        {
+            if (CheckTokenType(TokenType.Comma))
+            {
+                NextToken();
+                StatementExpressionList();
+            }
+            else
+            {
+                //Epsilon
+            }
         }
 
         private void DoStatement()
@@ -354,7 +464,7 @@ namespace SyntaxAnalyser.Parser
                 throw new ParserException($"'do' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
             NextToken();
-            EmbeddedStatementOrStatementExpression();
+            Statement();
             if (!CheckTokenType(TokenType.RwWhile))
                 throw new ParserException($"'while' keyword expected at row {GetTokenRow()}, column {GetTokenColumn()}.");
 
@@ -389,57 +499,7 @@ namespace SyntaxAnalyser.Parser
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            EmbeddedStatementOrStatementExpression();
-        }
-
-        private void JumpStatement()
-        {
-            if (CheckTokenType(TokenType.RwBreak) || CheckTokenType(TokenType.RwContinue)) NextToken();
-            else if (CheckTokenType(TokenType.RwReturn))
-            {
-                NextToken();
-                OptionalExpression();
-            }
-
-            else throw new ParserException($"'break', 'continue', or 'return' statements expected at row {GetTokenRow()} column {GetTokenColumn()}");
-        }
-
-        private Expression OptionalExpression()
-        {
-            if (IsUnaryExpression())
-            {
-                return Expression();
-            }
-
-            return null;
-        }
-
-        private void OptionalForInitializer()
-        {
-            //BUG Ambiguedad con identifier en local-variable-declaration y statement-expression-list
-            if (IsStatementOptions())
-            {
-                StatementOptions();
-                StatementOptionsList();
-            }
-            else
-            {
-                //Epsilon
-            }
-        }
-
-        private void StatementOptionsList()
-        {
-            if (CheckTokenType(TokenType.Comma))
-            {
-                NextToken();
-                StatementOptions();
-                StatementOptionsList();
-            }
-            else
-            {
-                //Epsilon
-            }
+            Statement();
         }
 
         private void SelectionStatement()
@@ -449,39 +509,102 @@ namespace SyntaxAnalyser.Parser
             else throw new ParserException($"'if' or 'switch' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void SwitchStatement()
+        private void IfStatement()
         {
-            if(!CheckTokenType(TokenType.RwSwitch))
-                throw new ParserException($"switch keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            if (!CheckTokenType(TokenType.RwIf))
+                throw new ParserException($"'if' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
             NextToken();
-            if(!CheckTokenType(TokenType.ParenthesisOpen))
+            if (!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
             Expression();
-            if(!CheckTokenType(TokenType.ParenthesisClose))
+            if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            if(!CheckTokenType(TokenType.CurlyBraceOpen))
+            Statement();
+            OptionalElsePart();
+        }
+
+        private void OptionalElsePart()
+        {
+            if (CheckTokenType(TokenType.RwElse))
+            {
+                NextToken();
+                Statement();
+            }
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void SwitchStatement()
+        {
+            if (!CheckTokenType(TokenType.RwSwitch))
+                throw new ParserException($"switch keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+
+            NextToken();
+            if (!CheckTokenType(TokenType.ParenthesisOpen))
+                throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            Expression();
+            if (!CheckTokenType(TokenType.ParenthesisClose))
+                throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
+
+            NextToken();
+            if (!CheckTokenType(TokenType.CurlyBraceOpen))
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalSwitchSectionList();
-            if(!CheckTokenType(TokenType.CurlyBraceClose))
+            SwitchBody();
+            if (!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
         }
 
-        private void OptionalSwitchSectionList()
+        private void SwitchBody()
         {
             if (CheckTokenType(TokenType.RwCase) || CheckTokenType(TokenType.RwDefault))
             {
-                SwitchLabelList();
+                SwitchSection();
+                SwitchBody();
+            }
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void OptionalStatementList()
+        {
+            if (IsStatementExpression() || IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() ||
+                IsJumpStatement())
+            {
                 StatementList();
-                OptionalSwitchSectionList();
+            }
+            else
+            {
+                //Epsilon
+            }
+        }
+
+        private void StatementList()
+        {
+            Statement();
+            StatementListPrime();
+        }
+
+        private void StatementListPrime()
+        {
+            if (IsStatementExpression() || IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() ||
+                IsJumpStatement())
+            {
+                StatementList();
             }
             else
             {
@@ -504,13 +627,19 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
+        private void SwitchSection()
+        {
+            SwitchLabelList();
+            StatementList();
+        }
+
         private void SwitchLabel()
         {
             if (CheckTokenType(TokenType.RwCase))
             {
                 NextToken();
                 Expression();
-                if(!CheckTokenType(TokenType.Colon))
+                if (!CheckTokenType(TokenType.Colon))
                     throw new ColonExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
@@ -519,125 +648,13 @@ namespace SyntaxAnalyser.Parser
             else if (CheckTokenType(TokenType.RwDefault))
             {
                 NextToken();
-                if(!CheckTokenType(TokenType.Colon))
+                if (!CheckTokenType(TokenType.Colon))
                     throw new ColonExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
             }
 
             else throw new ParserException($"'case' or 'default' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-        }
-
-        private void IfStatement()
-        {
-            if(!CheckTokenType(TokenType.RwIf))
-                throw new ParserException($"'if' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-
-            NextToken();
-            if(!CheckTokenType(TokenType.ParenthesisOpen))
-                throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
-
-            NextToken();
-            Expression();
-            if(!CheckTokenType(TokenType.ParenthesisClose))
-                throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
-
-            NextToken();
-            EmbeddedStatementOrStatementExpression();
-            OptionalElsePart();
-        }
-
-        private void OptionalElsePart()
-        {
-            if (CheckTokenType(TokenType.RwElse)) ElsePart();
-            else
-            {
-                //Epsilon
-            }
-        }
-
-        private void ElsePart()
-        {
-            if(!CheckTokenType(TokenType.RwElse))
-                throw new ParserException($"'else' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-
-            NextToken();
-            EmbeddedStatementOrStatementExpression();
-        }
-
-        private void StatementExpression()
-        {
-            if (IsPrimaryExpression() || CheckTokenType(TokenType.Id))
-            {
-                PrimaryExpressionOrIdentifier();
-                StatementExpressionPrimaryExpressionOptions();
-            }
-
-            else if (IsIncrementDecrementOperator())
-            {
-                IncrementDecrement();
-                PrimaryExpressionOrIdentifier();
-            }
-            else throw new ParserException($"StatementExpression error at row {GetTokenRow()} column {GetTokenColumn()}.");
-        }
-
-        private void StatementExpressionPrimaryExpressionOptions()
-        {
-            if (CheckTokenType(TokenType.ParenthesisOpen))
-            {
-                NextToken();
-                ArgumentList();
-                if(!CheckTokenType(TokenType.ParenthesisClose))
-                    throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-            }
-
-            else if(IsIncrementDecrementOperator()) IncrementDecrement();
-            else if (IsAssignmentOperator())
-            {
-                AssignmentOperator();
-                Expression();
-            }
-            else
-            {
-                //Epsilon
-            }
-            //else throw new ParserException($"'(', '++', '--', or assignment operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
-        }
-
-        private void StatementExpressionList()
-        {
-            StatementExpression();
-            StatementExpressionListPrime();
-        }
-
-        private void StatementExpressionListPrime()
-        {
-            if (CheckTokenType(TokenType.Comma))
-            {
-                NextToken();
-                StatementExpression();
-                StatementExpressionListPrime();
-            }
-            else
-            {
-                //Epsilon
-            }
-        }
-
-        private void OptionalStatementExpressionList()
-        {
-            if (IsPrimaryExpression() || CheckTokenType(TokenType.Id) || IsExpressionUnaryOperator() ||
-                IsIncrementDecrementOperator())
-            {
-                StatementExpressionList();
-            }
-
-            else
-            {
-                //Epsilon
-            }
         }
     }
 }

@@ -200,11 +200,6 @@ namespace SyntaxAnalyser.Parser
             throw new ParserException($"'.' or '[' token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void CallAccess()
-        {
-            throw new NotImplementedException();
-        }
-
         //private PrimaryExpressionOrIdentifier PrimaryExpressionOrIdentifier()
         //{
         //    if (IsPrimaryExpression()) return PrimaryExpression();
