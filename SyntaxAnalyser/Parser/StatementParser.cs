@@ -5,8 +5,13 @@ using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Statements;
+using SyntaxAnalyser.Nodes.Statements.DoStatement;
+using SyntaxAnalyser.Nodes.Statements.ForEachStatement;
+using SyntaxAnalyser.Nodes.Statements.ForStatement;
 using SyntaxAnalyser.Nodes.Statements.IfStatement;
+using SyntaxAnalyser.Nodes.Statements.StatementExpressions;
 using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
+using SyntaxAnalyser.Nodes.Statements.WhileStatement;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -83,7 +88,7 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsEmptyBlock()) MaybeEmptyBlock();//TODO
             else if (IsSelectionStatement()) return SelectionStatement();
-            else if (IsIterationStatement()) IterationStatement();
+            else if (IsIterationStatement()) return IterationStatement();
             else if (IsJumpStatement()) JumpStatement();
             else if (IsStatementExpression())
             {
@@ -358,16 +363,17 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void IterationStatement()
+        private IterationStatement IterationStatement()
         {
-            if (CheckTokenType(TokenType.RwWhile)) WhileStatement();
-            else if (CheckTokenType(TokenType.RwDo)) DoStatement();
-            else if (CheckTokenType(TokenType.RwFor)) ForStatement();
-            else if (CheckTokenType(TokenType.RwForEach)) ForEachStatement();
-            else throw new IterationStatementExpectedException(GetTokenRow(), GetTokenColumn());
+            if (CheckTokenType(TokenType.RwWhile)) return WhileStatement();
+            if (CheckTokenType(TokenType.RwDo)) return DoStatement();
+            if (CheckTokenType(TokenType.RwFor)) return ForStatement();
+            if (CheckTokenType(TokenType.RwForEach)) return ForEachStatement();
+
+            throw new IterationStatementExpectedException(GetTokenRow(), GetTokenColumn());
         }
 
-        private void ForEachStatement()
+        private ForEachStatement ForEachStatement()
         {
             if (!CheckTokenType(TokenType.RwForEach))
                 throw new ParserException($"'foreach' token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
@@ -377,24 +383,27 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            TypeOrVar();
+            var forEachStatement = new ForEachStatement{ IteratorType = TypeOrVar() };
             if (!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            forEachStatement.IteratorIdentifier = _token.Lexeme;
             NextToken();
             if (!CheckTokenType(TokenType.RwIn))
                 throw new InKeywordExpectedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Expression();
+            forEachStatement.EnumerableExpression = Expression();
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Statement();
+            forEachStatement.StatementBody = Statement();
+
+            return forEachStatement;
         }
 
-        private void ForStatement()
+        private ForStatement ForStatement()
         {
             if (!CheckTokenType(TokenType.RwFor))
                 throw new ParserException($"'for' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
@@ -404,70 +413,66 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            ForInitializer();
+            var forStatement = new ForStatement{Initializer = ForInitializer() };
             if (!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalExpression();
+            forStatement.ConditionExpression = OptionalExpression();
             if (!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            ForStatementExpressionList();
+            forStatement.StatementExpressionList = ForStatementExpressionList();
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Statement();
+            forStatement.StatementBody = Statement();
+
+            return forStatement;
         }
 
         //Can declare variables here
-        private void ForInitializer()
+        private List<StatementExpression> ForInitializer()
         {
-            if (IsStatementExpression()) StatementExpressionList();
-            else
-            {
-                //Epsilon
-            }
+            return IsStatementExpression() ? StatementExpressionList() : new List<StatementExpression>();
         }
 
         //Can't declare variables here
-        private void ForStatementExpressionList()
+        private List<StatementExpression> ForStatementExpressionList()
         {
-            if(IsStatementExpression()) StatementExpressionList();
-            else
-            {
-                //Epsilon
-            }
+            return IsStatementExpression() ? StatementExpressionList() : new List<StatementExpression>();
         }
 
-        private void StatementExpressionList()
+        private List<StatementExpression> StatementExpressionList()
         {
-            StatementExpression();
-            StatementExpressionListPrime();
+            var statementExpression = StatementExpression();
+            var statementExpressionList = StatementExpressionListPrime();
+
+            statementExpressionList.Insert(0, statementExpression);
+            return statementExpressionList;
         }
 
-        private void StatementExpressionListPrime()
+        private List<StatementExpression> StatementExpressionListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
                 NextToken();
-                StatementExpressionList();
+                return StatementExpressionList();
             }
-            else
-            {
-                //Epsilon
-            }
+            
+            return new List<StatementExpression>();
         }
 
-        private void DoStatement()
+        private DoStatement DoStatement()
         {
             if (!CheckTokenType(TokenType.RwDo))
                 throw new ParserException($"'do' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
             NextToken();
-            Statement();
+            var doStatement = new DoStatement{StatementBody = Statement() };
+
             if (!CheckTokenType(TokenType.RwWhile))
                 throw new ParserException($"'while' keyword expected at row {GetTokenRow()}, column {GetTokenColumn()}.");
 
@@ -476,7 +481,8 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Expression();
+            doStatement.ConditionExpression = Expression();
+
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
@@ -485,9 +491,10 @@ namespace SyntaxAnalyser.Parser
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            return doStatement;
         }
 
-        private void WhileStatement()
+        private WhileStatement WhileStatement()
         {
             if (!CheckTokenType(TokenType.RwWhile))
                 throw new ParserException($"'while' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
@@ -497,12 +504,15 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Expression();
+            var whileStatement = new WhileStatement{ConditionExpression = Expression() };
+
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Statement();
+            whileStatement.StatementBody = Statement();
+
+            return whileStatement;
         }
 
         private SelectionStatement SelectionStatement()
