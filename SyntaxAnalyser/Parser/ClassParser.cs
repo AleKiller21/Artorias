@@ -58,25 +58,25 @@ namespace SyntaxAnalyser.Parser
                 var declaration = memberDeclaration as FieldDeclaration;
                 if (declaration != null)
                 {
-                    foreach (var field in declaration.Declarators)
+                    foreach (var field in declaration.InlineFieldDeclarations)
                     {
-                        //TODO Fix this
-                        field.AccessModifier = memberDeclaration.AccessModifier;
-                        field.OptionalModifier = memberDeclaration.OptionalModifier;
-                        field.Type = memberDeclaration.Type;
+                        memberDeclarations.Add(new FieldDeclaration
+                        {
+                            AccessModifier = declaration.AccessModifier,
+                            OptionalModifier = declaration.OptionalModifier,
+                            Type = declaration.Type,
+                            Identifier = field.Identifier,
+                            Value = field.VariableInitializer
+                        });
                     }
-                    memberDeclarations.AddRange(declaration.Declarators);
-                    declaration.Declarators.Clear();
+                    declaration.InlineFieldDeclarations.Clear();
                 }
 
                 memberDeclarations.AddRange(OptionalClassMemberDeclarationList());
                 return memberDeclarations;
             }
 
-            else
-            {
-                return new List<ClassMemberDeclaration>();
-            }
+            return new List<ClassMemberDeclaration>();
         }
 
         private ClassMemberDeclaration ClassMemberDeclaration()
@@ -250,7 +250,7 @@ namespace SyntaxAnalyser.Parser
 
             fieldDeclaration.Value = VariableAssigner();
             //TODO preguntar sobre esto. Porque un FieldDeclaration puede llevar una lista de VariableDeclarators.
-            fieldDeclaration.Declarators = VariableDeclaratorListPrime();
+            fieldDeclaration.InlineFieldDeclarations = VariableDeclaratorListPrime();
 
             if(!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());

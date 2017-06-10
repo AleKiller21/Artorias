@@ -5,7 +5,7 @@ using SyntaxAnalyser.Nodes.Expressions.Unary;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
-    public class StatementExpressionIncrementDecrement : QualifiedIdentifierStatementExpressionPrime
+    public class ThisStatementExpressionPostIncrementDecrement : QualifiedIdentifierStatementExpressionPrime
     {
         public UnaryOperator IncrementDecrement;
     }

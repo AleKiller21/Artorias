@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
-    public class QualifiedIdentifierStatementExpression
+    public class QualifiedIdentifierStatementExpression : StatementExpression
     {
         public QualifiedIdentifier Identifier;
         public QualifiedIdentifierStatementExpressionPrime ExpressionPrime;

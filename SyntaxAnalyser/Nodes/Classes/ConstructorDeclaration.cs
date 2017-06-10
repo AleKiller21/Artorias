@@ -9,6 +9,6 @@ namespace SyntaxAnalyser.Nodes.Classes
     {
         public bool IsStatic;
         public List<FixedParameter> Params;
-        public List<Statement> Statements;
+        public Statement Statements;
     }
 }

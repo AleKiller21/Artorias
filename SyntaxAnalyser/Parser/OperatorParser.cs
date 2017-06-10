@@ -219,8 +219,6 @@ namespace SyntaxAnalyser.Parser
             if (IsIncrementDecrementOperator())
             {
                 UnaryOperator Operator;
-
-                //TODO Determinar si es Post o Pre
                 if(CheckTokenType(TokenType.OpIncrement)) Operator = new PostIncrementOperator();
                 else Operator = new PostDecrementOperator();
 

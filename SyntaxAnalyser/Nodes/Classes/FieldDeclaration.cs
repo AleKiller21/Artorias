@@ -10,11 +10,11 @@ namespace SyntaxAnalyser.Nodes.Classes
         //TODO Semantic: Solo los fields arreglos pueden usar array initializers.
         public string Identifier;
         public VariableInitializer Value;
-        public List<VariableDeclarator> Declarators;
+        public List<VariableDeclarator> InlineFieldDeclarations;
 
         public FieldDeclaration()
         {
-            Declarators = new List<VariableDeclarator>();
+            InlineFieldDeclarations = new List<VariableDeclarator>();
         }
     }
 }
