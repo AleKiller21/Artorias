@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes;
 using SyntaxAnalyser.Nodes.Classes;
 using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Statements;
@@ -59,6 +60,7 @@ namespace SyntaxAnalyser.Parser
                 {
                     foreach (var field in declaration.Declarators)
                     {
+                        //TODO Fix this
                         field.AccessModifier = memberDeclaration.AccessModifier;
                         field.OptionalModifier = memberDeclaration.OptionalModifier;
                         field.Type = memberDeclaration.Type;
@@ -247,6 +249,7 @@ namespace SyntaxAnalyser.Parser
             var fieldDeclaration = new FieldDeclaration();
 
             fieldDeclaration.Value = VariableAssigner();
+            //TODO preguntar sobre esto. Porque un FieldDeclaration puede llevar una lista de VariableDeclarators.
             fieldDeclaration.Declarators = VariableDeclaratorListPrime();
 
             if(!CheckTokenType(TokenType.EndStatement))
@@ -301,15 +304,9 @@ namespace SyntaxAnalyser.Parser
             return arrayInitializer;
         }
 
-        private void OptionalArrayInitializer()
+        private List<VariableInitializer> OptionalArrayInitializer()
         {
-            //TODO Borrar ya que no se usa en la gramatica
-            if(CheckTokenType(TokenType.CurlyBraceOpen))
-                ArrayInitializer();
-            else
-            {
-                //Epsilon
-            }
+            return CheckTokenType(TokenType.CurlyBraceOpen) ? ArrayInitializer() : new List<VariableInitializer>();
         }
 
         private List<VariableInitializer> ArrayInitializerPrime()
@@ -353,7 +350,7 @@ namespace SyntaxAnalyser.Parser
             return new List<VariableInitializer>();
         }
 
-        private List<FieldDeclaration> VariableDeclaratorListPrime()
+        private List<VariableDeclarator> VariableDeclaratorListPrime()
         {
             if (CheckTokenType(TokenType.Comma))
             {
@@ -361,20 +358,22 @@ namespace SyntaxAnalyser.Parser
                 return VariableDeclaratorList();
             }
 
-            return new List<FieldDeclaration>();
+            return new List<VariableDeclarator>();
         }
 
-        private List<FieldDeclaration> VariableDeclaratorList()
+        private List<VariableDeclarator> VariableDeclaratorList()
         {
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
-            var field = new FieldDeclaration{Identifier = _token.Lexeme};
+            //var field = new FieldDeclaration{Identifier = _token.Lexeme};
+            var variableDeclarator = new VariableDeclarator{Identifier = _token.Lexeme};
             NextToken();
-            field.Value = VariableAssigner();
+            //field.Value = VariableAssigner();
+            variableDeclarator.VariableInitializer = VariableAssigner();
             var declarators = VariableDeclaratorListPrime();
 
-            declarators.Insert(0, field);
+            declarators.Insert(0, variableDeclarator);
             return declarators;
         }
 

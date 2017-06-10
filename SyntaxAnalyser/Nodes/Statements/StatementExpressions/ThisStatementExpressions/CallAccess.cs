@@ -7,7 +7,7 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
 {
     public class CallAccess
     {
-        public QualifiedIdentifier Identifier;
+        public QualifiedIdentifier MethodIdentifier;
         public List<Expression> ArgumentList;
         public CallAccess Call;
 

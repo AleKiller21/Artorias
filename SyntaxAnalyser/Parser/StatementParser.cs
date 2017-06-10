@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
@@ -121,8 +122,8 @@ namespace SyntaxAnalyser.Parser
         private StatementExpression StatementExpression()
         {
             if (CheckTokenType(TokenType.RwThis)) return ThisStatementExpression();
-            else if (CheckTokenType(TokenType.RwBase)) BaseStatementExpression();
-            else if (CheckTokenType(TokenType.Id)) QualifiedIdentifierStatementExpression();
+            if (CheckTokenType(TokenType.RwBase)) return BaseStatementExpression();
+            if (CheckTokenType(TokenType.Id)) QualifiedIdentifierStatementExpression();
             else if (IsIncrementDecrementOperator()) IncrementDecrementStatementExpression();
             else if (CheckTokenType(TokenType.RwNew)) NewObjectStatementExpression();
             else if (CheckTokenType(TokenType.ParenthesisOpen)) ParenthesizedStatementExpression();
@@ -164,7 +165,7 @@ namespace SyntaxAnalyser.Parser
             CallAccess();
         }
 
-        private void BaseStatementExpression()
+        private BaseStatementExpression BaseStatementExpression()
         {
             if(!CheckTokenType(TokenType.RwBase))
                 throw new BaseKeywordExpectedException(GetTokenRow(), GetTokenColumn());
@@ -177,17 +178,19 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            var baseStatement = new BaseStatementExpression{MethodIdentifier = _token.Lexeme};
             NextToken();
             if(!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            ArgumentList();
-            if(!CheckTokenType(TokenType.ParenthesisClose))
+            baseStatement.ArgumentList = ArgumentList();
+            if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            CallAccess();
+            baseStatement.CallAccess = CallAccess();
+            return baseStatement;
         }
 
         private void BuiltInDeclaration()
@@ -228,7 +231,7 @@ namespace SyntaxAnalyser.Parser
             if (!CheckTokenType(TokenType.MemberAccess))
             {
                 NextToken();
-                var callAccess = new CallAccess{Identifier = QualifiedIdentifier() };
+                var callAccess = new CallAccess{MethodIdentifier = QualifiedIdentifier() };
                 if (!CheckTokenType(TokenType.ParenthesisOpen))
                     throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
@@ -272,7 +275,7 @@ namespace SyntaxAnalyser.Parser
             else throw new ParserException($"'this' keyword or id token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void ThisStatementExpression()
+        private ThisStatementExpression ThisStatementExpression()
         {
             if (!CheckTokenType(TokenType.RwThis))
                 throw new ThisKeywordExpectedException(GetTokenRow(), GetTokenColumn());
@@ -282,13 +285,16 @@ namespace SyntaxAnalyser.Parser
                 throw new MemberAccessExpectedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            QualifiedIdentifierStatementExpression();
+            return new ThisStatementExpression{StatementExpression = QualifiedIdentifierStatementExpression() };
         }
 
-        private void QualifiedIdentifierStatementExpression()
+        private QualifiedIdentifierStatementExpression QualifiedIdentifierStatementExpression()
         {
-            QualifiedIdentifier();
-            QualifiedIdentifierStatementExpressionPrime();
+            return new QualifiedIdentifierStatementExpression
+                {
+                    Identifier = QualifiedIdentifier(),
+                    ExpressionPrime = QualifiedIdentifierStatementExpressionPrime()
+                };
         }
 
         private QualifiedIdentifierStatementExpressionPrime QualifiedIdentifierStatementExpressionPrime()
@@ -308,16 +314,23 @@ namespace SyntaxAnalyser.Parser
             {
                 return new StatementExpressionIncrementDecrement { IncrementDecrement = IncrementDecrement() };
             }
-            if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
-            else if (CheckTokenType(TokenType.SquareBracketOpen))
+            if (CheckTokenType(TokenType.Id))
             {
+                return new StatementExpressionVariableDeclaratorList{VariableDeclaratorList = VariableDeclaratorList() };
+            }
+            if (CheckTokenType(TokenType.SquareBracketOpen))
+            {
+                //TODO
                 NextToken();
                 QualifiedIdentifierStatementExpressionPrimePrime();
             }
             else if (IsAssignmentOperator())
             {
-                AssignmentOperator();
-                Expression();
+                return new StatementExpressionAssignment
+                {
+                    Operator = AssignmentOperator(),
+                    ExpressionValue = Expression()
+                };
             }
 
             else throw new ParserException($"'[', assignment operator, increment/decrement operator, '(', or identifier tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
@@ -332,54 +345,59 @@ namespace SyntaxAnalyser.Parser
                     throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
+                //TODO return
                 OptionalRankSpecifierList();
                 VariableDeclaratorList();
             }
             else if (IsUnaryExpression())
             {
-                ExpressionList();
+                var arrayAccessModification = new ArrayAccessModification{ArrayAccessExpressionList = ExpressionList() };
                 if (!CheckTokenType(TokenType.SquareBracketClose))
                     throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                ArrayAccess();
-                QualifiedIdentifierStatementExpressionPrimePrimePrime();
+                arrayAccessModification.ArrayAccess = ArrayAccess();
+                arrayAccessModification.ArrayOperation = QualifiedIdentifierStatementExpressionPrimePrimePrime();
             }
             else throw new ParserException($"Unary expression or ',' expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void QualifiedIdentifierStatementExpressionPrimePrimePrime()
+        private ArrayAccessIncrementDecrementAssignment QualifiedIdentifierStatementExpressionPrimePrimePrime()
         {
             //Array access increment-decrement
-            if (IsIncrementDecrementOperator()) IncrementDecrement();
-
-            //Array access assignment
-            else if (IsAssignmentOperator())
+            if (IsIncrementDecrementOperator())
             {
-                AssignmentOperator();
-                Expression();
+                return new ArrayAccessIncrementDecrement { IncrementDecrementOperator = IncrementDecrement() };
             }
 
-            else throw new ParserException($"increment/decrement or assignment operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            //Array access assignment
+            if (IsAssignmentOperator())
+            {
+                return new ArrayAccessAssignment
+                {
+                    Operator = AssignmentOperator(),
+                    ExpressionValue = Expression()
+                };
+            }
+
+            throw new ParserException($"increment/decrement or assignment operator expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void ArrayAccess()
+        private ArrayAccess ArrayAccess()
         {
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
+                var arrayAccess = new ArrayAccess();
                 NextToken();
-                ExpressionList();
-                if(!CheckTokenType(TokenType.SquareBracketClose))
+                arrayAccess.ExpressionList = ExpressionList();
+                if (!CheckTokenType(TokenType.SquareBracketClose))
                     throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                ArrayAccess();
+                arrayAccess.Access = ArrayAccess();
             }
 
-            else
-            {
-                //Epsilon
-            }
+            return new ArrayAccess();
         }
 
         private IterationStatement IterationStatement()
