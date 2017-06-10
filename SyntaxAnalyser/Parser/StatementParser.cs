@@ -5,13 +5,11 @@ using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Statements;
-using SyntaxAnalyser.Nodes.Statements.DoStatement;
-using SyntaxAnalyser.Nodes.Statements.ForEachStatement;
-using SyntaxAnalyser.Nodes.Statements.ForStatement;
-using SyntaxAnalyser.Nodes.Statements.IfStatement;
+using SyntaxAnalyser.Nodes.Statements.IterationStatements;
+using SyntaxAnalyser.Nodes.Statements.JumpStatements;
+using SyntaxAnalyser.Nodes.Statements.SelectionStatements;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions;
 using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
-using SyntaxAnalyser.Nodes.Statements.WhileStatement;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -53,25 +51,42 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.RwReturn);
         }
 
-        private void JumpStatement()
+        private JumpStatement JumpStatement()
         {
-            JumpStatementPrime();
+            var statement = JumpStatementPrime();
             if (!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            return statement;
         }
 
-        private void JumpStatementPrime()
+        private JumpStatement JumpStatementPrime()
         {
-            if (CheckTokenType(TokenType.RwBreak) || CheckTokenType(TokenType.RwContinue)) NextToken();
-            else if (CheckTokenType(TokenType.RwReturn))
+            if (CheckTokenType(TokenType.RwBreak))
             {
+                var breakStatement = new BreakStatement();
+
                 NextToken();
-                OptionalExpression();
+                return breakStatement;
+            }
+            if (CheckTokenType(TokenType.RwContinue))
+            {
+                var continueStatement = new ContinueStatement();
+
+                NextToken();
+                return continueStatement;
+            }
+            if (CheckTokenType(TokenType.RwReturn))
+            {
+                var returnStatement = new ReturnStatement();
+
+                NextToken();
+                returnStatement.ReturnExpression = OptionalExpression();
+                return returnStatement;
             }
 
-            else throw new ParserException($"'break', 'continue', or 'return' statements expected at row {GetTokenRow()} column {GetTokenColumn()}");
+            throw new ParserException($"'break', 'continue', or 'return' statements expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
         private Expression OptionalExpression()
@@ -89,7 +104,7 @@ namespace SyntaxAnalyser.Parser
             if (IsEmptyBlock()) MaybeEmptyBlock();//TODO
             else if (IsSelectionStatement()) return SelectionStatement();
             else if (IsIterationStatement()) return IterationStatement();
-            else if (IsJumpStatement()) JumpStatement();
+            else if (IsJumpStatement()) return JumpStatement();
             else if (IsStatementExpression())
             {
                 StatementExpression();

@@ -1,4 +1,4 @@
-﻿namespace SyntaxAnalyser.Nodes.Statements.IfStatement
+﻿namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements
 {
     public class IfStatement : SelectionStatement
     {

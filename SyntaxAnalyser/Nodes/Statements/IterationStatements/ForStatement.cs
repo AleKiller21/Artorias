@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions;
 
-namespace SyntaxAnalyser.Nodes.Statements.ForStatement
+namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
 {
     public class ForStatement : IterationStatement
     {
