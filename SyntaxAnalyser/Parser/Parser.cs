@@ -310,6 +310,11 @@ namespace SyntaxAnalyser.Parser
                 NextToken();
                 return BuiltInDataType.String;
             }
+            if (CheckTokenType(TokenType.RwObject))
+            {
+                NextToken();
+                return BuiltInDataType.Object;
+            }
             if (CheckTokenType(TokenType.RwBool))
             {
                 NextToken();

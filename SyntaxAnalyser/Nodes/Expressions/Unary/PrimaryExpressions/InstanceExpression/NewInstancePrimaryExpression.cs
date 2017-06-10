@@ -2,12 +2,12 @@
 
 namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions.InstanceExpression
 {
-    public class NewInstanceExpression : Expression
+    public class NewInstancePrimaryExpression : Expression
     {
         public DataType InstanceType;
         public InstanceOptions Options;
 
-        public NewInstanceExpression()
+        public NewInstancePrimaryExpression()
         {
             InstanceType = new DataType();
         }

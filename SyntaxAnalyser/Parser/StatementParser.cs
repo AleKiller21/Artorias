@@ -114,7 +114,7 @@ namespace SyntaxAnalyser.Parser
                 return statementExpression;
             }
 
-            else throw new ParserException($"Begin of statement expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            throw new ParserException($"Begin of statement expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private StatementExpression StatementExpression()

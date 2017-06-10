@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions.InstanceExpression
 {
-    public class InstanceOptions2
+    public abstract class InstanceOptions2
     {
-
+        public List<int> RankSpecifier;
     }
 }

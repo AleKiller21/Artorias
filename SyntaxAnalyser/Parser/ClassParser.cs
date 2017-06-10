@@ -133,14 +133,13 @@ namespace SyntaxAnalyser.Parser
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            ConstructorInitializer();
+            ConstructorInitializer(constructor);
 
             return constructor;
         }
 
-        private void ConstructorInitializer()
+        private void ConstructorInitializer(ConstructorDeclaration constructor)
         {
-            //TODO Tratar con las llamadas a la clase padre
             if (CheckTokenType(TokenType.Colon))
             {
                 NextToken();
@@ -154,9 +153,9 @@ namespace SyntaxAnalyser.Parser
                     throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                ArgumentList();
+                constructor.ParentConstructorArguments = ArgumentList();
 
-                if(!CheckTokenType(TokenType.ParenthesisClose))
+                if (!CheckTokenType(TokenType.ParenthesisClose))
                     throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
@@ -249,7 +248,6 @@ namespace SyntaxAnalyser.Parser
             var fieldDeclaration = new FieldDeclaration();
 
             fieldDeclaration.Value = VariableAssigner();
-            //TODO preguntar sobre esto. Porque un FieldDeclaration puede llevar una lista de VariableDeclarators.
             fieldDeclaration.InlineFieldDeclarations = VariableDeclaratorListPrime();
 
             if(!CheckTokenType(TokenType.EndStatement))

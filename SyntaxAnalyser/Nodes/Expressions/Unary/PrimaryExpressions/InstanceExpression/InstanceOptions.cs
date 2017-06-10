@@ -7,13 +7,13 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions.InstanceExpr
 {
     public class InstanceOptions
     {
-        public List<Expression> ExpressionList;
+        //TODO Semantic: Si options no es null, entonces ignorar los demas campos. Solo revisar options
+        public InstanceOptions2 options;
         public List<Expression> ArgumentList;
         public List<DataType> Generic;
 
         public InstanceOptions()
         {
-            ExpressionList = new List<Expression>();
             ArgumentList = new List<Expression>();
             Generic = new List<DataType>();
         }

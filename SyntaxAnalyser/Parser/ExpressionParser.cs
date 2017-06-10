@@ -54,7 +54,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.RwNew))
             {
                 NextToken();
-                var instance = new NewInstanceExpression();
+                var instance = new NewInstancePrimaryExpression();
                 NonArrayType(instance.InstanceType);
                 instance.Options = InstanceOptions();
 
@@ -74,6 +74,7 @@ namespace SyntaxAnalyser.Parser
             }
             if (CheckTokenType(TokenType.ParenthesisOpen))
             {
+                //TODO SEMANTIC: Check if it's a parenthesized or cast expression
                 return new PrimaryExpression { PrimaryExpressionPrimePrime = CastOrParenthesizedExpression() };
             }
             if (CheckTokenType(TokenType.Id))
@@ -88,26 +89,27 @@ namespace SyntaxAnalyser.Parser
             }
             if (IsBuiltInType())
             {
-                //return new PrimaryExpression { Base = new BuiltInTypeExpression(BuiltInType()) };
-                //TODO return
-                BuiltInTypeAccess(BuiltInType());
+                var builtInTypeAccess = new BuiltInTypeAccessExpression{BuiltInType = BuiltInType() };
+                BuiltInTypeAccess(builtInTypeAccess);
+                return new PrimaryExpression { PrimaryExpressionPrimePrime = builtInTypeAccess };
             }
 
             throw new ParserException($"Primary expression token expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
-        private void BuiltInTypeAccess(BuiltInDataType type)
+        private void BuiltInTypeAccess(BuiltInTypeAccessExpression expression)
         {
             if (CheckTokenType(TokenType.MemberAccess))
             {
-                //TODO return
                 NextToken();
                 if(!CheckTokenType(TokenType.Id))
                     throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+                expression.Identifier = _token.Lexeme;
                 NextToken();
-                CallAccess();
+                expression.CallAccess = CallAccess();
             }
+
             else
             {
                 //Epsilon
@@ -220,7 +222,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
                 NextToken();
-                return InstanceOptions2();
+                return new InstanceOptions{options = InstanceOptions2() };
             }
 
             if (CheckTokenType(TokenType.ParenthesisOpen))
@@ -241,6 +243,41 @@ namespace SyntaxAnalyser.Parser
             }
 
             throw new ParserException($"'[' or '(' expected at row {GetTokenRow()} column {GetTokenColumn()}");
+        }
+
+        private InstanceOptions2 InstanceOptions2()
+        {
+            if (IsUnaryExpression())
+            {
+                var instanceOptionsExpressionList =
+                    new NewInstanceOptionsExpressionList {ExpressionList = ExpressionList()};
+                if (!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                instanceOptionsExpressionList.RankSpecifier = OptionalRankSpecifierList();
+                instanceOptionsExpressionList.ArrayInitializer = OptionalArrayInitializer();
+
+                return instanceOptionsExpressionList;
+            }
+
+            if (CheckTokenType(TokenType.Comma) || CheckTokenType(TokenType.SquareBracketClose))
+            {
+                var instanceOptionsCommaList = new NewInstanceOptionsCommaList
+                {
+                    CommaList = new List<int>{ OptionalCommaList() }
+                };
+                if (!CheckTokenType(TokenType.SquareBracketClose))
+                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
+
+                NextToken();
+                instanceOptionsCommaList.RankSpecifier = OptionalRankSpecifierList();
+                instanceOptionsCommaList.ArrayInitializer = ArrayInitializer();
+
+                return instanceOptionsCommaList;
+            }
+
+            throw new ParserException($"Unary expression or comma token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private List<DataType> Generic()
@@ -279,37 +316,6 @@ namespace SyntaxAnalyser.Parser
             }
 
             return new List<DataType>();
-        }
-
-        private InstanceOptions InstanceOptions2()
-        {
-            //TODO Return InstanceOptions2 class instance
-            if (IsUnaryExpression())
-            {
-                var expressions = ExpressionList();
-                if (!CheckTokenType(TokenType.SquareBracketClose))
-                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-                OptionalRankSpecifierList();
-                OptionalArrayInitializer();
-
-                return new InstanceOptions{ExpressionList = expressions};
-            }
-
-            if (CheckTokenType(TokenType.Comma) || CheckTokenType(TokenType.SquareBracketClose))
-            {
-                OptionalCommaList();
-                if (!CheckTokenType(TokenType.SquareBracketClose))
-                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-                OptionalRankSpecifierList();
-                ArrayInitializer();
-                return null;
-            }
-
-            throw new ParserException($"Unary expression or comma token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private CastOrParenthesizedExpression CastOrParenthesizedExpression()
