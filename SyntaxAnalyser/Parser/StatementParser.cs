@@ -4,6 +4,9 @@ using System.Text;
 using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes.Expressions;
+using SyntaxAnalyser.Nodes.Statements;
+using SyntaxAnalyser.Nodes.Statements.IfStatement;
+using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
 
 namespace SyntaxAnalyser.Parser
 {
@@ -76,10 +79,10 @@ namespace SyntaxAnalyser.Parser
             return null;
         }
 
-        private void Statement()
+        private Statement Statement()
         {
-            if (IsEmptyBlock()) MaybeEmptyBlock();
-            else if (IsSelectionStatement()) SelectionStatement();
+            if (IsEmptyBlock()) MaybeEmptyBlock();//TODO
+            else if (IsSelectionStatement()) return SelectionStatement();
             else if (IsIterationStatement()) IterationStatement();
             else if (IsJumpStatement()) JumpStatement();
             else if (IsStatementExpression())
@@ -502,14 +505,14 @@ namespace SyntaxAnalyser.Parser
             Statement();
         }
 
-        private void SelectionStatement()
+        private SelectionStatement SelectionStatement()
         {
-            if (CheckTokenType(TokenType.RwIf)) IfStatement();
-            else if (CheckTokenType(TokenType.RwSwitch)) SwitchStatement();
+            if (CheckTokenType(TokenType.RwIf)) return IfStatement();
+            if (CheckTokenType(TokenType.RwSwitch)) return SwitchStatement();
             else throw new ParserException($"'if' or 'switch' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void IfStatement()
+        private IfStatement IfStatement()
         {
             if (!CheckTokenType(TokenType.RwIf))
                 throw new ParserException($"'if' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
@@ -519,29 +522,30 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Expression();
+            var ifStatement = new IfStatement{TestValue = Expression()};
+
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Statement();
-            OptionalElsePart();
+            ifStatement.Statement = Statement();
+            ifStatement.ElseStatement = OptionalElsePart();
+
+            return ifStatement;
         }
 
-        private void OptionalElsePart()
+        private Statement OptionalElsePart()
         {
             if (CheckTokenType(TokenType.RwElse))
             {
                 NextToken();
-                Statement();
+                return Statement();
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return null;
         }
 
-        private void SwitchStatement()
+        private SwitchStatement SwitchStatement()
         {
             if (!CheckTokenType(TokenType.RwSwitch))
                 throw new ParserException($"switch keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
@@ -551,7 +555,8 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Expression();
+            var switchStatement = new SwitchStatement{TestValue = Expression()};
+
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
@@ -560,24 +565,27 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            SwitchBody();
+            switchStatement.Sections = SwitchBody();
+
             if (!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            return switchStatement;
         }
 
-        private void SwitchBody()
+        private List<SwitchSection> SwitchBody()
         {
             if (CheckTokenType(TokenType.RwCase) || CheckTokenType(TokenType.RwDefault))
             {
-                SwitchSection();
-                SwitchBody();
+                var section = SwitchSection();
+                var sections = SwitchBody();
+
+                sections.Insert(0, section);
+                return sections;
             }
-            else
-            {
-                //Epsilon
-            }
+
+            return new List<SwitchSection>();
         }
 
         private void OptionalStatementList()
@@ -593,68 +601,78 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private void StatementList()
+        private List<Statement> StatementList()
         {
-            Statement();
-            StatementListPrime();
+            var statement = Statement();
+            var statements = StatementListPrime();
+
+            statements.Insert(0, statement);
+            return statements;
         }
 
-        private void StatementListPrime()
+        private List<Statement> StatementListPrime()
         {
             if (IsStatementExpression() || IsEmptyBlock() || IsSelectionStatement() || IsIterationStatement() ||
                 IsJumpStatement())
             {
-                StatementList();
+                return StatementList();
             }
-            else
+            
+            return new List<Statement>();
+        }
+
+        private List<SwitchLabel> SwitchLabelList()
+        {
+            var label = SwitchLabel();
+            var labels = SwitchLabelListPrime();
+
+            labels.Insert(0, label);
+            return labels;
+        }
+
+        private List<SwitchLabel> SwitchLabelListPrime()
+        {
+            if (CheckTokenType(TokenType.RwCase) || CheckTokenType(TokenType.RwDefault)) return SwitchLabelList();
+            return new List<SwitchLabel>();
+        }
+
+        private SwitchSection SwitchSection()
+        {
+            return new SwitchSection
             {
-                //Epsilon
-            }
+                Labels = SwitchLabelList(),
+                Statement = StatementList()
+            };
         }
 
-        private void SwitchLabelList()
-        {
-            SwitchLabel();
-            SwitchLabelListPrime();
-        }
-
-        private void SwitchLabelListPrime()
-        {
-            if (CheckTokenType(TokenType.RwCase) || CheckTokenType(TokenType.RwDefault)) SwitchLabelList();
-            else
-            {
-                //Epsilon
-            }
-        }
-
-        private void SwitchSection()
-        {
-            SwitchLabelList();
-            StatementList();
-        }
-
-        private void SwitchLabel()
+        private SwitchLabel SwitchLabel()
         {
             if (CheckTokenType(TokenType.RwCase))
             {
+                var switchLabel = new SwitchLabel{Label = Label.Case};
+
                 NextToken();
-                Expression();
+                switchLabel.Expression = Expression();
                 if (!CheckTokenType(TokenType.Colon))
                     throw new ColonExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
+                return switchLabel;
             }
 
-            else if (CheckTokenType(TokenType.RwDefault))
+            if (CheckTokenType(TokenType.RwDefault))
             {
+                var switchLabel = new SwitchLabel { Label = Label.Default };
+
                 NextToken();
                 if (!CheckTokenType(TokenType.Colon))
                     throw new ColonExpectedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
+                return switchLabel;
             }
 
-            else throw new ParserException($"'case' or 'default' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            throw new ParserException($"'case' or 'default' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
     }
 }

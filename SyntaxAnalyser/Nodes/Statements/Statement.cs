@@ -4,7 +4,8 @@ using System.Text;
 
 namespace SyntaxAnalyser.Nodes.Statements
 {
-    public class Statement
+    public abstract class Statement
     {
+        public List<Statement> StatementList;
     }
 }
