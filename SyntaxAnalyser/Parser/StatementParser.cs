@@ -235,7 +235,7 @@ namespace SyntaxAnalyser.Parser
 
         private CallAccess CallAccess()
         {
-            if (!CheckTokenType(TokenType.MemberAccess))
+            if (CheckTokenType(TokenType.MemberAccess))
             {
                 NextToken();
                 var callAccess = new CallAccess{MethodIdentifier = QualifiedIdentifier() };
@@ -324,12 +324,16 @@ namespace SyntaxAnalyser.Parser
             {
                 return new ThisStatementExpressionPostIncrementDecrement { IncrementDecrement = IncrementDecrement() };
             }
+            if (CheckTokenType(TokenType.Id))
+            {
+                return new StatementExpressionVariableDeclaratorList{VariableDeclaratorList = VariableDeclaratorList()};
+            }
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
                 NextToken();
                 return QualifiedIdentifierStatementExpressionPrimePrime();
             }
-            else if (IsAssignmentOperator())
+            if (IsAssignmentOperator())
             {
                 return new StatementExpressionAssignment
                 {
@@ -338,14 +342,14 @@ namespace SyntaxAnalyser.Parser
                 };
             }
 
-            else throw new ParserException($"'[', assignment operator, increment/decrement operator, '(', or identifier tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            throw new ParserException($"'[', assignment operator, increment/decrement operator, '(', or identifier tokens expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private QualifiedIdentifierStatementExpressionPrime QualifiedIdentifierStatementExpressionPrimePrime()
         {
             if (CheckTokenType(TokenType.Comma) || CheckTokenType(TokenType.SquareBracketClose))
             {
-                var thisArray = new ThisArrayRankSpecifierList
+                var thisArray = new ArrayVariableDeclarations
                 {
                     RankSpecifier = new List<int>{ OptionalCommaList() }
                 };
@@ -354,8 +358,8 @@ namespace SyntaxAnalyser.Parser
 
                 NextToken();
                 thisArray.RankSpecifier.AddRange(OptionalRankSpecifierList());
-                //TODO revisar esto
-                //VariableDeclaratorList();
+                thisArray.Declarators = VariableDeclaratorList();
+                //int[] x, y, z = {5};
                 return thisArray;
             }
             if (IsUnaryExpression())

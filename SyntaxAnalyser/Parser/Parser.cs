@@ -290,7 +290,8 @@ namespace SyntaxAnalyser.Parser
                    CheckTokenType(TokenType.RwChar) ||
                    CheckTokenType(TokenType.RwString) ||
                    CheckTokenType(TokenType.RwBool) ||
-                   CheckTokenType(TokenType.RwFloat);
+                   CheckTokenType(TokenType.RwFloat) ||
+                   CheckTokenType(TokenType.RwObject);
         }
 
         private BuiltInDataType BuiltInType()
