@@ -9,6 +9,7 @@ using SyntaxAnalyser.Nodes.Statements.IterationStatements;
 using SyntaxAnalyser.Nodes.Statements.JumpStatements;
 using SyntaxAnalyser.Nodes.Statements.SelectionStatements;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions;
+using SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions;
 using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
 
 namespace SyntaxAnalyser.Parser
@@ -117,9 +118,9 @@ namespace SyntaxAnalyser.Parser
             else throw new ParserException($"Begin of statement expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
-        private void StatementExpression()
+        private StatementExpression StatementExpression()
         {
-            if (CheckTokenType(TokenType.RwThis)) ThisStatementExpression();
+            if (CheckTokenType(TokenType.RwThis)) return ThisStatementExpression();
             else if (CheckTokenType(TokenType.RwBase)) BaseStatementExpression();
             else if (CheckTokenType(TokenType.Id)) QualifiedIdentifierStatementExpression();
             else if (IsIncrementDecrementOperator()) IncrementDecrementStatementExpression();
@@ -222,28 +223,27 @@ namespace SyntaxAnalyser.Parser
             CallAccess();
         }
 
-        private void CallAccess()
+        private CallAccess CallAccess()
         {
             if (!CheckTokenType(TokenType.MemberAccess))
             {
                 NextToken();
-                QualifiedIdentifier();
+                var callAccess = new CallAccess{Identifier = QualifiedIdentifier() };
                 if (!CheckTokenType(TokenType.ParenthesisOpen))
                     throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                ArgumentList();
+                callAccess.ArgumentList = ArgumentList();
 
                 if (!CheckTokenType(TokenType.ParenthesisClose))
                     throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                CallAccess();
+                callAccess.Call = CallAccess();
+                return callAccess;
             }
-            else
-            {
-                //Epsilon
-            }
+            
+            return new CallAccess();
         }
 
         private void IncrementDecrementStatementExpression()
@@ -291,20 +291,24 @@ namespace SyntaxAnalyser.Parser
             QualifiedIdentifierStatementExpressionPrime();
         }
 
-        private void QualifiedIdentifierStatementExpressionPrime()
+        private QualifiedIdentifierStatementExpressionPrime QualifiedIdentifierStatementExpressionPrime()
         {
             if (CheckTokenType(TokenType.ParenthesisOpen))
             {
                 NextToken();
-                ArgumentList();
+                var thisMethodCall = new ThisMethodCall{ArgumentList = ArgumentList()};
                 if (!CheckTokenType(TokenType.ParenthesisClose))
                     throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
                 NextToken();
-                CallAccess();
+                thisMethodCall.CallAccess = CallAccess();
+                return thisMethodCall;
             }
-            else if (IsIncrementDecrementOperator()) IncrementDecrement();
-            else if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
+            if (IsIncrementDecrementOperator())
+            {
+                return new StatementExpressionIncrementDecrement { IncrementDecrement = IncrementDecrement() };
+            }
+            if (CheckTokenType(TokenType.Id)) VariableDeclaratorList();
             else if (CheckTokenType(TokenType.SquareBracketOpen))
             {
                 NextToken();

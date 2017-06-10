@@ -265,10 +265,7 @@ namespace SyntaxAnalyser.Parser
                 return VariableInitializer();
             }
 
-            else
-            {
-                return new VariableInitializer();
-            }
+            return new VariableInitializer();
         }
 
         private VariableInitializer VariableInitializer()
@@ -282,30 +279,31 @@ namespace SyntaxAnalyser.Parser
             }
             if (CheckTokenType(TokenType.CurlyBraceOpen))
             {
-                //TODO Tratar array initializers
-                ArrayInitializer();
-                return null;
+                variableInitializer.ArrayInitializers = ArrayInitializer();
+                return variableInitializer;
             }
 
             throw new ParserException($"OpenCurlyBrace token or expression expected at row {GetTokenRow()} column {GetTokenColumn()}");
         }
 
-        private void ArrayInitializer()
+        private List<VariableInitializer> ArrayInitializer()
         {
             if(!CheckTokenType(TokenType.CurlyBraceOpen))
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            OptionalVariableInitializerList();
+            var arrayInitializer = ArrayInitializerPrime();
 
             if(!CheckTokenType(TokenType.CurlyBraceClose))
                 throw new MissingCurlyBraceClosedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
+            return arrayInitializer;
         }
 
         private void OptionalArrayInitializer()
         {
+            //TODO Borrar ya que no se usa en la gramatica
             if(CheckTokenType(TokenType.CurlyBraceOpen))
                 ArrayInitializer();
             else
@@ -314,11 +312,25 @@ namespace SyntaxAnalyser.Parser
             }
         }
 
-        private List<VariableInitializer> OptionalVariableInitializerList()
+        private List<VariableInitializer> ArrayInitializerPrime()
         {
-            if (IsUnaryExpression() || CheckTokenType(TokenType.CurlyBraceOpen)) return VariableInitializerList();
+            if (IsUnaryExpression() || CheckTokenType(TokenType.CurlyBraceOpen))
+            {
+                var variableInitializer = VariableInitializerList();
+                OptionalComma();
+                return variableInitializer;
+            }
 
             return new List<VariableInitializer>();
+        }
+
+        private void OptionalComma()
+        {
+            if(CheckTokenType(TokenType.Comma)) NextToken();
+            else
+            {
+                //Epsilon
+            }
         }
 
         private List<VariableInitializer> VariableInitializerList()
@@ -338,10 +350,7 @@ namespace SyntaxAnalyser.Parser
                 return VariableInitializerList();
             }
 
-            else
-            {
-                return new List<VariableInitializer>();
-            }
+            return new List<VariableInitializer>();
         }
 
         private List<FieldDeclaration> VariableDeclaratorListPrime()
@@ -352,10 +361,7 @@ namespace SyntaxAnalyser.Parser
                 return VariableDeclaratorList();
             }
 
-            else
-            {
-                return new List<FieldDeclaration>();
-            }
+            return new List<FieldDeclaration>();
         }
 
         private List<FieldDeclaration> VariableDeclaratorList()

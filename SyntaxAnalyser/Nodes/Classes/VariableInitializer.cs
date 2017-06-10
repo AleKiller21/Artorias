@@ -8,11 +8,11 @@ namespace SyntaxAnalyser.Nodes.Classes
     public class VariableInitializer
     {
         public Expression Expression;
-        public List<ArrayInitializer> ArrayInitializers;
+        public List<VariableInitializer> ArrayInitializers;
 
         public VariableInitializer()
         {
-            ArrayInitializers = new List<ArrayInitializer>();
+            ArrayInitializers = new List<VariableInitializer>();
         }
     }
 }
