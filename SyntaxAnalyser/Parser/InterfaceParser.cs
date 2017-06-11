@@ -4,6 +4,7 @@ using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
 using SyntaxAnalyser.Nodes.Interfaces;
+using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Parser
 {

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
-using LexerAnalyser;
-using SyntaxAnalyser.Parser;
-using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Artorias
 {

@@ -45,8 +45,12 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.RwNameSpace))
                 throw new MissingNamespaceKeywordException(GetTokenRow(), GetTokenColumn());
 
+            var row = GetTokenRow();
+            var column = GetTokenColumn();
             NextToken();
             var newNamespace = new NamesapceDeclaration {NamespaceIdentifier = QualifiedIdentifier()};
+            Namespace.Row = row;
+            Namespace.Col = column;
             NamespaceBody(newNamespace);
             Namespace.NamespaceDeclarations.Add(newNamespace);
         }

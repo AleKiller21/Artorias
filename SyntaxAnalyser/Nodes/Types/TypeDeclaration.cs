@@ -1,4 +1,4 @@
-﻿namespace SyntaxAnalyser.Nodes
+﻿namespace SyntaxAnalyser.Nodes.Types
 {
     public abstract class TypeDeclaration
     {

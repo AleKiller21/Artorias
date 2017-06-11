@@ -148,7 +148,13 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingUsingKeywordException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var usingNamespace = new UsingNamespaceDeclaration(QualifiedIdentifier());
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+            var usingNamespace = new UsingNamespaceDeclaration(QualifiedIdentifier())
+            {
+                Row = row,
+                Col = col
+            };
 
             if(!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());

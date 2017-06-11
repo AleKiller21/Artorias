@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using LexerAnalyser;
+using SemanticAnalyser;
+using SemanticAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
+using SyntaxAnalyser.Nodes.Namespaces;
 using SyntaxAnalyser.Parser;
 
 namespace Artorias
@@ -12,13 +14,11 @@ namespace Artorias
     {
         private readonly string _sourceDirectory;
         private string _destiny;
-        private readonly Dictionary<string, Code> _namespaceDictionary;
 
         public Compiler(string sourceDirectory, string destiny)
         {
             _sourceDirectory = sourceDirectory;
             _destiny = destiny;
-            _namespaceDictionary = new Dictionary<string, Code>();
         }
 
         public void Compile()
@@ -32,6 +32,11 @@ namespace Artorias
             }
 
             ParseFiles(project, project.Name);
+            //var semantic = new Semantic();
+            //foreach (var entry in NamespaceTable.Dictionary)
+            //{
+            //    semantic.Analyse(entry.Value);
+            //}
         }
 
         private void ExploreDirectory(DirectoryInfo currentDirectory, string currentNamespace)
@@ -54,8 +59,24 @@ namespace Artorias
                 var lexer = new Lexer(stream);
                 var parser = new Parser(lexer);
                 var code = parser.Parse();
-                var fileName = file.Name.Remove(file.Name.Length - 3);
-                _namespaceDictionary.Add(currentNamespace + "." + fileName, code);
+
+                //TODO Semantic: Tratar con los namespaces anidados dentro de otro namespace
+                AddDictionaryEntry(code.GlobalNamespace, "");
+            }
+        }
+
+        private void AddDictionaryEntry(NamesapceDeclaration Namespace, string namespaceName)
+        {
+            foreach (var namespaceDeclaration in Namespace.NamespaceDeclarations)
+            {
+                var name = namespaceName;
+                foreach (var identifier in namespaceDeclaration.NamespaceIdentifier.Identifiers)
+                {
+                    name += identifier + ".";
+                }
+                name = name.Remove(name.Length - 1);
+                NamespaceTable.Dictionary.Add(name, namespaceDeclaration.TypeDeclarations);
+                AddDictionaryEntry(namespaceDeclaration, name + ".");
             }
         }
     }

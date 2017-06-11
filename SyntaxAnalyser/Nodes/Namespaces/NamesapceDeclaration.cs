@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Nodes.Namespaces
 {
-    public class NamesapceDeclaration
+    public class NamesapceDeclaration : LineNumbering
     {
         public QualifiedIdentifier NamespaceIdentifier;
         public List<UsingNamespaceDeclaration> UsingNamespaces;
