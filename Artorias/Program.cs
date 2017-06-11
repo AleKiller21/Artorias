@@ -14,12 +14,12 @@ namespace Artorias
             var lexer = new Lexer(stream);
             var parser = new Parser(lexer);
             var code = parser.Parse();
-            var json = JsonConvert.SerializeObject(code.GlobalNamespace, Formatting.Indented);
+            //var json = JsonConvert.SerializeObject(code.GlobalNamespace, Formatting.Indented);
             Console.WriteLine("SUCCESS");
-            using (var sw = new StreamWriter(File.Create("C:\\Users\\alefe\\Documents\\Code\\C#\\Compiler\\GrammarCJ\\serialize.json")))
-            {
-                sw.Write(json);
-            }
+            //using (var sw = new StreamWriter(File.Create("C:\\Users\\alefe\\Documents\\Code\\C#\\Compiler\\GrammarCJ\\serialize.json")))
+            //{
+            //    sw.Write(json);
+            //}
         }
     }
 }
