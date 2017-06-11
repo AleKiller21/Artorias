@@ -571,7 +571,7 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.RwIf)) return IfStatement();
             if (CheckTokenType(TokenType.RwSwitch)) return SwitchStatement();
-            else throw new ParserException($"'if' or 'switch' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
+            throw new ParserException($"'if' or 'switch' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
         }
 
         private IfStatement IfStatement()

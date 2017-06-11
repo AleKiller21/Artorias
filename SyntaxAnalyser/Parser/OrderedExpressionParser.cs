@@ -48,7 +48,7 @@ namespace SyntaxAnalyser.Parser
                 var expression = new NullCoalescingOperator{LeftOperand = leftOperand};
                 NextToken();
                 expression.RightOperand = ConditionalOrExpression();
-                NullCoalescingExpressionPrime(expression);
+                return NullCoalescingExpressionPrime(expression);
             }
 
             return leftOperand;
@@ -264,7 +264,7 @@ namespace SyntaxAnalyser.Parser
                 return MultiplicativeExpressionPrime(expression);
             }
 
-            if(IsMultiplicativeOperator()) MultiplicativeExpressionPrime(leftOperand);
+            if(IsMultiplicativeOperator()) return MultiplicativeExpressionPrime(leftOperand);
 
             return leftOperand;
         }
