@@ -2,7 +2,7 @@
   "profiles": {
     "Artorias": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\alefe\\Documents\\Code\\C#\\Compiler\\GrammarCJ\\Ejemplo_Parse.cs"
+      "commandLineArgs": "C:\\Users\\alefe\\Documents\\Code\\C#\\Compiler\\GrammarCJ\\TestFiles none"
     }
   }
 }

@@ -12,8 +12,8 @@ namespace SyntaxAnalyser.Nodes
         public Code()
         {
             GlobalNamespace = new NamesapceDeclaration();
-            GlobalNamespace.Identifier = new QualifiedIdentifier();
-            GlobalNamespace.Identifier.Identifiers.Add("global");
+            GlobalNamespace.NamespaceIdentifier = new QualifiedIdentifier();
+            GlobalNamespace.NamespaceIdentifier.Identifiers.Add("global");
         }
     }
 }

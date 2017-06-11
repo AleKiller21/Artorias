@@ -4,17 +4,17 @@ namespace SyntaxAnalyser.Nodes.Namespaces
 {
     public class NamesapceDeclaration
     {
-        public QualifiedIdentifier Identifier;
+        public QualifiedIdentifier NamespaceIdentifier;
         public List<UsingNamespaceDeclaration> UsingNamespaces;
-        public List<TypeDeclaration> Types;
-        public List<NamesapceDeclaration> Declarations;
+        public List<TypeDeclaration> TypeDeclarations;
+        public List<NamesapceDeclaration> NamespaceDeclarations;
 
         public NamesapceDeclaration()
         {
             UsingNamespaces = new List<UsingNamespaceDeclaration>();
-            Types = new List<TypeDeclaration>();
-            Identifier = new QualifiedIdentifier();
-            Declarations = new List<NamesapceDeclaration>();
+            TypeDeclarations = new List<TypeDeclaration>();
+            NamespaceIdentifier = new QualifiedIdentifier();
+            NamespaceDeclarations = new List<NamesapceDeclaration>();
         }
     }
 }

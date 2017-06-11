@@ -31,7 +31,7 @@ namespace SyntaxAnalyser.Parser
             }
             else if (HasEncapsulationModifier() || IsGroupDeclaration())
             {
-                Namespace.Types.AddRange(TypeDeclarationList());
+                Namespace.TypeDeclarations.AddRange(TypeDeclarationList());
                 OptionalNameSpaceMemberDeclaration(Namespace);
             }
             else
@@ -46,9 +46,9 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingNamespaceKeywordException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var newNamespace = new NamesapceDeclaration {Identifier = QualifiedIdentifier()};
+            var newNamespace = new NamesapceDeclaration {NamespaceIdentifier = QualifiedIdentifier()};
             NamespaceBody(newNamespace);
-            Namespace.Declarations.Add(newNamespace);
+            Namespace.NamespaceDeclarations.Add(newNamespace);
         }
 
         private void NamespaceBody(NamesapceDeclaration Namespace)
