@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
-    public class StatementExpressionVariableDeclaratorList : QualifiedIdentifierStatementExpressionPrime
+    public class VariableDeclaratorListStatementExpression : QualifiedIdentifierStatementExpressionPrime
     {
         public List<VariableDeclarator> VariableDeclaratorList;
     }

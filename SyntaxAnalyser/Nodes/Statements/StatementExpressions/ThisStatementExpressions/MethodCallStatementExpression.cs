@@ -5,12 +5,12 @@ using SyntaxAnalyser.Nodes.Expressions;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
-    public class ThisMethodCall : QualifiedIdentifierStatementExpressionPrime
+    public class MethodCallStatementExpression : QualifiedIdentifierStatementExpressionPrime
     {
         public List<Expression> ArgumentList;
         public CallAccess CallAccess;
 
-        public ThisMethodCall()
+        public MethodCallStatementExpression()
         {
             ArgumentList = new List<Expression>();
         }

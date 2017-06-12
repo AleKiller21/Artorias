@@ -10,12 +10,14 @@ namespace SyntaxAnalyser.Nodes.Namespaces
         public List<TypeDeclaration> TypeDeclarations;
         public List<NamesapceDeclaration> NamespaceDeclarations;
 
-        public NamesapceDeclaration()
+        public NamesapceDeclaration(int row, int col)
         {
             UsingNamespaces = new List<UsingNamespaceDeclaration>();
             TypeDeclarations = new List<TypeDeclaration>();
             NamespaceIdentifier = new QualifiedIdentifier();
             NamespaceDeclarations = new List<NamesapceDeclaration>();
+            Row = row;
+            Col = col;
         }
     }
 }

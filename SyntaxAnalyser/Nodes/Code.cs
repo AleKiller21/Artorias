@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SyntaxAnalyser.Nodes.Namespaces;
+﻿using SyntaxAnalyser.Nodes.Namespaces;
 
 namespace SyntaxAnalyser.Nodes
 {
@@ -11,9 +8,9 @@ namespace SyntaxAnalyser.Nodes
 
         public Code()
         {
-            GlobalNamespace = new NamesapceDeclaration();
+            GlobalNamespace = new NamesapceDeclaration(0, 0);
             GlobalNamespace.NamespaceIdentifier = new QualifiedIdentifier();
-            GlobalNamespace.NamespaceIdentifier.Identifiers.Add("global");
+            GlobalNamespace.NamespaceIdentifier.Identifiers.Identifiers.Add("global");
         }
     }
 }

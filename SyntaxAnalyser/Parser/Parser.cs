@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using LexerAnalyser;
 using LexerAnalyser.Enums;
 using LexerAnalyser.Models;
@@ -136,10 +135,7 @@ namespace SyntaxAnalyser.Parser
                 return UsingDirective();
             }
 
-            else
-            {
-                return new List<UsingNamespaceDeclaration>();
-            }
+            return new List<UsingNamespaceDeclaration>();
         }
 
         private List<UsingNamespaceDeclaration> UsingDirective()
@@ -147,9 +143,9 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.RwUsing))
                 throw new MissingUsingKeywordException(GetTokenRow(), GetTokenColumn());
 
-            NextToken();
             var row = GetTokenRow();
             var col = GetTokenColumn();
+            NextToken();
             var usingNamespace = new UsingNamespaceDeclaration(QualifiedIdentifier())
             {
                 Row = row,
@@ -166,8 +162,11 @@ namespace SyntaxAnalyser.Parser
             return usingNamespaceList;
         }
 
-        private List<string> IdentifierAttribute()
+        private IdentifierAttribute IdentifierAttribute()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (CheckTokenType(TokenType.MemberAccess))
             {
                 NextToken();
@@ -177,12 +176,14 @@ namespace SyntaxAnalyser.Parser
                 var identifier = _token.Lexeme;
                 NextToken();
                 var identifiers = IdentifierAttribute();
-                identifiers.Insert(0, identifier);
+                identifiers.Identifiers.Insert(0, identifier);
+                identifiers.Row = row;
+                identifiers.Col = col;
 
                 return identifiers;
             }
 
-            return new List<string>();
+            return new IdentifierAttribute(row, col);
         }
 
         private List<TypeDeclaration> TypeDeclarationList()
@@ -196,18 +197,19 @@ namespace SyntaxAnalyser.Parser
                 typeDeclarationList.Insert(0, typeDeclaration);
                 return typeDeclarationList;
             }
-            else
-            {
-                return new List<TypeDeclaration>();
-            }
+            return new List<TypeDeclaration>();
         }
 
         private TypeDeclaration TypeDeclaration()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
             var modifier = EncapsulationModifier();
             var @type = GroupDeclaration();
 
             @type.Modifier = modifier;
+            @type.Row = row;
+            @type.Col = col;
             return @type;
         }
 
@@ -270,10 +272,7 @@ namespace SyntaxAnalyser.Parser
 
                 return identifierList;
             }
-            else
-            {
-                return new List<QualifiedIdentifier>();
-            }
+            return new List<QualifiedIdentifier>();
         }
 
         private QualifiedIdentifier QualifiedIdentifier()
@@ -281,12 +280,19 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
             var identifier = _token.Lexeme;
             NextToken();
             var identifiers = IdentifierAttribute();
-            identifiers.Insert(0, identifier);
+            identifiers.Identifiers.Insert(0, identifier);
 
-            var qualifiedIdentifier = new QualifiedIdentifier {Identifiers = identifiers};
+            var qualifiedIdentifier = new QualifiedIdentifier
+            {
+                Identifiers = identifiers,
+                Row = row,
+                Col = col
+            };
             return qualifiedIdentifier;
         }
 
@@ -341,8 +347,15 @@ namespace SyntaxAnalyser.Parser
             if (IsType()) return Type();
             if (CheckTokenType(TokenType.RwVoid))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
-                return new DataType {BuiltInDataType = BuiltInDataType.Void};
+                return new DataType
+                {
+                    BuiltInDataType = BuiltInDataType.Void,
+                    Row = row,
+                    Col = col
+                };
             }
 
             throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
@@ -353,8 +366,15 @@ namespace SyntaxAnalyser.Parser
             if(IsType()) return Type();
             if (CheckTokenType(TokenType.RwOrIdVar))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
-                return new DataType {BuiltInDataType = BuiltInDataType.Var};
+                return new DataType
+                {
+                    BuiltInDataType = BuiltInDataType.Var,
+                    Row = row,
+                    Col = col
+                };
             }
 
             throw new MissingDataTypeForIdentifierToken(GetTokenRow(), GetTokenColumn());
@@ -362,7 +382,7 @@ namespace SyntaxAnalyser.Parser
 
         private DataType Type()
         {
-            var type = new DataType();
+            var type = new DataType{Row = GetTokenRow(), Col = GetTokenColumn()};
 
             NonArrayType(type);
             type.GenericTypes = OptionalGeneric();
@@ -374,10 +394,7 @@ namespace SyntaxAnalyser.Parser
         private List<DataType> OptionalGeneric()
         {
             if(CheckTokenType(TokenType.OpLessThan)) return Generic();
-            else
-            {
-                return new List<DataType>();
-            }
+            return new List<DataType>();
         }
 
         private void NonArrayType(DataType type)
@@ -405,10 +422,7 @@ namespace SyntaxAnalyser.Parser
                 return parameters;
             }
 
-            else
-            {
-                return new List<FixedParameter>();
-            }
+            return new List<FixedParameter>();
         }
 
         private List<FixedParameter> FixedParametersPrime()
@@ -422,16 +436,17 @@ namespace SyntaxAnalyser.Parser
                 parameters.Insert(0, parameter);
                 return parameters;
             }
-            else
-            {
-                return new List<FixedParameter>();
-            }
+            return new List<FixedParameter>();
         }
 
         private FixedParameter FixedParameter()
         {
-            var parameter = new FixedParameter();
-            parameter.Type = Type();
+            var parameter = new FixedParameter
+            {
+                Row = GetTokenRow(),
+                Col = GetTokenColumn(),
+                Type = Type()
+            };
 
             if (!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
@@ -448,12 +463,12 @@ namespace SyntaxAnalyser.Parser
             {
                 LiteralExpression literal;
 
-                if(IsLiteralInt()) literal = new IntLiteral(int.Parse(_token.Lexeme));
-                else if(IsLiteralString()) literal = new StringLiteral(_token.Lexeme);
-                else if(CheckTokenType(TokenType.LiteralCharSimple)) literal = new CharLiteral(_token.Lexeme.ToCharArray()[0]);
-                else if(CheckTokenType(TokenType.LiteralFloat)) literal = new FloatLiteral(float.Parse(_token.Lexeme.Substring(0, _token.Lexeme.Length-1)));
-                else if(CheckTokenType(TokenType.LiteralTrue)) literal = new BooleanLiteral(true);
-                else literal = new BooleanLiteral(false);
+                if(IsLiteralInt()) literal = new IntLiteral(int.Parse(_token.Lexeme), GetTokenRow(), GetTokenColumn());
+                else if(IsLiteralString()) literal = new StringLiteral(_token.Lexeme, GetTokenRow(), GetTokenColumn());
+                else if(CheckTokenType(TokenType.LiteralCharSimple)) literal = new CharLiteral(_token.Lexeme.ToCharArray()[0], GetTokenRow(), GetTokenColumn());
+                else if(CheckTokenType(TokenType.LiteralFloat)) literal = new FloatLiteral(float.Parse(_token.Lexeme.Substring(0, _token.Lexeme.Length-1)), GetTokenRow(), GetTokenColumn());
+                else if(CheckTokenType(TokenType.LiteralTrue)) literal = new BooleanLiteral(true, GetTokenRow(), GetTokenColumn());
+                else literal = new BooleanLiteral(false, GetTokenRow(), GetTokenColumn());
 
                 NextToken();
                 return literal;

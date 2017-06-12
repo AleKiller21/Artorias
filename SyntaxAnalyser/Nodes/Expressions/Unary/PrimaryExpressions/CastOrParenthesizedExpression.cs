@@ -6,7 +6,7 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions
 {
     public class CastOrParenthesizedExpression : Expression
     {
-        public Expression ParethesisExpression;
+        public Expression ParenthesisExpression;
         public Expression NonParenthesisExpression;
     }
 }

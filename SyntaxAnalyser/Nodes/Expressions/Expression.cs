@@ -1,6 +1,7 @@
 ﻿namespace SyntaxAnalyser.Nodes.Expressions
 {
-    public abstract class Expression
+    public abstract class Expression : LineNumbering
     {
+
     }
 }

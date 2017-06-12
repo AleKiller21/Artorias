@@ -9,6 +9,8 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions.InstanceExpr
     {
         public List<int> CommaList;
         public List<VariableInitializer> ArrayInitializer;
+        public int Row;
+        public int Col;
 
         public NewInstanceOptionsCommaList()
         {

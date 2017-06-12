@@ -67,17 +67,17 @@ namespace Artorias
 
         private void AddDictionaryEntry(NamesapceDeclaration Namespace, string namespaceName)
         {
-            foreach (var namespaceDeclaration in Namespace.NamespaceDeclarations)
-            {
-                var name = namespaceName;
-                foreach (var identifier in namespaceDeclaration.NamespaceIdentifier.Identifiers)
-                {
-                    name += identifier + ".";
-                }
-                name = name.Remove(name.Length - 1);
-                NamespaceTable.Dictionary.Add(name, namespaceDeclaration.TypeDeclarations);
-                AddDictionaryEntry(namespaceDeclaration, name + ".");
-            }
+            //foreach (var namespaceDeclaration in Namespace.NamespaceDeclarations)
+            //{
+            //    var name = namespaceName;
+            //    foreach (var identifier in namespaceDeclaration.NamespaceIdentifier.Identifiers)
+            //    {
+            //        name += identifier + ".";
+            //    }
+            //    name = name.Remove(name.Length - 1);
+            //    NamespaceTable.Dictionary.Add(name, namespaceDeclaration.TypeDeclarations);
+            //    AddDictionaryEntry(namespaceDeclaration, name + ".");
+            //}
         }
     }
 }

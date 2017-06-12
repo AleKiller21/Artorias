@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SyntaxAnalyser.Nodes.Statements
 {
-    public abstract class Statement
+    public abstract class Statement : LineNumbering
     {
         public List<Statement> StatementList;
     }

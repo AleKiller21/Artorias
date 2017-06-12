@@ -9,5 +9,7 @@ namespace SyntaxAnalyser.Nodes
     {
         public string Identifier;
         public VariableInitializer VariableInitializer;
+        public int row;
+        public int col;
     }
 }

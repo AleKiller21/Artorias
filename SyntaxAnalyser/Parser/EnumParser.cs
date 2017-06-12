@@ -16,7 +16,11 @@ namespace SyntaxAnalyser.Parser
 
         private EnumDeclaration EnumDeclaration()
         {
-            var enumDeclaration = new EnumDeclaration();
+            var enumDeclaration = new EnumDeclaration
+            {
+                Row = GetTokenRow(),
+                Col = GetTokenColumn()
+            };
 
             if (!CheckTokenType(TokenType.RwEnum))
                 throw new MissingEnumKeywordException(GetTokenRow(), GetTokenColumn());
@@ -51,14 +55,18 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.Id))
             {
-                var enumMember = new EnumMember {Identifier = _token.Lexeme, Value = new IntLiteral(_enumCounter++)};
+                var enumMember = new EnumMember
+                {
+                    Identifier = _token.Lexeme,
+                    Value = new IntLiteral(_enumCounter++, GetTokenRow(), GetTokenColumn()),
+                    Row = GetTokenRow(),
+                    Col = GetTokenColumn()
+                };
                 NextToken();
                 return AssignmentOptions(enumMember);
             }
-            else
-            {
-                return new List<EnumMember>();
-            }
+
+            return new List<EnumMember>();
         }
 
         private List<EnumMember> AssignmentOptions(EnumMember enumMember)
@@ -82,10 +90,7 @@ namespace SyntaxAnalyser.Parser
                 return enumMemberList;
             }
 
-            else
-            {
-                return new List<EnumMember> {enumMember};
-            }
+            return new List<EnumMember> {enumMember};
         }
 
         private List<EnumMember> OptionalAssignableIdentifiersListPrime()
@@ -95,10 +100,7 @@ namespace SyntaxAnalyser.Parser
                 NextToken();
                 return OptionalAssignableIdentifiersList();
             }
-            else
-            {
-                return new List<EnumMember>();
-            }
+            return new List<EnumMember>();
         }
     }
 }

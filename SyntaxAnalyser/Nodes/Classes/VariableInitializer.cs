@@ -5,14 +5,16 @@ using SyntaxAnalyser.Nodes.Expressions;
 
 namespace SyntaxAnalyser.Nodes.Classes
 {
-    public class VariableInitializer
+    public class VariableInitializer : LineNumbering
     {
         public Expression Expression;
         public List<VariableInitializer> ArrayInitializers;
 
-        public VariableInitializer()
+        public VariableInitializer(int row, int col)
         {
             ArrayInitializers = new List<VariableInitializer>();
+            Row = row;
+            Col = col;
         }
     }
 }

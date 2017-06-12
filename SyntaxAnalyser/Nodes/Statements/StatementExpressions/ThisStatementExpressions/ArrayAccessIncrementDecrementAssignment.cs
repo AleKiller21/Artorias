@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
-    public abstract class ArrayAccessIncrementDecrementAssignment
+    public abstract class ArrayAccessIncrementDecrementAssignment : LineNumbering
     {
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SyntaxAnalyser.Nodes.Statements.SwitchStatement
+namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements.SwitchStatement
 {
     public class SwitchStatement : SelectionStatement
     {

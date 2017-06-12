@@ -12,10 +12,12 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
         public List<int> OptionalRankSpecifierList;
         public List<VariableDeclarator> VariableDeclaratorList;
 
-        public BuiltInDeclarationStatement()
+        public BuiltInDeclarationStatement(int row, int col)
         {
             OptionalRankSpecifierList = new List<int>();
             VariableDeclaratorList = new List<VariableDeclarator>();
+            Row = row;
+            Col = col;
         }
     }
 }

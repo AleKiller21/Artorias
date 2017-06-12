@@ -5,7 +5,7 @@ using SyntaxAnalyser.Nodes.Expressions;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
-    public class CallAccess
+    public class CallAccess : LineNumbering
     {
         public QualifiedIdentifier MethodIdentifier;
         public List<Expression> ArgumentList;

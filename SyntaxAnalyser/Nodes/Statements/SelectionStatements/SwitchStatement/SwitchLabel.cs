@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SyntaxAnalyser.Nodes.Expressions;
+﻿using SyntaxAnalyser.Nodes.Expressions;
+using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
 
-namespace SyntaxAnalyser.Nodes.Statements.SwitchStatement
+namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements.SwitchStatement
 {
-    public class SwitchLabel
+    public class SwitchLabel : LineNumbering
     {
         public Label Label;
-        public Expression Expression; //Solo cuando el label es 'case'
+        public Expression Expression; //TODO Semantic: Solo cuando el label es 'case'
     }
 }

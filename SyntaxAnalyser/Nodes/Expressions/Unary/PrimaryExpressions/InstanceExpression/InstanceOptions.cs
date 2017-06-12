@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions.InstanceExpression
 {
-    public class InstanceOptions
+    public class InstanceOptions : LineNumbering
     {
         //TODO Semantic: Si options no es null, entonces ignorar los demas campos. Solo revisar options
         public InstanceOptions2 options;

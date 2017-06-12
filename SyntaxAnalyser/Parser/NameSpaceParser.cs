@@ -42,15 +42,13 @@ namespace SyntaxAnalyser.Parser
 
         private void NamespaceDeclaration(NamesapceDeclaration Namespace)
         {
-            if(!CheckTokenType(TokenType.RwNameSpace))
-                throw new MissingNamespaceKeywordException(GetTokenRow(), GetTokenColumn());
-
             var row = GetTokenRow();
             var column = GetTokenColumn();
+            if (!CheckTokenType(TokenType.RwNameSpace))
+                throw new MissingNamespaceKeywordException(GetTokenRow(), GetTokenColumn());
+
             NextToken();
-            var newNamespace = new NamesapceDeclaration {NamespaceIdentifier = QualifiedIdentifier()};
-            Namespace.Row = row;
-            Namespace.Col = column;
+            var newNamespace = new NamesapceDeclaration(row, column) {NamespaceIdentifier = QualifiedIdentifier()};
             NamespaceBody(newNamespace);
             Namespace.NamespaceDeclarations.Add(newNamespace);
         }

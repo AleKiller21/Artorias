@@ -3,6 +3,6 @@
     public class IfStatement : SelectionStatement
     {
         public Statement Statement;
-        public Statement ElseStatement;
+        public ElseStatement ElseStatement;
     }
 }

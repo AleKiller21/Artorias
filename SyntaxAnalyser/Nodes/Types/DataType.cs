@@ -2,7 +2,7 @@
 
 namespace SyntaxAnalyser.Nodes.Types
 {
-    public class DataType
+    public class DataType : LineNumbering
     {
         public BuiltInDataType BuiltInDataType;
         public QualifiedIdentifier CustomTypeName;

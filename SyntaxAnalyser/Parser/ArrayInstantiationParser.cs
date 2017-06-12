@@ -8,44 +8,6 @@ namespace SyntaxAnalyser.Parser
 {
     public partial class Parser
     {
-        private void OptionalFuncOrArrayCall()
-        {
-            if (CheckTokenType(TokenType.ParenthesisOpen))
-            {
-                NextToken();
-                ArgumentList();
-                if(!CheckTokenType(TokenType.ParenthesisClose))
-                    throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-            }
-
-            else if (CheckTokenType(TokenType.SquareBracketOpen)) OptionalAccessArrayList();
-            else
-            {
-                //Epsilon
-            }
-        }
-
-        private void OptionalAccessArrayList()
-        {
-            if (CheckTokenType(TokenType.SquareBracketOpen))
-            {
-                NextToken();
-                ExpressionList();
-                if (!CheckTokenType(TokenType.SquareBracketClose))
-                    throw new SquareBracketCloseExpectedException(GetTokenRow(), GetTokenColumn());
-
-                NextToken();
-                OptionalAccessArrayList();
-            }
-
-            else
-            {
-                //Epsilon
-            }
-        }
-
         private List<int> OptionalRankSpecifierList()
         {
             if (CheckTokenType(TokenType.SquareBracketOpen))
@@ -56,10 +18,7 @@ namespace SyntaxAnalyser.Parser
                 rankSpecifierCommas.Insert(0, commas);
                 return rankSpecifierCommas;
             }
-            else
-            {
-                return new List<int>();
-            }
+            return new List<int>();
         }
 
         private int RankSpecifier()

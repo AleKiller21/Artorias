@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LexerAnalyser.Enums;
+﻿using LexerAnalyser.Enums;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Expressions.Binary;
+using SyntaxAnalyser.Nodes.Expressions.Binary.IsAs;
 using SyntaxAnalyser.Nodes.Expressions.Ternary;
 
 namespace SyntaxAnalyser.Parser
@@ -20,7 +18,12 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.OpConditional))
             {
-                var conditionalOperator = new ConditionalOperator{LeftOperand = leftOperand};
+                var conditionalOperator = new ConditionalOperator
+                {
+                    Row = GetTokenRow(),
+                    Col = GetTokenColumn(),
+                    LeftOperand = leftOperand
+                };
 
                 NextToken();
                 conditionalOperator.FirstRightOperand = Expression();
@@ -45,7 +48,12 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.OpNullCoalescing))
             {
-                var expression = new NullCoalescingOperator{LeftOperand = leftOperand};
+                var expression = new NullCoalescingOperator
+                {
+                    Row = GetTokenRow(),
+                    Col = GetTokenColumn(),
+                    LeftOperand = leftOperand
+                };
                 NextToken();
                 expression.RightOperand = ConditionalOrExpression();
                 return NullCoalescingExpressionPrime(expression);
@@ -63,19 +71,21 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.OpConditionalOr))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
                 var expression = new ConditionalOrOperator
                 {
+                    Row = row,
+                    Col = col,
                     LeftOperand = leftOperand,
                     RightOperand = ConditionalAndExpression()
                 };
 
                 return ConditionalOrExpressionPrime(expression);
             }
-            else
-            {
-                return leftOperand;
-            }
+
+            return leftOperand;
         }
 
         private Expression ConditionalAndExpression()
@@ -87,19 +97,20 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.OpConditionalAnd))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
                 var expression = new ConditionalAndOperator
                 {
+                    Row = row,
+                    Col = col,
                     LeftOperand = leftOperand,
                     RightOperand = InclusiveOrExpression()
                 };
                 
                 return ConditionalAndExpressionPrime(expression);
             }
-            else
-            {
-                return leftOperand;
-            }
+            return leftOperand;
         }
 
         private Expression InclusiveOrExpression()
@@ -111,19 +122,20 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.OpLogicalOr))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
                 var expression = new InclusiveOrOperator()
                 {
+                    Row = row,
+                    Col = col,
                     LeftOperand = leftOperand,
                     RightOperand = ExclusiveOrExpression()
                 };
 
                 return InclusiveOrExpressionPrime(expression);
             }
-            else
-            {
-                return leftOperand;
-            }
+            return leftOperand;
         }
 
         private Expression ExclusiveOrExpression()
@@ -135,9 +147,13 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.OpLogicalXor))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
                 var expression = new ExclusiveOrOperator
                 {
+                    Row = row,
+                    Col = col,
                     LeftOperand = leftOperand,
                     RightOperand = AndExpression()
                 };
@@ -157,9 +173,13 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.OpLogicalAnd))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
                 var expression = new AndOperator
                 {
+                    Row = row,
+                    Col = col,
                     LeftOperand = leftOperand,
                     RightOperand = EqualityExpression()
                 };
@@ -179,16 +199,17 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsExpressionEqualityOperator())
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 var expression = ExpressionEqualityOperator();
                 expression.LeftOperand = leftOperand;
                 expression.RightOperand = RelationalExpression();
+                expression.Row = row;
+                expression.Col = col;
 
                 return EqualityExpressionPrime(expression);
             }
-            else
-            {
-                return leftOperand;
-            }
+            return leftOperand;
         }
 
         private Expression RelationalExpression()
@@ -198,11 +219,31 @@ namespace SyntaxAnalyser.Parser
 
         private Expression RelationalExpressionPrime(Expression leftOperand)
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (IsExpressionRelationalOperator())
             {
                 var expression = ExpressionRelationalOperator();
                 expression.LeftOperand = leftOperand;
                 expression.RightOperand = ShiftExpression();
+                expression.Row = row;
+                expression.Col = col;
+
+                return RelationalExpressionPrime(expression);
+            }
+            if (IsExpressionIsAsOperator())
+            {
+                var expression = ExpressionIsAsOperator();
+                expression.Row = row;
+                expression.Col = col;
+                expression.LeftOperand = leftOperand;
+                expression.RightOperand = new IsAsTypeExpression
+                {
+                    Row = GetTokenRow(),
+                    Col = GetTokenColumn(),
+                    Type = Type()
+                };
 
                 return RelationalExpressionPrime(expression);
             }
@@ -219,9 +260,13 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsExpressionShiftOperator())
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 var expression = ExpressionShiftOperator();
                 expression.LeftOperand = leftOperand;
                 expression.RightOperand = AdditiveExpression();
+                expression.Row = row;
+                expression.Col = col;
 
                 return ShiftExpressionPrime(expression);
             }
@@ -238,9 +283,13 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsAdditiveOperator())
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 var expression = AdditiveOperator();
                 expression.LeftOperand = leftOperand;
                 expression.RightOperand = MultiplicativeExpression();
+                expression.Row = row;
+                expression.Col = col;
 
                 return AdditiveExpressionPrime(expression);
             }
@@ -257,9 +306,13 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsAssignmentOperator())
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 var expression = AssignmentOperator();
                 expression.LeftOperand = leftOperand;
                 expression.RightOperand = Expression();
+                expression.Row = row;
+                expression.Col = col;
 
                 return MultiplicativeExpressionPrime(expression);
             }
@@ -273,9 +326,13 @@ namespace SyntaxAnalyser.Parser
         {
             if (IsMultiplicativeOperator())
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 var expression = MultiplicativeOperator();
                 expression.LeftOperand = leftOperand;
                 expression.RightOperand = UnaryExpression();
+                expression.Row = row;
+                expression.Col = col;
 
                 return MultiplicativeExpressionPrime(expression);
             }

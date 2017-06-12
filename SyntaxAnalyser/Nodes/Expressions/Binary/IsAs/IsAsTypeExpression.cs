@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using SyntaxAnalyser.Nodes.Types;
 
-namespace SyntaxAnalyser.Nodes
+namespace SyntaxAnalyser.Nodes.Expressions.Binary.IsAs
 {
-    public class FixedParameter : LineNumbering
+    public class IsAsTypeExpression : Expression
     {
         public DataType Type;
-        public string Identifier;
     }
 }

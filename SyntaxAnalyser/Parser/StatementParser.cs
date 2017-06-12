@@ -6,6 +6,7 @@ using SyntaxAnalyser.Nodes.Statements;
 using SyntaxAnalyser.Nodes.Statements.IterationStatements;
 using SyntaxAnalyser.Nodes.Statements.JumpStatements;
 using SyntaxAnalyser.Nodes.Statements.SelectionStatements;
+using SyntaxAnalyser.Nodes.Statements.SelectionStatements.SwitchStatement;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions;
 using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
@@ -64,21 +65,21 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.RwBreak))
             {
-                var breakStatement = new BreakStatement();
+                var breakStatement = new BreakStatement{Row = GetTokenRow(), Col = GetTokenColumn()};
 
                 NextToken();
                 return breakStatement;
             }
             if (CheckTokenType(TokenType.RwContinue))
             {
-                var continueStatement = new ContinueStatement();
+                var continueStatement = new ContinueStatement { Row = GetTokenRow(), Col = GetTokenColumn() };
 
                 NextToken();
                 return continueStatement;
             }
             if (CheckTokenType(TokenType.RwReturn))
             {
-                var returnStatement = new ReturnStatement();
+                var returnStatement = new ReturnStatement { Row = GetTokenRow(), Col = GetTokenColumn() };
 
                 NextToken();
                 returnStatement.ReturnExpression = OptionalExpression();
@@ -135,8 +136,15 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
             NextToken();
-            var parenthesizedExpression = new ParenthesizedStatementExpression{ParenthesisExpression = Expression() };
+            var parenthesizedExpression = new ParenthesizedStatementExpression
+            {
+                ParenthesisExpression = Expression(),
+                Row = row,
+                Col = col
+            };
 
             if(!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
@@ -166,6 +174,9 @@ namespace SyntaxAnalyser.Parser
 
         private BaseStatementExpression BaseStatementExpression()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if(!CheckTokenType(TokenType.RwBase))
                 throw new BaseKeywordExpectedException(GetTokenRow(), GetTokenColumn());
 
@@ -177,7 +188,12 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
-            var baseStatement = new BaseStatementExpression{MethodIdentifier = _token.Lexeme};
+            var baseStatement = new BaseStatementExpression
+            {
+                MethodIdentifier = _token.Lexeme,
+                Row = row,
+                Col = col
+            };
             NextToken();
             if(!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
@@ -194,7 +210,7 @@ namespace SyntaxAnalyser.Parser
 
         private BuiltInDeclarationStatement BuiltInDeclaration()
         {
-            var builtInDeclarationStatement = new BuiltInDeclarationStatement();
+            var builtInDeclarationStatement = new BuiltInDeclarationStatement(GetTokenRow(), GetTokenColumn());
             BuiltInDeclarationPrime(builtInDeclarationStatement);
             builtInDeclarationStatement.OptionalRankSpecifierList = OptionalRankSpecifierList();
             builtInDeclarationStatement.VariableDeclaratorList = VariableDeclaratorList();
@@ -219,7 +235,12 @@ namespace SyntaxAnalyser.Parser
                 throw new NewKeywordExpectedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var newObjectExpression = new NewObjectStatementExpression{Type = Type() };
+            var newObjectExpression = new NewObjectStatementExpression
+            {
+                Row = GetTokenRow(),
+                Col = GetTokenColumn(),
+                Type = Type()
+            };
             if(!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
@@ -237,8 +258,15 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.MemberAccess))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
                 NextToken();
-                var callAccess = new CallAccess{MethodIdentifier = QualifiedIdentifier() };
+                var callAccess = new CallAccess
+                {
+                    MethodIdentifier = QualifiedIdentifier(),
+                    Row = row,
+                    Col = col
+                };
                 if (!CheckTokenType(TokenType.ParenthesisOpen))
                     throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
@@ -258,7 +286,12 @@ namespace SyntaxAnalyser.Parser
 
         private PreIncrementDecrementStatementExpression IncrementDecrementStatementExpression()
         {
-            var operatorExpression = new PreIncrementDecrementStatementExpression{IncrementDecrement = IncrementDecrement() };
+            var operatorExpression = new PreIncrementDecrementStatementExpression
+            {
+                Row = GetTokenRow(),
+                Col = GetTokenColumn(),
+                IncrementDecrement = IncrementDecrement()
+            };
             IncrementDecrementStatementExpressionPrime(operatorExpression);
 
             return operatorExpression;
@@ -287,6 +320,8 @@ namespace SyntaxAnalyser.Parser
 
         private ThisStatementExpression ThisStatementExpression()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
             if (!CheckTokenType(TokenType.RwThis))
                 throw new ThisKeywordExpectedException(GetTokenRow(), GetTokenColumn());
 
@@ -295,13 +330,20 @@ namespace SyntaxAnalyser.Parser
                 throw new MemberAccessExpectedException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            return new ThisStatementExpression{StatementExpression = QualifiedIdentifierStatementExpression() };
+            return new ThisStatementExpression
+            {
+                Row = row,
+                Col = col,
+                StatementExpression = QualifiedIdentifierStatementExpression()
+            };
         }
 
         private QualifiedIdentifierStatementExpression QualifiedIdentifierStatementExpression()
         {
             return new QualifiedIdentifierStatementExpression
                 {
+                    Row = GetTokenRow(),
+                    Col = GetTokenColumn(),
                     Identifier = QualifiedIdentifier(),
                     ExpressionPrime = QualifiedIdentifierStatementExpressionPrime()
                 };
@@ -309,10 +351,18 @@ namespace SyntaxAnalyser.Parser
 
         private QualifiedIdentifierStatementExpressionPrime QualifiedIdentifierStatementExpressionPrime()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (CheckTokenType(TokenType.ParenthesisOpen))
             {
                 NextToken();
-                var thisMethodCall = new ThisMethodCall{ArgumentList = ArgumentList()};
+                var thisMethodCall = new MethodCallStatementExpression
+                {
+                    Row = row,
+                    Col = col,
+                    ArgumentList = ArgumentList()
+                };
                 if (!CheckTokenType(TokenType.ParenthesisClose))
                     throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
 
@@ -322,21 +372,37 @@ namespace SyntaxAnalyser.Parser
             }
             if (IsIncrementDecrementOperator())
             {
-                return new ThisStatementExpressionPostIncrementDecrement { IncrementDecrement = IncrementDecrement() };
+                return new PostIncrementDecrementStatementExpression
+                {
+                    Row = row,
+                    Col = col,
+                    IncrementDecrement = IncrementDecrement()
+                };
             }
             if (CheckTokenType(TokenType.Id))
             {
-                return new StatementExpressionVariableDeclaratorList{VariableDeclaratorList = VariableDeclaratorList()};
+                return new VariableDeclaratorListStatementExpression
+                {
+                    Row = row,
+                    Col = col,
+                    VariableDeclaratorList = VariableDeclaratorList()
+                };
             }
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
                 NextToken();
-                return QualifiedIdentifierStatementExpressionPrimePrime();
+                var statementExpression = QualifiedIdentifierStatementExpressionPrimePrime();
+                statementExpression.Row = row;
+                statementExpression.Col = col;
+
+                return statementExpression;
             }
             if (IsAssignmentOperator())
             {
                 return new StatementExpressionAssignment
                 {
+                    Row = row,
+                    Col = col,
                     Operator = AssignmentOperator(),
                     ExpressionValue = Expression()
                 };
@@ -382,7 +448,12 @@ namespace SyntaxAnalyser.Parser
             //Array access increment-decrement
             if (IsIncrementDecrementOperator())
             {
-                return new ArrayAccessIncrementDecrement { IncrementDecrementOperator = IncrementDecrement() };
+                return new ArrayAccessIncrementDecrement
+                {
+                    Row = GetTokenRow(),
+                    Col = GetTokenColumn(),
+                    IncrementDecrementOperator = IncrementDecrement()
+                };
             }
 
             //Array access assignment
@@ -390,6 +461,8 @@ namespace SyntaxAnalyser.Parser
             {
                 return new ArrayAccessAssignment
                 {
+                    Row = GetTokenRow(),
+                    Col = GetTokenColumn(),
                     Operator = AssignmentOperator(),
                     ExpressionValue = Expression()
                 };
@@ -402,7 +475,7 @@ namespace SyntaxAnalyser.Parser
         {
             if (CheckTokenType(TokenType.SquareBracketOpen))
             {
-                var arrayAccess = new ArrayAccess();
+                var arrayAccess = new ArrayAccess(GetTokenRow(), GetTokenColumn());
                 NextToken();
                 arrayAccess.ExpressionList = ExpressionList();
                 if (!CheckTokenType(TokenType.SquareBracketClose))
@@ -412,7 +485,7 @@ namespace SyntaxAnalyser.Parser
                 arrayAccess.Access = ArrayAccess();
             }
 
-            return new ArrayAccess();
+            return new ArrayAccess(GetTokenRow(), GetTokenColumn());
         }
 
         private IterationStatement IterationStatement()
@@ -427,6 +500,9 @@ namespace SyntaxAnalyser.Parser
 
         private ForEachStatement ForEachStatement()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (!CheckTokenType(TokenType.RwForEach))
                 throw new ParserException($"'foreach' token expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
@@ -435,7 +511,12 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var forEachStatement = new ForEachStatement{ IteratorType = TypeOrVar() };
+            var forEachStatement = new ForEachStatement
+            {
+                Row = row,
+                Col = col,
+                IteratorType = TypeOrVar()
+            };
             if (!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
@@ -457,6 +538,9 @@ namespace SyntaxAnalyser.Parser
 
         private ForStatement ForStatement()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (!CheckTokenType(TokenType.RwFor))
                 throw new ParserException($"'for' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
@@ -465,7 +549,12 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var forStatement = new ForStatement{Initializer = ForInitializer() };
+            var forStatement = new ForStatement
+            {
+                Row = row,
+                Col = col,
+                Initializer = ForInitializer()
+            };
             if (!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
 
@@ -519,11 +608,19 @@ namespace SyntaxAnalyser.Parser
 
         private DoStatement DoStatement()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (!CheckTokenType(TokenType.RwDo))
                 throw new ParserException($"'do' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
             NextToken();
-            var doStatement = new DoStatement{StatementBody = Statement() };
+            var doStatement = new DoStatement
+            {
+                Row = row,
+                Col = col,
+                StatementBody = Statement()
+            };
 
             if (!CheckTokenType(TokenType.RwWhile))
                 throw new ParserException($"'while' keyword expected at row {GetTokenRow()}, column {GetTokenColumn()}.");
@@ -548,6 +645,9 @@ namespace SyntaxAnalyser.Parser
 
         private WhileStatement WhileStatement()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (!CheckTokenType(TokenType.RwWhile))
                 throw new ParserException($"'while' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
@@ -556,7 +656,12 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var whileStatement = new WhileStatement{ConditionExpression = Expression() };
+            var whileStatement = new WhileStatement
+            {
+                Row = row,
+                Col = col,
+                ConditionExpression = Expression()
+            };
 
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
@@ -576,6 +681,9 @@ namespace SyntaxAnalyser.Parser
 
         private IfStatement IfStatement()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (!CheckTokenType(TokenType.RwIf))
                 throw new ParserException($"'if' keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
@@ -584,7 +692,12 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var ifStatement = new IfStatement{TestValue = Expression()};
+            var ifStatement = new IfStatement
+            {
+                Row = row,
+                Col = col,
+                TestValue = Expression()
+            };
 
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
@@ -596,12 +709,20 @@ namespace SyntaxAnalyser.Parser
             return ifStatement;
         }
 
-        private Statement OptionalElsePart()
+        private ElseStatement OptionalElsePart()
         {
             if (CheckTokenType(TokenType.RwElse))
             {
+                var row = GetTokenRow();
+                var col = GetTokenColumn();
+
                 NextToken();
-                return Statement();
+                return new ElseStatement
+                {
+                    Row = row,
+                    Col = col,
+                    Statement = Statement()
+                };
             }
 
             return null;
@@ -609,6 +730,9 @@ namespace SyntaxAnalyser.Parser
 
         private SwitchStatement SwitchStatement()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (!CheckTokenType(TokenType.RwSwitch))
                 throw new ParserException($"switch keyword expected at row {GetTokenRow()} column {GetTokenColumn()}.");
 
@@ -617,7 +741,12 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            var switchStatement = new SwitchStatement{TestValue = Expression()};
+            var switchStatement = new SwitchStatement
+            {
+                Row = row,
+                Col = col,
+                TestValue = Expression()
+            };
 
             if (!CheckTokenType(TokenType.ParenthesisClose))
                 throw new ParenthesisClosedException(GetTokenRow(), GetTokenColumn());
@@ -700,6 +829,8 @@ namespace SyntaxAnalyser.Parser
         {
             return new SwitchSection
             {
+                Row = GetTokenRow(),
+                Col = GetTokenColumn(),
                 Labels = SwitchLabelList(),
                 Statement = StatementList()
             };
@@ -707,9 +838,17 @@ namespace SyntaxAnalyser.Parser
 
         private SwitchLabel SwitchLabel()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             if (CheckTokenType(TokenType.RwCase))
             {
-                var switchLabel = new SwitchLabel{Label = Label.Case};
+                var switchLabel = new SwitchLabel
+                {
+                    Row = row,
+                    Col = col,
+                    Label = Label.Case
+                };
 
                 NextToken();
                 switchLabel.Expression = Expression();
@@ -722,7 +861,12 @@ namespace SyntaxAnalyser.Parser
 
             if (CheckTokenType(TokenType.RwDefault))
             {
-                var switchLabel = new SwitchLabel { Label = Label.Default };
+                var switchLabel = new SwitchLabel
+                {
+                    Row = row,
+                    Col = col,
+                    Label = Label.Default
+                };
 
                 NextToken();
                 if (!CheckTokenType(TokenType.Colon))

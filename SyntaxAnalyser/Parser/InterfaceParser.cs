@@ -15,12 +15,19 @@ namespace SyntaxAnalyser.Parser
             if (!CheckTokenType(TokenType.RwInterface))
                 throw new MissingInterfaceKeywordException(GetTokenRow(), GetTokenColumn());
 
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
+
             NextToken();
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
-            var interfaceDeclaration = new InterfaceDeclaration();
-            interfaceDeclaration.Identifier = _token.Lexeme;
+            var interfaceDeclaration = new InterfaceDeclaration
+            {
+                Identifier = _token.Lexeme,
+                Row = row,
+                Col = col
+            };
 
             NextToken();
             interfaceDeclaration.Parents = InheritanceBase();
@@ -59,16 +66,17 @@ namespace SyntaxAnalyser.Parser
                 return methodDeclarationList;
             }
 
-            else
-            {
-                return new List<InterfaceMethodDeclaration>();
-            }
+            return new List<InterfaceMethodDeclaration>();
         }
 
         private InterfaceMethodDeclaration InterfaceMethodHeader()
         {
-            var methodDeclaration = new InterfaceMethodDeclaration();
-            methodDeclaration.Type = TypeOrVoid();
+            var methodDeclaration = new InterfaceMethodDeclaration
+            {
+                Row = GetTokenRow(),
+                Col = GetTokenColumn(),
+                Type = TypeOrVoid()
+            };
 
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
@@ -98,10 +106,7 @@ namespace SyntaxAnalyser.Parser
                 return IdentifiersList();
             }
 
-            else
-            {
-                return new List<QualifiedIdentifier>();
-            }
+            return new List<QualifiedIdentifier>();
         }
     }
 }

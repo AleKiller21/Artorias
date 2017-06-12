@@ -2,7 +2,7 @@
 
 namespace SyntaxAnalyser.Nodes.Enums
 {
-    public class EnumMember
+    public class EnumMember : LineNumbering
     {
         public string Identifier;
         public Expression Value;

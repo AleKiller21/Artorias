@@ -6,9 +6,11 @@ namespace SyntaxAnalyser.Nodes.Expressions.Literal
 {
     public class StringLiteral : LiteralExpression
     {
-        public StringLiteral(string value)
+        public StringLiteral(string value, int row, int col)
         {
             Value = value;
+            Row = row;
+            Col = col;
         }
     }
 }

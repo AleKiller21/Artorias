@@ -5,7 +5,7 @@ using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Nodes
 {
-    public abstract class MethodDeclaration
+    public abstract class MethodDeclaration : LineNumbering
     {
         public AccessModifier Modifier;
         public string Identifier;

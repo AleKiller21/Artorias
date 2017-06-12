@@ -12,9 +12,13 @@ namespace SyntaxAnalyser.Parser
     {
         private ClassDeclaration ClassDeclaration()
         {
-            var classDeclaration = new ClassDeclaration();
+            var classDeclaration = new ClassDeclaration
+            {
+                Row = GetTokenRow(),
+                Col = GetTokenColumn(),
+                IsAbstract = ClassModifier()
+            };
 
-            classDeclaration.IsAbstract = ClassModifier();
             if (!CheckTokenType(TokenType.RwClass))
                 throw new ClassKeywordExpectedException(GetTokenRow(), GetTokenColumn());
 
@@ -90,12 +94,16 @@ namespace SyntaxAnalyser.Parser
 
         private ClassMemberDeclaration ClassMemberDeclarationOptions()
         {
+            var row = GetTokenRow();
+            var col = GetTokenColumn();
             var optionalModifier = OptionalModifier();
             var type = TypeOrVoid();
             var memberDeclaration = ClassMemberDeclarationOptionsPrime();
 
             memberDeclaration.OptionalModifier = optionalModifier;
             memberDeclaration.Type = type;
+            memberDeclaration.Row = row;
+            memberDeclaration.Col = col;
 
             return memberDeclaration;
         }
@@ -245,10 +253,11 @@ namespace SyntaxAnalyser.Parser
 
         private FieldDeclaration FieldDeclaration()
         {
-            var fieldDeclaration = new FieldDeclaration();
-
-            fieldDeclaration.Value = VariableAssigner();
-            fieldDeclaration.InlineFieldDeclarations = VariableDeclaratorListPrime();
+            var fieldDeclaration = new FieldDeclaration
+            {
+                Value = VariableAssigner(),
+                InlineFieldDeclarations = VariableDeclaratorListPrime()
+            };
 
             if(!CheckTokenType(TokenType.EndStatement))
                 throw new EndOfStatementException(GetTokenRow(), GetTokenColumn());
@@ -266,12 +275,12 @@ namespace SyntaxAnalyser.Parser
                 return VariableInitializer();
             }
 
-            return new VariableInitializer();
+            return new VariableInitializer(GetTokenRow(), GetTokenColumn());
         }
 
         private VariableInitializer VariableInitializer()
         {
-            var variableInitializer = new VariableInitializer();
+            var variableInitializer = new VariableInitializer(GetTokenRow(), GetTokenColumn());
             if (IsUnaryExpression())
             {
                 variableInitializer.Expression = Expression();
@@ -364,10 +373,14 @@ namespace SyntaxAnalyser.Parser
             if(!CheckTokenType(TokenType.Id))
                 throw new IdTokenExpectecException(GetTokenRow(), GetTokenColumn());
 
-            //var field = new FieldDeclaration{Identifier = _token.Lexeme};
-            var variableDeclarator = new VariableDeclarator{Identifier = _token.Lexeme};
+            var variableDeclarator = new VariableDeclarator
+            {
+                Identifier = _token.Lexeme,
+                row = GetTokenRow(),
+                col = GetTokenColumn()
+            };
+
             NextToken();
-            //field.Value = VariableAssigner();
             variableDeclarator.VariableInitializer = VariableAssigner();
             var declarators = VariableDeclaratorListPrime();
 
@@ -383,7 +396,6 @@ namespace SyntaxAnalyser.Parser
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            //FixedParameters();
             var methodDeclaration = new ClassMethodDeclaration {Params = FixedParameters()};
 
             if(!CheckTokenType(TokenType.ParenthesisClose))
@@ -424,10 +436,7 @@ namespace SyntaxAnalyser.Parser
                 NextToken();
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
     }
 }

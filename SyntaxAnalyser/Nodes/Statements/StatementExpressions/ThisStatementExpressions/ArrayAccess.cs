@@ -5,14 +5,16 @@ using SyntaxAnalyser.Nodes.Expressions;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
-    public class ArrayAccess
+    public class ArrayAccess : LineNumbering
     {
         public List<Expression> ExpressionList;
         public ArrayAccess Access;
 
-        public ArrayAccess()
+        public ArrayAccess(int row, int col)
         {
             ExpressionList = new List<Expression>();
+            Row = row;
+            Col = col;
         }
     }
 }

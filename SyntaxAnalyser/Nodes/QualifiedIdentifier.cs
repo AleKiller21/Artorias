@@ -2,13 +2,13 @@
 
 namespace SyntaxAnalyser.Nodes
 {
-    public class QualifiedIdentifier
+    public class QualifiedIdentifier : LineNumbering
     {
-        public List<string> Identifiers;
+        public IdentifierAttribute Identifiers;
 
         public QualifiedIdentifier()
         {
-            Identifiers = new List<string>();
+            Identifiers = new IdentifierAttribute(0, 0);
         }
     }
 }
