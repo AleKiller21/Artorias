@@ -6,6 +6,6 @@ namespace SyntaxAnalyser.TablesMetadata
 {
     public class UsingDirectivesTable
     {
-        public static Dictionary<string, List<string> > Directives;
+        public static Dictionary<string, List<string> > Directives = new Dictionary<string, List<string>>();
     }
 }

@@ -11,7 +11,7 @@ namespace SyntaxAnalyser.Nodes.Namespaces
         public List<NamesapceDeclaration> NamespaceDeclarations;
         public string FileName;
 
-        public NamesapceDeclaration(int row, int col)
+        public NamesapceDeclaration(int row = 0, int col = 0)
         {
             UsingDirectives = new List<UsingNamespaceDeclaration>();
             TypeDeclarations = new List<TypeDeclaration>();

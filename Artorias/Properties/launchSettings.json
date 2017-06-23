@@ -2,7 +2,7 @@
   "profiles": {
     "Artorias": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\alefe\\Documents\\Code\\C#\\Compiler\\GrammarCJ\\TestFilesSemantic\\Namespaces none"
+      "commandLineArgs": "C:\\Users\\alefe\\Documents\\Code\\C#\\Compiler\\GrammarCJ\\TestFilesSemantic\\Namespaces\\Test1 none"
     }
   }
 }
