@@ -6,16 +6,18 @@ namespace SyntaxAnalyser.Nodes.Namespaces
     public class NamesapceDeclaration : LineNumbering
     {
         public QualifiedIdentifier NamespaceIdentifier;
-        public List<UsingNamespaceDeclaration> UsingNamespaces;
+        public List<UsingNamespaceDeclaration> UsingDirectives;
         public List<TypeDeclaration> TypeDeclarations;
         public List<NamesapceDeclaration> NamespaceDeclarations;
+        public string FileName;
 
         public NamesapceDeclaration(int row, int col)
         {
-            UsingNamespaces = new List<UsingNamespaceDeclaration>();
+            UsingDirectives = new List<UsingNamespaceDeclaration>();
             TypeDeclarations = new List<TypeDeclaration>();
             NamespaceIdentifier = new QualifiedIdentifier();
             NamespaceDeclarations = new List<NamesapceDeclaration>();
+            FileName = "";
             Row = row;
             Col = col;
         }

@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LexerAnalyser\LexerAnalyser.csproj" />
-    <ProjectReference Include="..\SemanticAnalyser\SemanticAnalyser.csproj" />
     <ProjectReference Include="..\SyntaxAnalyser\SyntaxAnalyser.csproj" />
   </ItemGroup>
 

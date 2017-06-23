@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LexerAnalyser;
-using SemanticAnalyser;
-using SemanticAnalyser.Exceptions;
+using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes;
 using SyntaxAnalyser.Nodes.Namespaces;
 using SyntaxAnalyser.Parser;
+using SyntaxAnalyser.TablesMetadata;
+using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 namespace Artorias
 {
@@ -28,56 +30,86 @@ namespace Artorias
 
             foreach (var directory in directories)
             {
-                ExploreDirectory(directory, project.Name + "." + directory.Name);
+                ExploreDirectory(directory);
             }
 
-            ParseFiles(project, project.Name);
-            //var semantic = new Semantic();
-            //foreach (var entry in NamespaceTable.Dictionary)
-            //{
-            //    semantic.Analyse(entry.Value);
-            //}
+            CompileFiles(project);
+            var x = NamespaceTable.Namespaces;
         }
 
-        private void ExploreDirectory(DirectoryInfo currentDirectory, string currentNamespace)
+        private void ExploreDirectory(DirectoryInfo currentDirectory)
         {
             var directories = currentDirectory.GetDirectories();
             foreach (var directory in directories)
             {
-                ExploreDirectory(directory, currentNamespace + "." + directory.Name);
+                ExploreDirectory(directory);
             }
 
-            ParseFiles(currentDirectory, currentNamespace);
+            CompileFiles(currentDirectory);
         }
 
-        private void ParseFiles(DirectoryInfo currentDirectory, string currentNamespace)
+        private void CompileFiles(DirectoryInfo currentDirectory)
         {
             var files = currentDirectory.GetFiles();
+            var fileCode = new List<Code>();
             foreach (var file in files)
             {
                 var stream = new FileInputStream(file.FullName);
                 var lexer = new Lexer(stream);
                 var parser = new Parser(lexer);
                 var code = parser.Parse();
+                fileCode.Add(code);
 
-                //TODO Semantic: Tratar con los namespaces anidados dentro de otro namespace
-                AddDictionaryEntry(code.GlobalNamespace, "");
+                code.GlobalNamespace.FileName = file.Name;
+                AddNamespaceEntry(code.GlobalNamespace, "", file.Name);
+            }
+
+            foreach (var code in fileCode)
+            {
+                //code.ValidateSemantic()
             }
         }
 
-        private void AddDictionaryEntry(NamesapceDeclaration Namespace, string namespaceName)
+        private void AddDirectivesToUsingDirectivesTable(string namespaceName, string fileName, List<UsingNamespaceDeclaration> directives)
         {
-            //foreach (var namespaceDeclaration in Namespace.NamespaceDeclarations)
-            //{
-            //    var name = namespaceName;
-            //    foreach (var identifier in namespaceDeclaration.NamespaceIdentifier.Identifiers)
-            //    {
-            //        name += identifier + ".";
-            //    }
-            //    name = name.Remove(name.Length - 1);
-            //    NamespaceTable.Dictionary.Add(name, namespaceDeclaration.TypeDeclarations);
-            //    AddDictionaryEntry(namespaceDeclaration, name + ".");
-            //}
+            var directiveNames = directives.Select(directive => string.Join(".", directive.Identifier.Identifiers.Identifiers)).ToList();
+            foreach (var directiveName in directiveNames)
+            {
+                if(!NamespaceTable.Namespaces.ContainsKey(directiveName))
+                    throw new SemanticException($"The type or namespace '{directiveName}' could not be found.");
+            }
+            UsingDirectivesTable.Directives.Add($"{fileName},{namespaceName}", directiveNames);
+        }
+
+        private void AddNamespaceEntry(NamesapceDeclaration Namespace, string namespaceName, string fileName)
+        {
+            var entryName = namespaceName.Equals("") ? "global" : namespaceName;
+            if (!NamespaceTable.Namespaces.ContainsKey(entryName))
+            {
+                NamespaceTable.Namespaces.Add(entryName, new Dictionary<string, Type>());
+                AddDirectivesToUsingDirectivesTable(entryName, fileName, Namespace.UsingDirectives);
+            }
+            
+            foreach (var typeDeclaration in Namespace.TypeDeclarations)
+            {
+                if(NamespaceTable.Namespaces[entryName].ContainsKey(typeDeclaration.Identifier))
+                    throw new SemanticException($"<{entryName}> namespace already contains a definition for {typeDeclaration.Identifier}.");
+
+                NamespaceTable.Namespaces[entryName].Add(typeDeclaration.Identifier, typeDeclaration);
+            }
+
+            foreach (var namespaceDeclaration in Namespace.NamespaceDeclarations)
+            {
+                if (entryName.Equals("global"))
+                {
+                    AddNamespaceEntry(namespaceDeclaration, string.Join(".", 
+                        namespaceDeclaration.NamespaceIdentifier.Identifiers.Identifiers), fileName);
+                }
+                else
+                {
+                    AddNamespaceEntry(namespaceDeclaration, $"{entryName}.{string.Join(".", namespaceDeclaration.NamespaceIdentifier.Identifiers.Identifiers)}", fileName);
+                }
+            }
         }
     }
 }

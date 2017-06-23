@@ -59,7 +59,7 @@ namespace SyntaxAnalyser.Parser
                 throw new MissingCurlyBraceOpenException(GetTokenRow(), GetTokenColumn());
 
             NextToken();
-            Namespace.UsingNamespaces = OptionalUsingDirective();
+            Namespace.UsingDirectives = OptionalUsingDirective();
             OptionalNameSpaceMemberDeclaration(Namespace);
 
             if(!CheckTokenType(TokenType.CurlyBraceClose))

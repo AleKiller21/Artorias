@@ -8,6 +8,7 @@ namespace SyntaxAnalyser.Nodes.Types
         public QualifiedIdentifier CustomTypeName;
         public List<DataType> GenericTypes;
         public List<int> RankSpecifiers;
+        //TODO Semantic: Arrays for later
 
         public DataType()
         {

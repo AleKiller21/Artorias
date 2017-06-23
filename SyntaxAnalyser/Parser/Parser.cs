@@ -112,7 +112,7 @@ namespace SyntaxAnalyser.Parser
 
             if (CheckTokenType(TokenType.RwUsing))
             {
-                code.GlobalNamespace.UsingNamespaces = UsingDirective();
+                code.GlobalNamespace.UsingDirectives = UsingDirective();
                 OptionalNameSpaceMemberDeclaration(code.GlobalNamespace);
 
                 return code;
