@@ -39,7 +39,7 @@ namespace Artorias
 
             CompileFiles(project);
             var x = NamespaceTable.Namespaces;
-            var y = UsingDirectivesTable.Directives;
+            var y = UsingDirectiveTable.Directives;
         }
 
         private void ExploreDirectory(DirectoryInfo currentDirectory)
@@ -154,12 +154,12 @@ namespace Artorias
                 directiveNames.Add(directiveName);
             }
 
-            if(UsingDirectivesTable.Directives.ContainsKey($"{_fileName},{namespaceName}"))
-                UsingDirectivesTable.Directives[$"{_fileName},{namespaceName}"].AddRange(directiveNames);
+            if(UsingDirectiveTable.Directives.ContainsKey($"{_fileName},{namespaceName}"))
+                UsingDirectiveTable.Directives[$"{_fileName},{namespaceName}"].AddRange(directiveNames);
 
             else
             {
-                UsingDirectivesTable.Directives.Add($"{_fileName},{namespaceName}", directiveNames);
+                UsingDirectiveTable.Directives.Add($"{_fileName},{namespaceName}", directiveNames);
             }
         }
     }
