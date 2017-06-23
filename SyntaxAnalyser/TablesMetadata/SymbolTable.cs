@@ -9,19 +9,25 @@ namespace SyntaxAnalyser.TablesMetadata
 {
     public class SymbolTable
     {
+        private static SymbolTable _instance;
         public readonly Dictionary<string, SymbolAttributes> Symbols;
-        public readonly string CurrentNamespace;
-        public readonly string FileName;
+        public string CurrentNamespace;
+        public string FileName;
         public SymbolTable CurrentScope;
-        private readonly Stack<SymbolTable> _scope;
+        private Stack<SymbolTable> _scope;
 
-        public SymbolTable(string namespaceName, string fileName)
+        private SymbolTable()
         {
             _scope = new Stack<SymbolTable>();
             Symbols = new Dictionary<string, SymbolAttributes>();
-            CurrentScope = this;
-            CurrentNamespace = namespaceName;
-            FileName = fileName;
+            //CurrentScope = this;
+            //CurrentNamespace = namespaceName;
+            //FileName = fileName;
+        }
+
+        public static SymbolTable GetInstance()
+        {
+            return _instance ?? (_instance = new SymbolTable());
         }
 
         public void InsertSymbol(string identifier, SymbolAttributes attributes)
@@ -40,17 +46,18 @@ namespace SyntaxAnalyser.TablesMetadata
             return null;
         }
 
-        public void CreateNewScope()
+        public void PushScope(string currentNamespace, string fileName)
         {
-            var table = new SymbolTable(CurrentNamespace, FileName);
-            _scope.Push(table);
-            CurrentScope = table;
+            _scope.Push(new SymbolTable());
+            CurrentScope = _scope.Peek();
+            CurrentScope.CurrentNamespace = currentNamespace;
+            CurrentScope.FileName = fileName;
         }
 
-        public void ExitScope()
+        public void PopScope()
         {
             _scope.Pop();
-            CurrentScope = _scope.Peek();
+            CurrentScope = _scope.Count == 0 ? null : _scope.Peek();
         }
 
         public void CheckSymbolDuplication(string identifier, SymbolAttributes attributes)

@@ -18,7 +18,9 @@ namespace Artorias
         private readonly string _sourceDirectory;
         private string _destiny;
         private string _fileName;
-        private List<Code> _codeFiles;
+        private string _codeOutput;
+        private readonly List<Code> _codeFiles;
+        private SymbolTable _symbolTable;
 
         public Compiler(string sourceDirectory, string destiny)
         {
@@ -55,6 +57,14 @@ namespace Artorias
 
         private void CompileFiles(DirectoryInfo currentDirectory)
         {
+            ParseFiles(currentDirectory);
+            FillNamespaceTable();
+            FillUsingDirectiveTable();
+            GenerateCode();
+        }
+
+        private void ParseFiles(DirectoryInfo currentDirectory)
+        {
             var files = currentDirectory.GetFiles();
             foreach (var file in files)
             {
@@ -62,17 +72,71 @@ namespace Artorias
                 var lexer = new Lexer(stream);
                 var parser = new Parser(lexer);
                 var code = parser.Parse();
-                _codeFiles.Add(code);
 
                 code.GlobalNamespace.FileName = file.Name;
-                _fileName = file.Name;
+                _codeFiles.Add(code);
+            }
+        }
+
+        private void FillNamespaceTable()
+        {
+            foreach (var code in _codeFiles)
+            {
+                _fileName = code.GlobalNamespace.FileName;
                 AddNamespaceEntry(code.GlobalNamespace, "");
             }
+        }
 
+        private void FillUsingDirectiveTable()
+        {
             foreach (var code in _codeFiles)
             {
                 _fileName = code.GlobalNamespace.FileName;
                 AddUsingDirectives(code.GlobalNamespace, "");
+            }
+        }
+
+        private void GenerateCode()
+        {
+            foreach (var code in _codeFiles)
+            {
+                _fileName = code.GlobalNamespace.FileName;
+                SymbolTable.GetInstance().PushScope("global", _fileName);
+                GenerateJS(code.GlobalNamespace);
+                SymbolTable.GetInstance().PopScope();
+            }
+        }
+
+        private void GenerateJS(NamesapceDeclaration Namespace)
+        {
+            var entryName = SymbolTable.GetInstance().CurrentScope.CurrentNamespace.Equals("global") ? 
+                "global" : SymbolTable.GetInstance().CurrentScope.CurrentNamespace;
+
+            foreach (var typeDeclaration in Namespace.TypeDeclarations)
+            {
+                SymbolTable.GetInstance().PushScope(entryName, _fileName);
+                //_codeOutput += typeDeclaration.GenerateCode();
+                SymbolTable.GetInstance().PopScope();
+            }
+
+            foreach (var namespaceDeclaration in Namespace.NamespaceDeclarations)
+            {
+                if (entryName.Equals("global"))
+                {
+                    SymbolTable.GetInstance().PushScope(string.Join(".",
+                        namespaceDeclaration.NamespaceIdentifier.Identifiers.Identifiers), _fileName);
+
+                    GenerateJS(namespaceDeclaration);
+                    SymbolTable.GetInstance().PopScope();
+                }
+
+                else
+                {
+                    SymbolTable.GetInstance().PushScope($"{entryName}.{string.Join(".", namespaceDeclaration.NamespaceIdentifier.Identifiers.Identifiers)}", _fileName);
+
+                    GenerateJS(namespaceDeclaration);
+                    SymbolTable.GetInstance().PopScope();
+                }
             }
         }
 

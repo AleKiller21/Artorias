@@ -4,5 +4,7 @@
     {
         public string Identifier;
         public AccessModifier Modifier;
+        public abstract void ValidateSemantic();
+        public abstract string GenerateCode();
     }
 }
