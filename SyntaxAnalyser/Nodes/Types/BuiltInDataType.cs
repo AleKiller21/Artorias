@@ -8,8 +8,6 @@
         Object,
         Bool,
         Float,
-        Var,
-        Void,
         None
     }
 }

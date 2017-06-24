@@ -6,5 +6,10 @@
         public AccessModifier Modifier;
         public abstract void ValidateSemantic();
         public abstract string GenerateCode();
+
+        public override string ToString()
+        {
+            return Identifier;
+        }
     }
 }

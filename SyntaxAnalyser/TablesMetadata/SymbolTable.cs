@@ -20,9 +20,6 @@ namespace SyntaxAnalyser.TablesMetadata
         {
             _scope = new Stack<SymbolTable>();
             Symbols = new Dictionary<string, SymbolAttributes>();
-            //CurrentScope = this;
-            //CurrentNamespace = namespaceName;
-            //FileName = fileName;
         }
 
         public static SymbolTable GetInstance()
@@ -41,6 +38,50 @@ namespace SyntaxAnalyser.TablesMetadata
             {
                 if (table.Symbols.ContainsKey(identifier))
                     return table.Symbols[identifier];
+            }
+
+            return null;
+        }
+
+        public Type FindType(string identifier)
+        {
+            //TODO Semantic: Fix using directives ambiguous reference
+            var currentNamespace = _scope.Peek().CurrentNamespace;
+            var type = CheckForTypeInCurrentNamespace(identifier, currentNamespace);
+            if (type != null) return type;
+
+            type = CheckInUsingDirectives(identifier, currentNamespace);
+            if (type != null) return type;
+
+            foreach (var table in _scope)
+            {
+                if(table.CurrentNamespace.Equals(currentNamespace)) continue;
+
+                currentNamespace = table.CurrentNamespace;
+                type = CheckForTypeInCurrentNamespace(identifier, currentNamespace);
+                if (type != null) return type;
+
+                type = CheckInUsingDirectives(identifier, currentNamespace);
+                if (type != null) return type;
+            }
+
+            return null;
+        }
+
+        private Type CheckForTypeInCurrentNamespace(string identifier, string Namespace)
+        {
+            return NamespaceTable.Namespaces[Namespace].ContainsKey(identifier) ? 
+                NamespaceTable.Namespaces[Namespace][identifier] : null;
+        }
+
+        private Type CheckInUsingDirectives(string identifier, string Namespace)
+        {
+            var directives = UsingDirectiveTable.Directives[$"{SymbolTable.GetInstance().CurrentScope.FileName},{Namespace}"];
+            foreach (var directive in directives)
+            {
+                var type = CheckForTypeInCurrentNamespace(identifier, directive);
+                if(type == null) continue;
+                return type;
             }
 
             return null;

@@ -352,7 +352,7 @@ namespace SyntaxAnalyser.Parser
                 NextToken();
                 return new DataType
                 {
-                    BuiltInDataType = BuiltInDataType.Void,
+                    IsVoid = true,
                     Row = row,
                     Col = col
                 };
@@ -371,7 +371,8 @@ namespace SyntaxAnalyser.Parser
                 NextToken();
                 return new DataType
                 {
-                    BuiltInDataType = BuiltInDataType.Var,
+                    BuiltInDataType = BuiltInDataType.None,
+                    IsVar = true,
                     Row = row,
                     Col = col
                 };
