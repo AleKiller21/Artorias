@@ -6,5 +6,9 @@ namespace SyntaxAnalyser.Nodes.Expressions.Binary.Equality
 {
     public class EqualOperator : EqualityOperator
     {
+        public override string ToJS()
+        {
+            return $"({LeftOperand.ToJS()} === {RightOperand.ToJS()})";
+        }
     }
 }

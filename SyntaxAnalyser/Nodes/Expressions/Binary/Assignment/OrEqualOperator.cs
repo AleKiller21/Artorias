@@ -6,5 +6,9 @@ namespace SyntaxAnalyser.Nodes.Expressions.Binary.Assignment
 {
     public class OrEqualOperator : AssignmentOperator
     {
+        public override string ToJS()
+        {
+            return $"({LeftOperand.ToJS()} |= {RightOperand.ToJS()})";
+        }
     }
 }

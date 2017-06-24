@@ -115,7 +115,7 @@ namespace Artorias
             foreach (var typeDeclaration in Namespace.TypeDeclarations)
             {
                 SymbolTable.GetInstance().PushScope(entryName, _fileName);
-                //_codeOutput += typeDeclaration.GenerateCode();
+                _codeOutput += typeDeclaration.GenerateCode();
                 SymbolTable.GetInstance().PopScope();
             }
 

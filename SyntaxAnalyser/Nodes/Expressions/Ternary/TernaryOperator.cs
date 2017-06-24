@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 namespace SyntaxAnalyser.Nodes.Expressions.Ternary
 {
@@ -9,5 +10,6 @@ namespace SyntaxAnalyser.Nodes.Expressions.Ternary
         public Expression LeftOperand;
         public Expression FirstRightOperand;
         public Expression SecondRightOperand;
+        
     }
 }

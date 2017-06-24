@@ -11,5 +11,15 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions.InstanceExpr
         {
             InstanceType = new DataType();
         }
+
+        public override string ToJS()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Type EvaluateType()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

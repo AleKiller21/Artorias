@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions
 {
@@ -13,6 +14,16 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions
         {
             ArgumentList = new List<Expression>();
             ExpressionList = new List<Expression>();
+        }
+
+        public override string ToJS()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Type EvaluateType()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

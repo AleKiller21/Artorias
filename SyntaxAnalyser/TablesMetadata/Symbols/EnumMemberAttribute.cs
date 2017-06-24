@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SyntaxAnalyser.Nodes.Expressions;
+using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 namespace SyntaxAnalyser.TablesMetadata.Symbols
 {

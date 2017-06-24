@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SyntaxAnalyser.Nodes.Types;
+using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 namespace SyntaxAnalyser.Nodes.Expressions.Literal
 {
@@ -11,6 +13,11 @@ namespace SyntaxAnalyser.Nodes.Expressions.Literal
             Value = value;
             Row = row;
             Col = col;
+        }
+
+        public override Type EvaluateType()
+        {
+            return new FloatType();
         }
     }
 }

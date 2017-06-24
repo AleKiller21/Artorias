@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SyntaxAnalyser.Nodes.Types;
 
 namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions
 {
@@ -6,5 +7,15 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions
     {
         public Expression PrimaryExpressionPrimePrime;
         public List<PrimaryExpressionPrime> PrimaryExpressionPrime;
+        public override string ToJS()
+        {
+            //TODO Semantic: Por el momento solo funciona con literal. Arreglar.
+            return PrimaryExpressionPrimePrime.ToJS();
+        }
+
+        public override Type EvaluateType()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
