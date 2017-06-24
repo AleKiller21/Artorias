@@ -60,10 +60,10 @@ namespace SyntaxAnalyser.TablesMetadata
             CurrentScope = _scope.Count == 0 ? null : _scope.Peek();
         }
 
-        public void CheckSymbolDuplication(string identifier, SymbolAttributes attributes)
+        public void CheckSymbolDuplication(string identifier, int row, int col)
         {
             if (Symbols.ContainsKey(identifier))
-                throw new SemanticException($"A symbol with the name {identifier} already exists within the current scope in file {FileName} at row {attributes.Row} column {attributes.Col}.");
+                throw new SemanticException($"A symbol with the name {identifier} already exists within the current scope in file {FileName} at row {row} column {col}.");
         }
     }
 }
