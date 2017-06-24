@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using SyntaxAnalyser.Nodes;
 
-namespace SyntaxAnalyser.General
+namespace SyntaxAnalyser.Utilities
 {
     public class CompilerUtilities
     {
