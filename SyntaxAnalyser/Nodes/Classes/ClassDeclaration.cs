@@ -38,6 +38,8 @@ namespace SyntaxAnalyser.Nodes.Classes
                 var methodSignature = CompilerUtilities.GenerateMethodSignature(method.Identifier, method.Params);
                 CheckMethodDuplication(methodsDictionary, methodSignature, method);
                 CheckMethodName(method);
+                CheckAbstractVirtualMethodsAccessModifier(method);
+                CheckIfAbstractMethodIsInAbstractClass(method);
 
                 methodsDictionary[methodSignature] = methodSignature;
             }
@@ -69,6 +71,23 @@ namespace SyntaxAnalyser.Nodes.Classes
         {
             if(method.Identifier == Identifier)
                 throw new SemanticException($"Method '{method.Identifier}' cannot be named as its enclosing type at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
+        }
+
+        private void CheckAbstractVirtualMethodsAccessModifier(ClassMethodDeclaration method)
+        {
+            var errorLocation = $"cannot be private at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.";
+
+            if(method.OptionalModifier == OptionalModifier.Virtual && method.AccessModifier == AccessModifier.Private)
+                throw new SemanticException($"Virtual method '{method.Identifier}' {errorLocation}");
+
+            if(method.OptionalModifier == OptionalModifier.Abstract && method.AccessModifier == AccessModifier.Private)
+                throw new SemanticException($"Abstract method '{method.Identifier}' {errorLocation}");
+        }
+
+        private void CheckIfAbstractMethodIsInAbstractClass(ClassMethodDeclaration method)
+        {
+            if(method.OptionalModifier == OptionalModifier.Abstract && !IsAbstract)
+                throw new SemanticException($"Abstract method '{method.Identifier}' is abstract but it is contained in non-abstract class '{Identifier}' at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckFields()
