@@ -124,22 +124,29 @@ namespace SyntaxAnalyser.Nodes.Classes
             {
                 var parentName = CompilerUtilities.GetQualifiedName(parent);
                 var parentType = SymbolTable.GetInstance().FindType(parentName);
-                if (parentType is InterfaceDeclaration)
+                var parentNamespace = SymbolTable.GetInstance().FindTypeNamespace(parentName);
+                var type = parentType as InterfaceDeclaration;
+                if (type != null)
                 {
-                    InterfaceDeclaration.CheckInterfaceCircularInheritance((InterfaceDeclaration)parentType,
+                    InterfaceDeclaration.CheckInterfaceCircularInheritance(type,
                         circularList);
                 }
-                else if (parentType == null || !(parentType is ClassDeclaration))
+                else if (!(parentType is ClassDeclaration))
                     throw new SemanticException(
                         $"The type '{parentName}' at {Class.Row} column {Class.Col} in file {SymbolTable.GetInstance().CurrentScope.FileName} is not a class);");
 
                 else
                 {
-                    if(circularList.Contains(parentName))
+                    var fullTypeName = $"{parentNamespace}.{parentName}";
+                    if(circularList.Contains(fullTypeName))
                         throw new SemanticException($"Circular base class involving '{Class.Identifier}' and '{parentName}' at row {Class.Row} column {Class.Col} in file {SymbolTable.GetInstance().CurrentScope.FileName}.");
 
-                    circularList.Push(Class.Identifier);
+                    //TODO Hacer lo mismo para CheckInterfaceCircularInheritance
+                    var classNamespace = SymbolTable.GetInstance().CurrentScope.CurrentNamespace;
+                    circularList.Push($"{classNamespace}.{Class.Identifier}");
+                    SymbolTable.GetInstance().PushScope(parentNamespace, CompilerUtilities.FileName);
                     CheckClassCircularInheritance((ClassDeclaration)parentType, circularList);
+                    SymbolTable.GetInstance().PopScope();
                     circularList.Pop();
                 }
             }

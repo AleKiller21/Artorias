@@ -96,16 +96,21 @@ namespace SyntaxAnalyser.Nodes.Interfaces
             foreach (var parent in Interface.Parents)
             {
                 var parentName = CompilerUtilities.GetQualifiedName(parent);
-                if(circularList.Contains(parentName))
+                var parentNamespace = SymbolTable.GetInstance().FindTypeNamespace(parentName);
+                var fullTypeName = $"{parentNamespace}.{parentName}";
+                if (circularList.Contains(fullTypeName))
                     throw new SemanticException($"Inherited interface '{parentName}' causes a cycle in the interface hierarchy of '{Interface.Identifier}' at row {Interface.Row} column {Interface.Col} in file {SymbolTable.GetInstance().CurrentScope.FileName}.");
 
-                circularList.Push(Interface.Identifier);
+                var interfaceNamespace = SymbolTable.GetInstance().CurrentScope.CurrentNamespace;
+                circularList.Push($"{interfaceNamespace}.{Interface.Identifier}");
                 var typeFound = SymbolTable.GetInstance().FindType(parentName);
-                if(typeFound == null || !(typeFound is InterfaceDeclaration))
+                if(!(typeFound is InterfaceDeclaration))
                     throw new SemanticException($"The type '{parentName}' at row {Interface.Row} column {Interface.Col} in file {SymbolTable.GetInstance().CurrentScope.FileName} is not an interface.");
 
                 var parentInterface = (InterfaceDeclaration)typeFound;
+                SymbolTable.GetInstance().PushScope(parentNamespace, CompilerUtilities.FileName);
                 CheckInterfaceCircularInheritance(parentInterface, circularList);
+                SymbolTable.GetInstance().PopScope();
                 circularList.Pop();
             }
         }

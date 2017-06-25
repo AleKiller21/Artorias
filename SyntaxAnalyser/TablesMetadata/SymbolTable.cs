@@ -92,6 +92,48 @@ namespace SyntaxAnalyser.TablesMetadata
 
             return null;
         }
+        public string FindTypeNamespace(string typeIdentifier)
+        {
+            //TODO Semantic: Fix using directives ambiguous reference
+            var currentNamespace = _scope.Peek().CurrentNamespace;
+            var typeNamespace = TryGetNamespace(typeIdentifier, currentNamespace);
+            if (typeNamespace != "") return typeNamespace;
+
+            typeNamespace = GetNamespaceTypeThroughDirectives(typeIdentifier, currentNamespace);
+            if (typeNamespace != "") return typeNamespace;
+
+            foreach (var table in _scope)
+            {
+                if (table.CurrentNamespace.Equals(currentNamespace)) continue;
+
+                currentNamespace = table.CurrentNamespace;
+                typeNamespace = TryGetNamespace(typeIdentifier, currentNamespace);
+                if (typeNamespace != "") return typeNamespace;
+
+                typeNamespace = GetNamespaceTypeThroughDirectives(typeIdentifier, currentNamespace);
+                if (typeNamespace != "") return typeNamespace;
+            }
+
+            return "";
+        }
+
+        private string TryGetNamespace(string identifier, string Namespace)
+        {
+            return NamespaceTable.Namespaces[Namespace].ContainsKey(identifier) ? Namespace : "";
+        }
+
+        private string GetNamespaceTypeThroughDirectives(string identifier, string Namespace)
+        {
+            var directives = UsingDirectiveTable.Directives[$"{SymbolTable.GetInstance().CurrentScope.FileName},{Namespace}"];
+            foreach (var directive in directives)
+            {
+                var namespaceType = TryGetNamespace(identifier, directive);
+                if (namespaceType == "") continue;
+                return namespaceType;
+            }
+
+            return "";
+        }
 
         public void PushScope(string currentNamespace, string fileName)
         {
@@ -117,5 +159,17 @@ namespace SyntaxAnalyser.TablesMetadata
                 throw new SemanticException($"{errMessage} {identifier} at row {row} column {col} in {FileName}.");
             }
         }
+
+        //public void GetNamespaceHolder(Type typeDeclaration)
+        //{
+        //    foreach (var Namespace in NamespaceTable.Namespaces)
+        //    {
+        //        var types = Namespace.Value;
+        //        foreach (var type in types)
+        //        {
+                    
+        //        }
+        //    }
+        //}
     }
 }
