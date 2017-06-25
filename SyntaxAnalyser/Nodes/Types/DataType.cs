@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using SyntaxAnalyser.TablesMetadata;
+using SyntaxAnalyser.Utilities;
 
 namespace SyntaxAnalyser.Nodes.Types
 {
@@ -21,6 +22,8 @@ namespace SyntaxAnalyser.Nodes.Types
 
         public Type EvaluateType()
         {
+            if(IsVoid) return new VoidType();
+
             switch (BuiltInDataType)
             {
                 case BuiltInDataType.Bool:
@@ -36,7 +39,7 @@ namespace SyntaxAnalyser.Nodes.Types
                 case BuiltInDataType.String:
                     return new StringType();
                 default:
-                    return SymbolTable.GetInstance().FindType(string.Join(".", CustomTypeName.Identifiers.Identifiers));
+                    return SymbolTable.GetInstance().FindType(CompilerUtilities.GetQualifiedName(CustomTypeName));
             }
         }
     }

@@ -22,6 +22,28 @@ namespace SyntaxAnalyser.Nodes.Classes
             CheckParents();
             var circularList = new Stack<string>();
             CheckClassCircularInheritance(this, circularList);
+            CheckFields();
+        }
+
+        private void CheckFields()
+        {
+            foreach (var fieldDeclaration in Members)
+            {
+                if(!(fieldDeclaration is FieldDeclaration)) continue;
+
+                var field = (FieldDeclaration) fieldDeclaration;
+                CheckFieldType(field);
+            }
+        }
+
+        private void CheckFieldType(FieldDeclaration field)
+        {
+            var fieldType = field.Type.EvaluateType();
+            if (fieldType == null)
+                throw new GeneralSemanticException(field.Row, field.Col, SymbolTable.GetInstance().CurrentScope.FileName, CompilerUtilities.GetQualifiedName(field.Type.CustomTypeName));
+
+            if(fieldType is VoidType)
+                throw new SemanticException($"Field type cannot be 'void' at row {field.Row} column {field.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckParents()

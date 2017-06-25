@@ -69,7 +69,6 @@ namespace Artorias
             var files = currentDirectory.GetFiles();
             foreach (var file in files)
             {
-                CompilerUtilities.FileName = file.Name;
                 var stream = new FileInputStream(file.FullName);
                 var lexer = new Lexer(stream);
                 var parser = new Parser(lexer);
@@ -103,6 +102,7 @@ namespace Artorias
             foreach (var code in _codeFiles)
             {
                 _fileName = code.GlobalNamespace.FileName;
+                CompilerUtilities.FileName = _fileName;
                 SymbolTable.GetInstance().PushScope("global", _fileName);
                 GenerateJS(code.GlobalNamespace);
                 SymbolTable.GetInstance().PopScope();
