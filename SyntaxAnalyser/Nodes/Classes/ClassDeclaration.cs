@@ -35,6 +35,7 @@ namespace SyntaxAnalyser.Nodes.Classes
                 var fieldType = CheckFieldType(field);
                 CheckFieldDuplication(field);
                 CheckFieldName(field);
+                CheckFieldOptionalModifier(field);
 
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(field.Identifier, new FieldAttributes(field, fieldType));
             }
@@ -63,6 +64,20 @@ namespace SyntaxAnalyser.Nodes.Classes
         {
             if(field.Identifier.Equals(Identifier))
                 throw new SemanticException($"field '{field.Identifier}' cannot be named as its enclosing type at row {field.Row} column {field.Col} in file {CompilerUtilities.FileName}.");
+        }
+
+        private void CheckFieldOptionalModifier(FieldDeclaration field)
+        {
+            var errMessage = "";
+            if (field.OptionalModifier == OptionalModifier.Abstract)
+                errMessage = $"Field '{field.Identifier}' cannot be declared abstract";
+            else if (field.OptionalModifier == OptionalModifier.Override)
+                errMessage = $"Field '{field.Identifier}' cannot be declared override";
+            else if (field.OptionalModifier == OptionalModifier.Virtual)
+                errMessage = $"Field '{field.Identifier}' cannot be declared virtual";
+
+            if(errMessage != "")
+                throw new SemanticException($"{errMessage} at row {field.Row} column {field.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckParents()
