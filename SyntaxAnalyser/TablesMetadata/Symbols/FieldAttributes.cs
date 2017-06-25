@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SyntaxAnalyser.Nodes.Classes;
+using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 namespace SyntaxAnalyser.TablesMetadata.Symbols
 {
@@ -9,9 +10,10 @@ namespace SyntaxAnalyser.TablesMetadata.Symbols
     {
         private FieldDeclaration _field;
 
-        public FieldAttributes(FieldDeclaration field)
+        public FieldAttributes(FieldDeclaration field, Type fieldType)
         {
             _field = field;
+            SymbolType = fieldType;
         }
     }
 }

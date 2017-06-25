@@ -113,10 +113,8 @@ namespace SyntaxAnalyser.TablesMetadata
             {
                 if(errMessage == "")
                     throw new SemanticException($"A symbol with the name {identifier} already exists within the current scope in file {FileName} at row {row} column {col}.");
-                else
-                {
-                    throw new SemanticException(errMessage);
-                }
+
+                throw new SemanticException($"{errMessage} {identifier} at row {row} column {col} in {FileName}.");
             }
         }
     }
