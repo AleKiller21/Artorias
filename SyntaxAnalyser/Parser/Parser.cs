@@ -59,6 +59,7 @@ namespace SyntaxAnalyser.Parser
                 CheckTokenType(TokenType.RwString) ||
                 CheckTokenType(TokenType.RwBool) ||
                 CheckTokenType(TokenType.RwFloat) ||
+                CheckTokenType(TokenType.RwObject) ||
                 CheckTokenType(TokenType.Id);
         }
 

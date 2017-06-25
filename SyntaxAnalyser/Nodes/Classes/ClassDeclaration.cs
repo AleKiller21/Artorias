@@ -20,9 +20,26 @@ namespace SyntaxAnalyser.Nodes.Classes
                 throw new SemanticException($"{Identifier} access modifier is invalid at row {Row} column {Col} in file {SymbolTable.GetInstance().CurrentScope.FileName}.");
 
             CheckParents();
-            var circularList = new Stack<string>();
-            CheckClassCircularInheritance(this, circularList);
             CheckFields();
+            CheckMethods();
+        }
+
+        private void CheckMethods()
+        {
+            foreach (var methodDeclaration in Members)
+            {
+                if (!(methodDeclaration is ClassMethodDeclaration)) continue;
+
+                var method = (ClassMethodDeclaration) methodDeclaration;
+
+                CheckMethodType(method);
+            }
+        }
+
+        private void CheckMethodType(ClassMethodDeclaration method)
+        {
+            if(method.Type.EvaluateType() == null)
+                throw new GeneralSemanticException(method.Row, method.Col, CompilerUtilities.FileName, CompilerUtilities.GetQualifiedName(method.Type.CustomTypeName));
         }
 
         private void CheckFields()
@@ -98,6 +115,9 @@ namespace SyntaxAnalyser.Nodes.Classes
                 else
                     SymbolTable.GetInstance().CurrentScope.InsertSymbol(parentName, new InterfaceAttribute(parentType));
             }
+
+            var circularList = new Stack<string>();
+            CheckClassCircularInheritance(this, circularList);
         }
 
         private Type CheckParentType(string parentName)
