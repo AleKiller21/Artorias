@@ -40,6 +40,8 @@ namespace SyntaxAnalyser.Nodes.Classes
                 CheckMethodName(method);
                 CheckAbstractVirtualMethodsAccessModifier(method);
                 CheckIfAbstractMethodIsInAbstractClass(method);
+                CheckAbstractMethodHasBody(method);
+                CheckNonAbstractMethodHasBody(method);
 
                 methodsDictionary[methodSignature] = methodSignature;
             }
@@ -88,6 +90,18 @@ namespace SyntaxAnalyser.Nodes.Classes
         {
             if(method.OptionalModifier == OptionalModifier.Abstract && !IsAbstract)
                 throw new SemanticException($"Abstract method '{method.Identifier}' is abstract but it is contained in non-abstract class '{Identifier}' at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
+        }
+
+        private void CheckAbstractMethodHasBody(ClassMethodDeclaration method)
+        {
+            if(method.OptionalModifier == OptionalModifier.Abstract && method.Statements != null)
+                throw new SemanticException($"Abstract method '{method.Identifier}' cannot declared a body because it is marked as abstract at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
+        }
+
+        private void CheckNonAbstractMethodHasBody(ClassMethodDeclaration method)
+        {
+            if (method.OptionalModifier != OptionalModifier.Abstract && method.Statements == null)
+                throw new SemanticException($"Method '{method.Identifier}' must declare a body because it is not marked as abstract at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckFields()

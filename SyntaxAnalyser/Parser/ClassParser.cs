@@ -423,7 +423,7 @@ namespace SyntaxAnalyser.Parser
             if (CheckTokenType(TokenType.EndStatement))
             {
                 NextToken();
-                return new StatementBlock();
+                return null;
             }
             
             throw new ParserException($"CurlyBraceOpen or EndOfStatement token expected at row {GetTokenRow()} column {GetTokenColumn()}");
