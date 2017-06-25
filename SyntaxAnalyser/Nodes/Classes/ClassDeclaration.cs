@@ -32,8 +32,15 @@ namespace SyntaxAnalyser.Nodes.Classes
                 if (!(constructorDeclaration is ConstructorDeclaration)) continue;
 
                 var constructor = (ConstructorDeclaration)constructorDeclaration;
+                var constructorName = CompilerUtilities.GetQualifiedName(constructor.Type.CustomTypeName);
                 CheckConstructorsName(constructor);
                 CheckConstructorAccessModifier(constructor);
+                CheckMethodParameters(constructor.Params);
+
+                var methodSignature = CompilerUtilities.GenerateMethodSignature(constructorName, constructor.Params);
+                CheckMethodDuplication(methodSignature, constructor.Row, constructor.Col, constructorName);
+
+                SymbolTable.GetInstance().CurrentScope.InsertSymbol(constructorName, new ConstructorAttributes(constructor));
             }
         }
 
@@ -53,7 +60,6 @@ namespace SyntaxAnalyser.Nodes.Classes
 
         private void CheckMethods()
         {
-            var methodsDictionary = new Dictionary<string, string>();
             foreach (var methodDeclaration in Members)
             {
                 if (!(methodDeclaration is ClassMethodDeclaration)) continue;
@@ -61,16 +67,17 @@ namespace SyntaxAnalyser.Nodes.Classes
                 var method = (ClassMethodDeclaration) methodDeclaration;
 
                 CheckMethodType(method);
-                CheckMethodParameters(method);
+                CheckMethodParameters(method.Params);
                 var methodSignature = CompilerUtilities.GenerateMethodSignature(method.Identifier, method.Params);
-                CheckMethodDuplication(methodsDictionary, methodSignature, method);
+                CheckMethodDuplication(methodSignature, method.Row, method.Col, method.Identifier);
                 CheckMethodName(method);
                 CheckAbstractVirtualMethodsAccessModifier(method);
                 CheckIfAbstractMethodIsInAbstractClass(method);
                 CheckAbstractMethodHasBody(method);
                 CheckNonAbstractMethodHasBody(method);
-
-                methodsDictionary[methodSignature] = methodSignature;
+                
+                SymbolTable.GetInstance().CurrentScope.InsertSymbol(methodSignature, 
+                    new ClassMethodAttributes(method, method.Type.EvaluateType()));
             }
         }
 
@@ -80,9 +87,9 @@ namespace SyntaxAnalyser.Nodes.Classes
                 throw new GeneralSemanticException(method.Row, method.Col, CompilerUtilities.FileName, CompilerUtilities.GetQualifiedName(method.Type.CustomTypeName));
         }
 
-        private void CheckMethodParameters(ClassMethodDeclaration method)
+        private void CheckMethodParameters(List<FixedParameter> parameters)
         {
-            foreach (var param in method.Params)
+            foreach (var param in parameters)
             {
                 var paramType = param.Type.EvaluateType();
                 if (paramType == null)
@@ -90,10 +97,10 @@ namespace SyntaxAnalyser.Nodes.Classes
             }
         }
 
-        private void CheckMethodDuplication(Dictionary<string, string> methodsDictionary, string methodSignature, ClassMethodDeclaration method)
+        private void CheckMethodDuplication(string methodSignature, int row, int col, string id)
         {
-            if (methodsDictionary.ContainsKey(methodSignature))
-                throw new SemanticException($"Type '{Identifier}' already defines a member called '{method.Identifier}' with same parameter types at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
+            if (SymbolTable.GetInstance().CurrentScope.Symbols.ContainsKey(methodSignature))
+                throw new SemanticException($"Type '{Identifier}' already defines a member called '{id}' with same parameter types at row {row} column {col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckMethodName(ClassMethodDeclaration method)
