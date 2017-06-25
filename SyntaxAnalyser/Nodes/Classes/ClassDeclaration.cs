@@ -26,6 +26,7 @@ namespace SyntaxAnalyser.Nodes.Classes
 
         private void CheckMethods()
         {
+            var methodsDictionary = new Dictionary<string, string>();
             foreach (var methodDeclaration in Members)
             {
                 if (!(methodDeclaration is ClassMethodDeclaration)) continue;
@@ -33,6 +34,11 @@ namespace SyntaxAnalyser.Nodes.Classes
                 var method = (ClassMethodDeclaration) methodDeclaration;
 
                 CheckMethodType(method);
+                CheckMethodParameters(method);
+                var methodSignature = CompilerUtilities.GenerateMethodSignature(method.Identifier, method.Params);
+                CheckMethodDuplication(methodsDictionary, methodSignature, method);
+
+                methodsDictionary[methodSignature] = methodSignature;
             }
         }
 
@@ -40,6 +46,22 @@ namespace SyntaxAnalyser.Nodes.Classes
         {
             if(method.Type.EvaluateType() == null)
                 throw new GeneralSemanticException(method.Row, method.Col, CompilerUtilities.FileName, CompilerUtilities.GetQualifiedName(method.Type.CustomTypeName));
+        }
+
+        private void CheckMethodParameters(ClassMethodDeclaration method)
+        {
+            foreach (var param in method.Params)
+            {
+                var paramType = param.Type.EvaluateType();
+                if (paramType == null)
+                    throw new SemanticException($"Parameter type '{CompilerUtilities.GetQualifiedName(param.Type.CustomTypeName)}' at row {param.Row} column {param.Col} in file {CompilerUtilities.FileName} does not exist.");
+            }
+        }
+
+        private void CheckMethodDuplication(Dictionary<string, string> methodsDictionary, string methodSignature, ClassMethodDeclaration method)
+        {
+            if (methodsDictionary.ContainsKey(methodSignature))
+                throw new SemanticException($"Type '{Identifier}' already defines a member called '{method.Identifier}' with same parameter types at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckFields()
