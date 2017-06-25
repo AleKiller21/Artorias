@@ -10,5 +10,10 @@ namespace SyntaxAnalyser.Nodes.Types
         {
             return "void";
         }
+
+        public override string GetDefaultValue()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

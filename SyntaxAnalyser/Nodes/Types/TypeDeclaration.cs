@@ -11,5 +11,10 @@
         {
             return Identifier;
         }
+
+        public override string GetDefaultValue()
+        {
+            return "null";
+        }
     }
 }

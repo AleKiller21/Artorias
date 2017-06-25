@@ -10,5 +10,10 @@ namespace SyntaxAnalyser.Nodes.Types
         {
             return "object";
         }
+
+        public override string GetDefaultValue()
+        {
+            return "null";
+        }
     }
 }

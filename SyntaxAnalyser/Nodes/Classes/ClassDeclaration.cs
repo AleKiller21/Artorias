@@ -34,16 +34,10 @@ namespace SyntaxAnalyser.Nodes.Classes
                 var field = (FieldDeclaration) fieldDeclaration;
                 var fieldType = CheckFieldType(field);
                 CheckFieldDuplication(field);
+                CheckFieldName(field);
 
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(field.Identifier, new FieldAttributes(field, fieldType));
             }
-        }
-
-        private void CheckFieldDuplication(FieldDeclaration field)
-        {
-            SymbolTable.GetInstance()
-                .CurrentScope.CheckSymbolDuplication(field.Identifier, field.Row, field.Col,
-                    $"The type '{Identifier}' already contains a definition for ");
         }
 
         private Type CheckFieldType(FieldDeclaration field)
@@ -56,6 +50,19 @@ namespace SyntaxAnalyser.Nodes.Classes
                 throw new SemanticException($"Field type cannot be 'void' at row {field.Row} column {field.Col} in file {CompilerUtilities.FileName}.");
 
             return fieldType;
+        }
+
+        private void CheckFieldDuplication(FieldDeclaration field)
+        {
+            SymbolTable.GetInstance()
+                .CurrentScope.CheckSymbolDuplication(field.Identifier, field.Row, field.Col,
+                    $"The type '{Identifier}' already contains a definition for ");
+        }
+
+        private void CheckFieldName(FieldDeclaration field)
+        {
+            if(field.Identifier.Equals(Identifier))
+                throw new SemanticException($"field '{field.Identifier}' cannot be named as its enclosing type at row {field.Row} column {field.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckParents()

@@ -156,20 +156,8 @@ namespace SyntaxAnalyser.TablesMetadata
                 if(errMessage == "")
                     throw new SemanticException($"A symbol with the name {identifier} already exists within the current scope in file {FileName} at row {row} column {col}.");
 
-                throw new SemanticException($"{errMessage} {identifier} at row {row} column {col} in {FileName}.");
+                throw new SemanticException($"{errMessage} '{identifier}' at row {row} column {col} in {FileName}.");
             }
         }
-
-        //public void GetNamespaceHolder(Type typeDeclaration)
-        //{
-        //    foreach (var Namespace in NamespaceTable.Namespaces)
-        //    {
-        //        var types = Namespace.Value;
-        //        foreach (var type in types)
-        //        {
-                    
-        //        }
-        //    }
-        //}
     }
 }

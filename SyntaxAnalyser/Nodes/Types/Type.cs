@@ -6,5 +6,6 @@ namespace SyntaxAnalyser.Nodes.Types
 {
     public abstract class Type : LineNumbering
     {
+        public abstract string GetDefaultValue();
     }
 }
