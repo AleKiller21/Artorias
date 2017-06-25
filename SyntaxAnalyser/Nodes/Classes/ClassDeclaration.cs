@@ -33,6 +33,7 @@ namespace SyntaxAnalyser.Nodes.Classes
 
                 var constructor = (ConstructorDeclaration)constructorDeclaration;
                 CheckConstructorsName(constructor);
+                CheckConstructorAccessModifier(constructor);
             }
         }
 
@@ -41,6 +42,13 @@ namespace SyntaxAnalyser.Nodes.Classes
             var constructorName = CompilerUtilities.GetQualifiedName(constructor.Type.CustomTypeName);
             if (constructorName != Identifier)
                 throw new SemanticException($"Constructor '{constructorName}' must have the same name as its enclosing type at row {constructor.Row} column {constructor.Col} in file {CompilerUtilities.FileName}.");
+        }
+
+        private void CheckConstructorAccessModifier(ConstructorDeclaration constructor)
+        {
+            var constructorName = CompilerUtilities.GetQualifiedName(constructor.Type.CustomTypeName);
+            if(constructor.OptionalModifier == OptionalModifier.Static && constructor.AccessModifier != AccessModifier.None)
+                throw new SemanticException($"Access modifier is not allowed for static constructor '{constructorName}' at row {constructor.Row} column {constructor.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckMethods()
