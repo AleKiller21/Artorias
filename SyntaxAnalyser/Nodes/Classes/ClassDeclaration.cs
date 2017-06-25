@@ -22,6 +22,25 @@ namespace SyntaxAnalyser.Nodes.Classes
             CheckParents();
             CheckFields();
             CheckMethods();
+            CheckConstructors();
+        }
+
+        private void CheckConstructors()
+        {
+            foreach (var constructorDeclaration in Members)
+            {
+                if (!(constructorDeclaration is ConstructorDeclaration)) continue;
+
+                var constructor = (ConstructorDeclaration)constructorDeclaration;
+                CheckConstructorsName(constructor);
+            }
+        }
+
+        private void CheckConstructorsName(ConstructorDeclaration constructor)
+        {
+            var constructorName = CompilerUtilities.GetQualifiedName(constructor.Type.CustomTypeName);
+            if (constructorName != Identifier)
+                throw new SemanticException($"Constructor '{constructorName}' must have the same name as its enclosing type at row {constructor.Row} column {constructor.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckMethods()
