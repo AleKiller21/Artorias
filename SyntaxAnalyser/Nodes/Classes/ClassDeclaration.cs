@@ -37,6 +37,7 @@ namespace SyntaxAnalyser.Nodes.Classes
                 CheckMethodParameters(method);
                 var methodSignature = CompilerUtilities.GenerateMethodSignature(method.Identifier, method.Params);
                 CheckMethodDuplication(methodsDictionary, methodSignature, method);
+                CheckMethodName(method);
 
                 methodsDictionary[methodSignature] = methodSignature;
             }
@@ -62,6 +63,12 @@ namespace SyntaxAnalyser.Nodes.Classes
         {
             if (methodsDictionary.ContainsKey(methodSignature))
                 throw new SemanticException($"Type '{Identifier}' already defines a member called '{method.Identifier}' with same parameter types at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
+        }
+
+        private void CheckMethodName(ClassMethodDeclaration method)
+        {
+            if(method.Identifier == Identifier)
+                throw new SemanticException($"Method '{method.Identifier}' cannot be named as its enclosing type at row {method.Row} column {method.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckFields()
