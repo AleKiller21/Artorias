@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SyntaxAnalyser.Nodes;
 using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 namespace SyntaxAnalyser.TablesMetadata.Symbols
 {
-    public abstract class SymbolAttributes : LineNumbering
+    public class ClassAttribute : SymbolAttributes
     {
-        public Type SymbolType;
+        public ClassAttribute(Type classDeclaration)
+        {
+            SymbolType = classDeclaration;
+        }
     }
 }

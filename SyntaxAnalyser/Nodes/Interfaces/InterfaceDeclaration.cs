@@ -18,6 +18,10 @@ namespace SyntaxAnalyser.Nodes.Interfaces
             var parentsDictionary = new Dictionary<string, Type>();
             var methodsDictionary = new Dictionary<string, string>();
             var currentFile = SymbolTable.GetInstance().CurrentScope.FileName;
+
+            if (Modifier != AccessModifier.Public && Modifier != AccessModifier.None)
+                throw new SemanticException($"{Identifier} access modifier is invalid at row {Row} column {Col} in file {SymbolTable.GetInstance().CurrentScope.FileName}.");
+
             foreach (var parent in Parents)
             {
                 var parentName = string.Join(".", parent.Identifiers.Identifiers);
@@ -39,7 +43,7 @@ namespace SyntaxAnalyser.Nodes.Interfaces
             }
 
             var circularList = new Stack<string>();
-            CheckCircularInheritance(this, circularList);
+            CheckInterfaceCircularInheritance(this, circularList);
         }
 
         private Type CheckParentType(string parentName, string currentFile)
@@ -87,17 +91,21 @@ namespace SyntaxAnalyser.Nodes.Interfaces
                 throw new SemanticException($"Type '{Identifier}' already defines a member called '{method.Identifier}' with same parameter types at row {method.Row} column {method.Col} in file {currentFile}");
         }
 
-        private void CheckCircularInheritance(InterfaceDeclaration Interface, Stack<string> circularList)
+        public static void CheckInterfaceCircularInheritance(InterfaceDeclaration Interface, Stack<string> circularList)
         {
             foreach (var parent in Interface.Parents)
             {
-                var parentName = string.Join(".", parent.Identifiers.Identifiers);
+                var parentName = CompilerUtilities.GetQualifiedName(parent);
                 if(circularList.Contains(parentName))
                     throw new SemanticException($"Inherited interface '{parentName}' causes a cycle in the interface hierarchy of '{Interface.Identifier}' at row {Interface.Row} column {Interface.Col} in file {SymbolTable.GetInstance().CurrentScope.FileName}.");
 
                 circularList.Push(Interface.Identifier);
-                var parentInterface = (InterfaceDeclaration) SymbolTable.GetInstance().FindType(parentName);
-                CheckCircularInheritance(parentInterface, circularList);
+                var typeFound = SymbolTable.GetInstance().FindType(parentName);
+                if(typeFound == null || !(typeFound is InterfaceDeclaration))
+                    throw new SemanticException($"The type '{parentName}' at row {Interface.Row} column {Interface.Col} in file {SymbolTable.GetInstance().CurrentScope.FileName} is not an interface.");
+
+                var parentInterface = (InterfaceDeclaration)typeFound;
+                CheckInterfaceCircularInheritance(parentInterface, circularList);
                 circularList.Pop();
             }
         }

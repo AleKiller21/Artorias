@@ -5,6 +5,7 @@ namespace SyntaxAnalyser.Utilities
 {
     public class CompilerUtilities
     {
+        public static string FileName;
         public static string GenerateMethodSignature(string identifier, List<FixedParameter> parameters)
         {
             var signature = identifier;
@@ -14,6 +15,11 @@ namespace SyntaxAnalyser.Utilities
             }
 
             return signature;
+        }
+
+        public static string GetQualifiedName(QualifiedIdentifier identifier)
+        {
+            return string.Join(".", identifier.Identifiers.Identifiers);
         }
     }
 }

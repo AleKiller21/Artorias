@@ -13,6 +13,9 @@ namespace SyntaxAnalyser.Nodes.Enums
 
         public override void ValidateSemantic()
         {
+            if (Modifier != AccessModifier.Public && Modifier != AccessModifier.None)
+                throw new SemanticException($"{Identifier} access modifier is invalid at row {Row} column {Col} in file {SymbolTable.GetInstance().CurrentScope.FileName}.");
+
             foreach (var member in Members)
             {
                 SymbolTable.GetInstance()

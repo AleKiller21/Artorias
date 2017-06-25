@@ -8,6 +8,7 @@ using SyntaxAnalyser.Nodes;
 using SyntaxAnalyser.Nodes.Namespaces;
 using SyntaxAnalyser.Parser;
 using SyntaxAnalyser.TablesMetadata;
+using SyntaxAnalyser.Utilities;
 using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 //TODO Agregar 'Dictionary' como keyword. Validarlo en la produccion NonArrayType
@@ -68,6 +69,7 @@ namespace Artorias
             var files = currentDirectory.GetFiles();
             foreach (var file in files)
             {
+                CompilerUtilities.FileName = file.Name;
                 var stream = new FileInputStream(file.FullName);
                 var lexer = new Lexer(stream);
                 var parser = new Parser(lexer);

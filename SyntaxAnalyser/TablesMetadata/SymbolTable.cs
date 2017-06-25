@@ -7,6 +7,7 @@ using Type = SyntaxAnalyser.Nodes.Types.Type;
 
 namespace SyntaxAnalyser.TablesMetadata
 {
+    //TODO Semantic: Validar cuando los tipos esten usando el full qualified name
     public class SymbolTable
     {
         private static SymbolTable _instance;
@@ -41,6 +42,11 @@ namespace SyntaxAnalyser.TablesMetadata
             }
 
             return null;
+        }
+
+        public SymbolAttributes LookForSymbonInParents()
+        {
+            throw new NotImplementedException();
         }
 
         public Type FindType(string identifier)
@@ -101,10 +107,17 @@ namespace SyntaxAnalyser.TablesMetadata
             CurrentScope = _scope.Count == 0 ? null : _scope.Peek();
         }
 
-        public void CheckSymbolDuplication(string identifier, int row, int col)
+        public void CheckSymbolDuplication(string identifier, int row, int col, string errMessage="")
         {
             if (Symbols.ContainsKey(identifier))
-                throw new SemanticException($"A symbol with the name {identifier} already exists within the current scope in file {FileName} at row {row} column {col}.");
+            {
+                if(errMessage == "")
+                    throw new SemanticException($"A symbol with the name {identifier} already exists within the current scope in file {FileName} at row {row} column {col}.");
+                else
+                {
+                    throw new SemanticException(errMessage);
+                }
+            }
         }
     }
 }
