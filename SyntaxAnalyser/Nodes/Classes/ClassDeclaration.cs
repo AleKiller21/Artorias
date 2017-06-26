@@ -501,6 +501,31 @@ namespace SyntaxAnalyser.Nodes.Classes
         public override string GenerateCode()
         {
             ValidateSemantic();
+            var tab = "\t";
+            var classCode = $"class {Identifier} ";
+            classCode += GetInheritanceListJS() + " {\n";
+            classCode += tab;
+            return "";
+        }
+
+        private string GetInheritanceListJS()
+        {
+            var parentName = CompilerUtilities.GetQualifiedName(Parents[0]);
+            var parentType = CompilerUtilities.GetTypeFromName(Parents[0]);
+            if (parentType is InterfaceDeclaration) return "";
+            return $"extends {parentName}";
+        }
+
+        private string GetConstructorsJS()
+        {
+            foreach (var member in Members)
+            {
+                if(!(member is ConstructorDeclaration)) continue;
+                var constructor = member as ConstructorDeclaration;
+                return "";
+                //TODO Semantic: Continuar la generacion del constructor
+            }
+
             return "";
         }
     }
