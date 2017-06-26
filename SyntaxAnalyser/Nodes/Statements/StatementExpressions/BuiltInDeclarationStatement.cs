@@ -22,12 +22,12 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
 
         public override void ValidateSemantic()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override string GenerateJS()
         {
-            throw new NotImplementedException();
+            return "";
         }
     }
 }

@@ -22,7 +22,7 @@ namespace SyntaxAnalyser.Nodes.Statements.JumpStatements
 
         public override string GenerateJS()
         {
-            throw new NotImplementedException();
+            return "continue;\n";
         }
     }
 }

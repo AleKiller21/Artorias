@@ -16,7 +16,7 @@ namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements
 
         public override string GenerateJS()
         {
-            throw new System.NotImplementedException();
+            return "";
         }
     }
 }

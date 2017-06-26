@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
 
 namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements.SwitchStatement
 {

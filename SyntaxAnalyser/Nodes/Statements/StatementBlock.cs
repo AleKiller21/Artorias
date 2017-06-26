@@ -25,7 +25,8 @@ namespace SyntaxAnalyser.Nodes.Statements
 
         public override string GenerateJS()
         {
-            throw new NotImplementedException();
+            //TODO
+            return "";
         }
     }
 }

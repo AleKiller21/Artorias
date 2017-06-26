@@ -16,12 +16,13 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
         public CallAccess CallAccess;
         public override void ValidateSemantic()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override string GenerateJS()
         {
-            throw new NotImplementedException();
+            //TODO
+            return "";
         }
     }
 }

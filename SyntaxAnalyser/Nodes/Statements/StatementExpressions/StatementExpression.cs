@@ -4,12 +4,13 @@
     {
         public override void ValidateSemantic()
         {
-            throw new System.NotImplementedException();
+            //TODO
         }
 
         public override string GenerateJS()
         {
-            throw new System.NotImplementedException();
+            //TODO
+            return "";
         }
     }
 }

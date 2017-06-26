@@ -1,5 +1,4 @@
 ﻿using SyntaxAnalyser.Nodes.Expressions;
-using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
 
 namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements.SwitchStatement
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SyntaxAnalyser.Nodes.Statements.SwitchStatement
+﻿namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements.SwitchStatement
 {
     public enum Label
     {

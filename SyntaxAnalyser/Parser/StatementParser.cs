@@ -9,7 +9,6 @@ using SyntaxAnalyser.Nodes.Statements.SelectionStatements;
 using SyntaxAnalyser.Nodes.Statements.SelectionStatements.SwitchStatement;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions;
-using SyntaxAnalyser.Nodes.Statements.SwitchStatement;
 
 namespace SyntaxAnalyser.Parser
 {

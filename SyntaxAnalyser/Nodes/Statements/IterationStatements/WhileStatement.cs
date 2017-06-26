@@ -19,7 +19,7 @@ namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
 
         public override string GenerateJS()
         {
-            throw new System.NotImplementedException();
+            return "";
         }
     }
 }

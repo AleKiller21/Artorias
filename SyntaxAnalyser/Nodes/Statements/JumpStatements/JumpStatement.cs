@@ -6,14 +6,5 @@ namespace SyntaxAnalyser.Nodes.Statements.JumpStatements
 {
     public abstract class JumpStatement : Statement
     {
-        public override void ValidateSemantic()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string GenerateJS()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
