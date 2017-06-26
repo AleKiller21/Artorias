@@ -1,4 +1,6 @@
-﻿namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements
+﻿using SyntaxAnalyser.Utilities;
+
+namespace SyntaxAnalyser.Nodes.Statements.SelectionStatements
 {
     public class IfStatement : SelectionStatement
     {
@@ -6,7 +8,10 @@
         public ElseStatement ElseStatement;
         public override void ValidateSemantic()
         {
-            throw new System.NotImplementedException();
+            CommonStatementValidations.ValidateConditionExpression(TestValue, "if");
+            Statement.ValidateSemantic();
+            if(this.ElseStatement != null)
+                this.ElseStatement.Statement.ValidateSemantic();
         }
 
         public override string GenerateJS()
