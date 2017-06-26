@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using SyntaxAnalyser.Nodes;
+using SyntaxAnalyser.Nodes.Types;
+using SyntaxAnalyser.TablesMetadata;
 
 namespace SyntaxAnalyser.Utilities
 {
@@ -20,6 +22,12 @@ namespace SyntaxAnalyser.Utilities
         public static string GetQualifiedName(QualifiedIdentifier identifier)
         {
             return string.Join(".", identifier.Identifiers.Identifiers);
+        }
+
+        public static Type GetTypeFromName(QualifiedIdentifier parent)
+        {
+            var parentName = CompilerUtilities.GetQualifiedName(parent);
+            return SymbolTable.GetInstance().FindType(parentName);
         }
     }
 }

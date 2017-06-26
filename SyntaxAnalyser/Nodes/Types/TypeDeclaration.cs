@@ -9,6 +9,7 @@
 
         public override string ToString()
         {
+            //TODO Semantic: Analisar si utilizar el full qualified name en lugar de solo el nombre del tipo
             return Identifier;
         }
 

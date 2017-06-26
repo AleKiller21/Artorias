@@ -23,6 +23,7 @@ namespace SyntaxAnalyser.Nodes.Classes
             CheckFields();
             CheckMethods();
             CheckConstructors();
+            CheckParentMethodsImplementation();
         }
 
         private void CheckConstructors()
@@ -40,7 +41,7 @@ namespace SyntaxAnalyser.Nodes.Classes
                 var methodSignature = CompilerUtilities.GenerateMethodSignature(constructorName, constructor.Params);
                 CheckMethodDuplication(methodSignature, constructor.Row, constructor.Col, constructorName);
 
-                SymbolTable.GetInstance().CurrentScope.InsertSymbol(constructorName, new ConstructorAttributes(constructor));
+                SymbolTable.GetInstance().CurrentScope.InsertSymbol(methodSignature, new ConstructorAttributes(constructor));
             }
         }
 
@@ -288,6 +289,169 @@ namespace SyntaxAnalyser.Nodes.Classes
                     circularList.Pop();
                 }
             }
+        }
+
+        private void CheckParentMethodsImplementation()
+        {
+            var baseClassMethods = new List<ClassMethodDeclaration>();
+            var interfaceMethods = new List<InterfaceMethodDeclaration>();
+
+            foreach (var parent in Parents)
+            {
+                var parentName = CompilerUtilities.GetQualifiedName(parent);
+                var parentType = SymbolTable.GetInstance().FindType(parentName);
+                if (parentType is ClassDeclaration)
+                {
+                    if(IsAbstract) continue;
+                    CheckBaseClassMethodsImplementation((ClassDeclaration) parentType, baseClassMethods);
+                }
+                else
+                {
+                    CheckInterfaceMethodsImplementation((InterfaceDeclaration)parentType, interfaceMethods);
+                }
+            }
+
+            CheckIfBaseClassMethodIsImplemented(baseClassMethods);
+            CheckIfInterfaceMethodsIsImplemented(interfaceMethods);
+
+
+        }
+
+        private void CheckIfBaseClassMethodIsImplemented(List<ClassMethodDeclaration> baseClassMethods)
+        {
+            foreach (var toImplementMethod in baseClassMethods)
+            {
+                var exists = false;
+                foreach (var methodDeclaration in Members)
+                {
+                    if (!(methodDeclaration is ClassMethodDeclaration)) continue;
+                    var method = methodDeclaration as ClassMethodDeclaration;
+                    exists = CompareMethodsDefinition(method, toImplementMethod);
+                    if (exists) break;
+                }
+
+                if(!exists)
+                    throw new SemanticException($"{Identifier} does not implement inherited abstract method {toImplementMethod.Identifier} at row {Row} column {Col} in file {CompilerUtilities.FileName}.");
+            }
+        }
+
+        private void CheckIfInterfaceMethodsIsImplemented(List<InterfaceMethodDeclaration> interfaceMethods)
+        {
+            if(interfaceMethods.Count == 0) return;
+
+            var firstParentType = CompilerUtilities.GetTypeFromName(Parents[0]);
+            if (firstParentType is ClassDeclaration)
+                CheckIfBaseClassImplementsInterfaceMethods(firstParentType as ClassDeclaration, interfaceMethods);
+            else
+                AreInterfaceMethodsImplemented(interfaceMethods, this);
+
+            if (interfaceMethods.Count != 0)
+                throw new SemanticException($"Interface member {interfaceMethods[0].Identifier} is not implemented at row {Row} column {Col} in file {CompilerUtilities.FileName}.");
+        }
+
+        private void CheckBaseClassMethodsImplementation(ClassDeclaration baseClass, List<ClassMethodDeclaration> toImplement)
+        {
+            foreach (var parent in baseClass.Parents)
+            {
+                var parentName = CompilerUtilities.GetQualifiedName(parent);
+                var parentType = SymbolTable.GetInstance().FindType(parentName);
+                if (parentType is ClassDeclaration)
+                {
+                    CheckBaseClassMethodsImplementation((ClassDeclaration)parentType, toImplement);
+                }
+            }
+
+            for(var i = 0; i < toImplement.Count; i++)
+            {
+                var toImplementMethod = toImplement[i];
+                foreach (var methodDeclaration in baseClass.Members)
+                {
+                    if(!(methodDeclaration is ClassMethodDeclaration)) continue;
+                    var method = methodDeclaration as ClassMethodDeclaration;
+                    if (!CompareMethodsDefinition(method, toImplementMethod)) continue;
+                    toImplement.RemoveAt(i--);
+                    break;
+                }
+            }
+
+            foreach (var methodDeclaration in baseClass.Members)
+            {
+                var method = methodDeclaration as ClassMethodDeclaration;
+                if(method?.OptionalModifier == OptionalModifier.Abstract)
+                    toImplement.Add(method);
+            }
+        }
+
+        private bool CompareMethodsDefinition(ClassMethodDeclaration currentClassMethod, ClassMethodDeclaration baseClassMethod)
+        {
+            if (currentClassMethod?.OptionalModifier != OptionalModifier.Override) return false;
+            if (currentClassMethod.AccessModifier != baseClassMethod.AccessModifier) return false;
+            if (currentClassMethod.Type.EvaluateType().ToString() != baseClassMethod.Type.EvaluateType().ToString()) return false;
+
+            var methodSignature = CompilerUtilities.GenerateMethodSignature(currentClassMethod.Identifier, currentClassMethod.Params);
+            var toImplementSignature =
+                CompilerUtilities.GenerateMethodSignature(baseClassMethod.Identifier, baseClassMethod.Params);
+
+            if (methodSignature != toImplementSignature) return false;
+
+            return true;
+        }
+
+        private void CheckInterfaceMethodsImplementation(InterfaceDeclaration parentInterface,
+            List<InterfaceMethodDeclaration> toImplement)
+        {
+            foreach (var interfaceParent in parentInterface.Parents)
+            {
+                var parentName = CompilerUtilities.GetQualifiedName(interfaceParent);
+                var parentType = SymbolTable.GetInstance().FindType(parentName);
+                CheckInterfaceMethodsImplementation(parentType as InterfaceDeclaration, toImplement);
+            }
+
+            toImplement.AddRange(parentInterface.Methods);
+        }
+
+        private void CheckIfBaseClassImplementsInterfaceMethods(ClassDeclaration baseClass, List<InterfaceMethodDeclaration> inMethods)
+        {
+            foreach (var parent in baseClass.Parents)
+            {
+                var parentName = CompilerUtilities.GetQualifiedName(parent);
+                var parentType = SymbolTable.GetInstance().FindType(parentName);
+                if (parentType is ClassDeclaration)
+                    CheckIfBaseClassImplementsInterfaceMethods(parentType as ClassDeclaration, inMethods);
+
+                break;
+            }
+
+            AreInterfaceMethodsImplemented(inMethods, baseClass);
+        }
+
+        private void AreInterfaceMethodsImplemented(List<InterfaceMethodDeclaration> inMethods, ClassDeclaration currentClass)
+        {
+            for (var i = 0; i < inMethods.Count; i++)
+            {
+                foreach (var classMethod in currentClass.Members)
+                {
+                    var method = classMethod as ClassMethodDeclaration;
+                    if (method == null) continue;
+
+                    if (!CompareClassInterfaceMethodDeclaration(method, inMethods[i])) continue;
+                    inMethods.RemoveAt(i--);
+                    break;
+                }
+            }
+        }
+
+        private bool CompareClassInterfaceMethodDeclaration(ClassMethodDeclaration classMethod, InterfaceMethodDeclaration interfaceMethod)
+        {
+            if (classMethod.AccessModifier != AccessModifier.Public) return false;
+            if (classMethod.Type.EvaluateType().ToString() != interfaceMethod.Type.EvaluateType().ToString()) return false;
+
+            var classMethodSignature = CompilerUtilities.GenerateMethodSignature(classMethod.Identifier, classMethod.Params);
+            var interfaceMethodSignature = CompilerUtilities.GenerateMethodSignature(interfaceMethod.Identifier, interfaceMethod.Params);
+
+            if (classMethodSignature != interfaceMethodSignature) return false;
+
+            return true;
         }
 
         public override string GenerateCode()

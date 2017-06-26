@@ -390,8 +390,6 @@ namespace SyntaxAnalyser.Parser
 
         private ClassMethodDeclaration MethodDeclaration()
         {
-            //TODO Semantic: validar que si la clase es abstract, el metodo no debe llevar cuerpo.
-            //TODO Semantic: validar que si el metodo no es abstracto, entonces no puede terminar en ';'
              if(!CheckTokenType(TokenType.ParenthesisOpen))
                 throw new ParentesisOpenException(GetTokenRow(), GetTokenColumn());
 

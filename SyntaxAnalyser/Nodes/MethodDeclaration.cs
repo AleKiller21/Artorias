@@ -9,6 +9,7 @@ namespace SyntaxAnalyser.Nodes
     {
         public AccessModifier Modifier;
         public string Identifier;
+        public DataType Type;
         public List<FixedParameter> Params;
     }
 }
