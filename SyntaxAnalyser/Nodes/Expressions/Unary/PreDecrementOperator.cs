@@ -18,10 +18,5 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary
         {
             return $"(--{Operand.ToJS()})";
         }
-
-        public override Type EvaluateType()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

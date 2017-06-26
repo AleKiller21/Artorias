@@ -8,6 +8,7 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary
 {
     public class PreIncrementOperator : UnaryOperator
     {
+        //TODO Semantic: Nunca se manda a llamar
         public PreIncrementOperator()
         {
             Rules["int"] = new IntType();
@@ -17,11 +18,6 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary
         public override string ToJS()
         {
             return $"(++{Operand.ToJS()})";
-        }
-
-        public override Type EvaluateType()
-        {
-            throw new NotImplementedException();
         }
     }
 }
