@@ -143,6 +143,8 @@ namespace SyntaxAnalyser.Parser
             NextToken();
             ConstructorInitializer(constructor);
 
+            if (constructor.Params.Count == 0)
+                constructor.IsDefault = true;
             return constructor;
         }
 

@@ -28,12 +28,15 @@ namespace SyntaxAnalyser.Nodes.Classes
 
         private void CheckConstructors()
         {
+            var existsDefault = false;
             foreach (var constructorDeclaration in Members)
             {
                 if (!(constructorDeclaration is ConstructorDeclaration)) continue;
 
                 var constructor = (ConstructorDeclaration)constructorDeclaration;
                 var constructorName = CompilerUtilities.GetQualifiedName(constructor.Type.CustomTypeName);
+                if (constructor.IsDefault) existsDefault = true;
+
                 CheckConstructorsName(constructor);
                 CheckConstructorAccessModifier(constructor);
                 CheckMethodParameters(constructor.Params);
@@ -43,6 +46,9 @@ namespace SyntaxAnalyser.Nodes.Classes
 
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(methodSignature, new ConstructorAttributes(constructor));
             }
+
+            if(existsDefault) return;
+            Members.Add(new ConstructorDeclaration {OptionalModifier = OptionalModifier.None, IsDefault = true});
         }
 
         private void CheckConstructorsName(ConstructorDeclaration constructor)
@@ -341,9 +347,14 @@ namespace SyntaxAnalyser.Nodes.Classes
 
             var firstParentType = CompilerUtilities.GetTypeFromName(Parents[0]);
             if (firstParentType is ClassDeclaration)
+            {
                 CheckIfBaseClassImplementsInterfaceMethods(firstParentType as ClassDeclaration, interfaceMethods);
-            else
                 AreInterfaceMethodsImplemented(interfaceMethods, this);
+            }
+            else
+            {
+                AreInterfaceMethodsImplemented(interfaceMethods, this);
+            }
 
             if (interfaceMethods.Count != 0)
                 throw new SemanticException($"Interface member {interfaceMethods[0].Identifier} is not implemented at row {Row} column {Col} in file {CompilerUtilities.FileName}.");
@@ -351,6 +362,13 @@ namespace SyntaxAnalyser.Nodes.Classes
 
         private void CheckBaseClassMethodsImplementation(ClassDeclaration baseClass, List<ClassMethodDeclaration> toImplement)
         {
+            foreach (var member in baseClass.Members)
+            {
+                if (!(member is ConstructorDeclaration)) continue;
+                var constructor = member as ConstructorDeclaration;
+                if (constructor.IsDefault && constructor.AccessModifier == AccessModifier.Private)
+                    throw new SemanticException($"{baseClass.Identifier} is inaccessible due to its protection level at row {baseClass.Row} column {baseClass.Col} in file {CompilerUtilities.FileName}.");
+            }
             foreach (var parent in baseClass.Parents)
             {
                 var parentName = CompilerUtilities.GetQualifiedName(parent);

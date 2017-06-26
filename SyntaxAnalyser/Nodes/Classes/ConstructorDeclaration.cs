@@ -9,6 +9,7 @@ namespace SyntaxAnalyser.Nodes.Classes
     public class ConstructorDeclaration : ClassMemberDeclaration
     {
         public bool IsStatic;
+        public bool IsDefault;
         public List<FixedParameter> Params;
         public List<Expression> ParentConstructorArguments;
         public Statement Statements;
