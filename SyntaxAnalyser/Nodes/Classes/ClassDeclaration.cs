@@ -43,12 +43,38 @@ namespace SyntaxAnalyser.Nodes.Classes
 
                 var methodSignature = CompilerUtilities.GenerateMethodSignature(constructorName, constructor.Params);
                 CheckMethodDuplication(methodSignature, constructor.Row, constructor.Col, constructorName);
+                //CheckBaseCall(constructor);
 
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(methodSignature, new ConstructorAttributes(constructor));
             }
 
             if(existsDefault) return;
             Members.Add(new ConstructorDeclaration {OptionalModifier = OptionalModifier.None, IsDefault = true});
+        }
+
+        private void CheckBaseCall(ConstructorDeclaration constructor)
+        {
+            if(constructor.ParentConstructorArguments.Count == 0) return;
+
+            var baseConstructorSignature = CompilerUtilities.GetQualifiedName(Parents[0]);
+            foreach (var argument in constructor.ParentConstructorArguments)
+            {
+                baseConstructorSignature += $",{argument.EvaluateType()}";
+            }
+
+            var parentType = CompilerUtilities.GetTypeFromName(Parents[0]);
+            if(!(parentType is ClassDeclaration))
+                throw new SemanticException($"object does not have the calling constructor at row {parentType.Row} column {parentType.Col} in file {CompilerUtilities.FileName}.");
+            var baseClass = parentType as ClassDeclaration;
+            foreach (var member in baseClass.Members)
+            {
+                if(!(member is ConstructorDeclaration)) continue;
+                var baseConstructor = member as ConstructorDeclaration;
+                if(CompilerUtilities.GenerateMethodSignature(baseClass.Identifier, baseConstructor.Params) == baseConstructorSignature)
+                    return;
+            }
+
+            throw new SemanticException($"{baseClass.Identifier} does not contain the specified constructor at row {Row} column {Col} in file {CompilerUtilities.FileName}.");
         }
 
         private void CheckConstructorsName(ConstructorDeclaration constructor)
