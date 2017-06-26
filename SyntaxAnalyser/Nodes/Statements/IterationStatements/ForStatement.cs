@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using SyntaxAnalyser.Nodes.Expressions;
 using SyntaxAnalyser.Nodes.Statements.StatementExpressions;
+using SyntaxAnalyser.TablesMetadata;
 using SyntaxAnalyser.Utilities;
 
 namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
@@ -14,6 +15,7 @@ namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
 
         public override void ValidateSemantic()
         {
+            SymbolTable.GetInstance().PushScope(SymbolTable.GetInstance().CurrentNamespace, CompilerUtilities.FileName, "forStatement");
             foreach (var statementExpression in Initializer)
             {
                 //statementExpression.ValidateSemantic();
@@ -24,6 +26,7 @@ namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
                 //statementExpression.ValidateSemantic();
             }
             StatementBody.ValidateSemantic();
+            SymbolTable.GetInstance().PopScope();
         }
 
         public override string GenerateJS()

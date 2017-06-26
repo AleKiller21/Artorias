@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.TablesMetadata;
+using SyntaxAnalyser.Utilities;
 
 namespace SyntaxAnalyser.Nodes.Statements.JumpStatements
 {
@@ -8,7 +11,13 @@ namespace SyntaxAnalyser.Nodes.Statements.JumpStatements
     {
         public override void ValidateSemantic()
         {
-            throw new NotImplementedException();
+            if (SymbolTable.GetInstance().CurrentScope.ScopeLabel != "whileStatement" &&
+                SymbolTable.GetInstance().CurrentScope.ScopeLabel != "doStatement" &&
+                SymbolTable.GetInstance().CurrentScope.ScopeLabel != "forStatement" &&
+                SymbolTable.GetInstance().CurrentScope.ScopeLabel != "forEachStatement")
+            {
+                throw new SemanticException($"'break' statement is not valid in current context at row {Row} column {Col} in file {CompilerUtilities.FileName}.");
+            }
         }
 
         public override string GenerateJS()

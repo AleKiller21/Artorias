@@ -14,6 +14,7 @@ namespace SyntaxAnalyser.TablesMetadata
         public readonly Dictionary<string, SymbolAttributes> Symbols;
         public string CurrentNamespace;
         public string FileName;
+        public string ScopeLabel;
         public SymbolTable CurrentScope;
         private Stack<SymbolTable> _scope;
 
@@ -135,12 +136,18 @@ namespace SyntaxAnalyser.TablesMetadata
             return "";
         }
 
-        public void PushScope(string currentNamespace, string fileName)
+        public void PushScope(string currentNamespace, string fileName, string scopeLabel="")
         {
+            var currentScope = SymbolTable.GetInstance().CurrentScope == null
+                ? ""
+                : SymbolTable.GetInstance().CurrentScope.ScopeLabel;
             _scope.Push(new SymbolTable());
             CurrentScope = _scope.Peek();
             CurrentScope.CurrentNamespace = currentNamespace;
             CurrentScope.FileName = fileName;
+            if (scopeLabel != "") CurrentScope.ScopeLabel = scopeLabel;
+            else CurrentScope.ScopeLabel = currentScope;
+
         }
 
         public void PopScope()

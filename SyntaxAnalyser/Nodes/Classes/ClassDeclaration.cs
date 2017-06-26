@@ -120,10 +120,6 @@ namespace SyntaxAnalyser.Nodes.Classes
         private void CheckMethodBody(ClassMethodDeclaration method)
         {
             method.Statements.ValidateSemantic();
-            //foreach (var statement in method.Statements.StatementList)
-            //{
-            //    statement.ValidateSemantic();
-            //}
         }
 
         private void CheckMethodType(ClassMethodDeclaration method)
