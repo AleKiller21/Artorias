@@ -65,6 +65,7 @@ namespace SyntaxAnalyser.Nodes.Classes
             var parentType = CompilerUtilities.GetTypeFromName(Parents[0]);
             if(!(parentType is ClassDeclaration))
                 throw new SemanticException($"object does not have the calling constructor at row {parentType.Row} column {parentType.Col} in file {CompilerUtilities.FileName}.");
+
             var baseClass = parentType as ClassDeclaration;
             foreach (var member in baseClass.Members)
             {
@@ -190,6 +191,7 @@ namespace SyntaxAnalyser.Nodes.Classes
 
         private void CheckFieldValueType(FieldDeclaration field)
         {
+            if(field.Value.Expression == null) return;
             var valueType = field.Value.Expression.EvaluateType();
             var fieldType = field.Type.EvaluateType();
             if(valueType.ToString() != fieldType.ToString())
