@@ -12,5 +12,15 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
         public UnaryOperator IncrementDecrement;
         public QualifiedIdentifier Identifier;
         public ArrayAccess ArrayAccess;
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            //TODO
+            return "";
+        }
     }
 }

@@ -65,6 +65,7 @@ namespace SyntaxAnalyser.Nodes.Classes
             var parentType = CompilerUtilities.GetTypeFromName(Parents[0]);
             if(!(parentType is ClassDeclaration))
                 throw new SemanticException($"object does not have the calling constructor at row {parentType.Row} column {parentType.Col} in file {CompilerUtilities.FileName}.");
+
             var baseClass = parentType as ClassDeclaration;
             foreach (var member in baseClass.Members)
             {
@@ -108,10 +109,17 @@ namespace SyntaxAnalyser.Nodes.Classes
                 CheckIfAbstractMethodIsInAbstractClass(method);
                 CheckAbstractMethodHasBody(method);
                 CheckNonAbstractMethodHasBody(method);
-                
+                CheckMethodBody(method);
+
+
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(methodSignature, 
                     new ClassMethodAttributes(method, method.Type.EvaluateType()));
             }
+        }
+
+        private void CheckMethodBody(ClassMethodDeclaration method)
+        {
+            method.Statements.ValidateSemantic();
         }
 
         private void CheckMethodType(ClassMethodDeclaration method)
@@ -182,9 +190,19 @@ namespace SyntaxAnalyser.Nodes.Classes
                 CheckFieldDuplication(field);
                 CheckFieldName(field);
                 CheckFieldOptionalModifier(field);
+                CheckFieldValueType(field);
 
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(field.Identifier, new FieldAttributes(field, fieldType));
             }
+        }
+
+        private void CheckFieldValueType(FieldDeclaration field)
+        {
+            if(field.Value.Expression == null) return;
+            var valueType = field.Value.Expression.EvaluateType();
+            var fieldType = field.Type.EvaluateType();
+            if(valueType.ToString() != fieldType.ToString())
+                throw new SemanticException($"Value type '{valueType}' is not compatible with field {field.Identifier} at row {field.Row} column {field.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private Type CheckFieldType(FieldDeclaration field)

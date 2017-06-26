@@ -14,5 +14,15 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
         public QualifiedIdentifier MemberAccessQualifiedIdentifier;
         public List<Expression> ArgumentList;
         public CallAccess CallAccess;
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            //TODO
+            return "";
+        }
     }
 }

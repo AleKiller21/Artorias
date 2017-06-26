@@ -8,5 +8,14 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
     {
         public QualifiedIdentifier Identifier;
         public QualifiedIdentifierStatementExpressionPrime ExpressionPrime;
+        public override void ValidateSemantic()
+        {
+            
+        }
+
+        public override string GenerateJS()
+        {
+            return "";
+        }
     }
 }

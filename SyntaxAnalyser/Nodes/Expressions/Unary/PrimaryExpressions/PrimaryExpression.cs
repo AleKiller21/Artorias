@@ -15,7 +15,8 @@ namespace SyntaxAnalyser.Nodes.Expressions.Unary.PrimaryExpressions
 
         public override Type EvaluateType()
         {
-            throw new System.NotImplementedException();
+            //TODO Semantic: Revisar tambien el tipo de PrimaryExpressionPrime
+            return PrimaryExpressionPrimePrime.EvaluateType();
         }
     }
 }
