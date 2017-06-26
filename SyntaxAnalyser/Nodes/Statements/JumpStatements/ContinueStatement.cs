@@ -6,5 +6,14 @@ namespace SyntaxAnalyser.Nodes.Statements.JumpStatements
 {
     public class ContinueStatement : JumpStatement
     {
+        public override void ValidateSemantic()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GenerateJS()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

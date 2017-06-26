@@ -11,5 +11,14 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
         public string MethodIdentifier;
         public List<Expression> ArgumentList;
         public CallAccess CallAccess;
+        public override void ValidateSemantic()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GenerateJS()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -19,5 +19,15 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
             Row = row;
             Col = col;
         }
+
+        public override void ValidateSemantic()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GenerateJS()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

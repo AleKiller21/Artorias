@@ -1,4 +1,6 @@
-﻿using SyntaxAnalyser.Nodes.Expressions;
+﻿using SyntaxAnalyser.Exceptions;
+using SyntaxAnalyser.Nodes.Expressions;
+using SyntaxAnalyser.Utilities;
 
 namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
 {
@@ -6,5 +8,16 @@ namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
     {
         public Statement StatementBody;
         public Expression ConditionExpression;
+
+        public override void ValidateSemantic()
+        {
+            StatementBody.ValidateSemantic();
+            CommonStatementValidations.ValidateConditionExpression(ConditionExpression, "do");
+        }
+
+        public override string GenerateJS()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

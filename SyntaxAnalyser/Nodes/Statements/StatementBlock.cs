@@ -10,5 +10,18 @@ namespace SyntaxAnalyser.Nodes.Statements
         {
             StatementList = new List<Statement>();
         }
+
+        public override void ValidateSemantic()
+        {
+            foreach (var statement in StatementList)
+            {
+                statement.ValidateSemantic();
+            }
+        }
+
+        public override string GenerateJS()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

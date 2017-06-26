@@ -9,5 +9,15 @@ namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
         public string IteratorIdentifier;
         public Expression EnumerableExpression;
         public Statement StatementBody;
+
+        public override void ValidateSemantic()
+        {
+            //TODO Semantic: To implement
+        }
+
+        public override string GenerateJS()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

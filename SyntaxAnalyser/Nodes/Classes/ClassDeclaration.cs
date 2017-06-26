@@ -109,10 +109,21 @@ namespace SyntaxAnalyser.Nodes.Classes
                 CheckIfAbstractMethodIsInAbstractClass(method);
                 CheckAbstractMethodHasBody(method);
                 CheckNonAbstractMethodHasBody(method);
-                
+                CheckMethodBody(method);
+
+
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(methodSignature, 
                     new ClassMethodAttributes(method, method.Type.EvaluateType()));
             }
+        }
+
+        private void CheckMethodBody(ClassMethodDeclaration method)
+        {
+            method.Statements.ValidateSemantic();
+            //foreach (var statement in method.Statements.StatementList)
+            //{
+            //    statement.ValidateSemantic();
+            //}
         }
 
         private void CheckMethodType(ClassMethodDeclaration method)
