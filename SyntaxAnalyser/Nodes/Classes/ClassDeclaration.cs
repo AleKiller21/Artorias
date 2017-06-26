@@ -182,9 +182,18 @@ namespace SyntaxAnalyser.Nodes.Classes
                 CheckFieldDuplication(field);
                 CheckFieldName(field);
                 CheckFieldOptionalModifier(field);
+                CheckFieldValueType(field);
 
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(field.Identifier, new FieldAttributes(field, fieldType));
             }
+        }
+
+        private void CheckFieldValueType(FieldDeclaration field)
+        {
+            var valueType = field.Value.Expression.EvaluateType();
+            var fieldType = field.Type.EvaluateType();
+            if(valueType.ToString() != fieldType.ToString())
+                throw new SemanticException($"Value type '{valueType}' is not compatible with field {field.Identifier} at row {field.Row} column {field.Col} in file {CompilerUtilities.FileName}.");
         }
 
         private Type CheckFieldType(FieldDeclaration field)
