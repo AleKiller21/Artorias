@@ -14,5 +14,16 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
             RankSpecifier = new List<int>();
             Declarators = new List<VariableDeclarator>();
         }
+
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            //TODO
+            return "";
+        }
     }
 }

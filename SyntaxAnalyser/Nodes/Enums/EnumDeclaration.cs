@@ -4,6 +4,7 @@ using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes.Types;
 using SyntaxAnalyser.TablesMetadata;
 using SyntaxAnalyser.TablesMetadata.Symbols;
+using SyntaxAnalyser.Utilities;
 
 namespace SyntaxAnalyser.Nodes.Enums
 {
@@ -21,12 +22,11 @@ namespace SyntaxAnalyser.Nodes.Enums
                 SymbolTable.GetInstance()
                     .CurrentScope.CheckSymbolDuplication(member.Identifier, member.Row, member.Col);
 
-                //TODO Semantic: Implement EvaluateType() for all Expression Nodes.
-                //var typeName = member.Value.EvaluateType().ToString();
-                //if (!typeName.Equals("int") && !typeName.Equals("char"))
-                //    throw new SemanticException($"Enum member {member.Identifier} at file {SymbolTable.GetInstance().CurrentScope.FileName} row {member.Row} column {member.Col} must be of type int or char.");
+                var typeName = member.Value.EvaluateType().ToString();
+                if (!typeName.Equals("int") && !typeName.Equals("char"))
+                    throw new SemanticException($"Enum member {member.Identifier} at file {SymbolTable.GetInstance().CurrentScope.FileName} row {member.Row} column {member.Col} must be of type int or char.");
 
-                
+
                 SymbolTable.GetInstance().CurrentScope.InsertSymbol(member.Identifier, new EnumMemberAttribute(member.Value, this));
             }
         }
@@ -34,7 +34,7 @@ namespace SyntaxAnalyser.Nodes.Enums
         public override string GenerateCode()
         {
             ValidateSemantic();
-            var code = $"class {SymbolTable.GetInstance().CurrentScope.CurrentNamespace.Replace(".", string.Empty)}{Identifier}";
+            var code = $"class {CompilerUtilities.GetFullQualifiedTypeName(Identifier)}";
             code += " { constructor() {";
 
             foreach (var member in Members)

@@ -10,5 +10,14 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
     {
         public AssignmentOperator Operator;
         public Expression ExpressionValue;
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            return ExpressionValue.ToJS();
+        }
     }
 }

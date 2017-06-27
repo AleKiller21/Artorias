@@ -14,5 +14,16 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
         {
             ArgumentList = new List<Expression>();
         }
+
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            //TODO
+            return "";
+        }
     }
 }

@@ -10,5 +10,16 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
         public List<Expression> ArrayAccessExpressionList;
         public ArrayAccess ArrayAccess;
         public ArrayAccessIncrementDecrementAssignment ArrayOperation;
+
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            //TODO
+            return "";
+        }
     }
 }

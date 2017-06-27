@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SyntaxAnalyser.Utilities;
 
 namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpressions
 {
@@ -15,7 +16,7 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
 
         public override string GenerateJS()
         {
-            return "";
+            return $"{CompilerUtilities.GetQualifiedName(Identifier)} = {ExpressionPrime.GenerateJS()};";
         }
     }
 }

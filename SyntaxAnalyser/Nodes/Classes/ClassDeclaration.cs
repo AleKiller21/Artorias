@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using SyntaxAnalyser.Exceptions;
 using SyntaxAnalyser.Nodes.Interfaces;
+using SyntaxAnalyser.Nodes.Statements;
 using SyntaxAnalyser.Nodes.Types;
 using SyntaxAnalyser.TablesMetadata;
 using SyntaxAnalyser.TablesMetadata.Symbols;
@@ -49,7 +50,13 @@ namespace SyntaxAnalyser.Nodes.Classes
             }
 
             if(existsDefault) return;
-            Members.Add(new ConstructorDeclaration {OptionalModifier = OptionalModifier.None, IsDefault = true});
+            Members.Add(new ConstructorDeclaration
+            {
+                OptionalModifier = OptionalModifier.None,
+                IsDefault = true,
+                Type = new DataType { BuiltInDataType = BuiltInDataType.None, CustomTypeName = new QualifiedIdentifier
+                { Identifiers = new IdentifierAttribute(Row, Col) { Identifiers = new List<string> { Identifier} } } }
+            });
         }
 
         private void CheckBaseCall(ConstructorDeclaration constructor)
@@ -519,32 +526,144 @@ namespace SyntaxAnalyser.Nodes.Classes
         public override string GenerateCode()
         {
             ValidateSemantic();
-            var tab = "\t";
-            var classCode = $"class {Identifier} ";
+            var classCode = $"class {CompilerUtilities.GetFullQualifiedTypeName(Identifier)} ";
             classCode += GetInheritanceListJS() + " {\n";
-            classCode += tab;
-            return "";
+            classCode += GetConstructorsJS();
+            classCode += GetMethodsJS();
+            return classCode + "}\n\n\n";
         }
 
         private string GetInheritanceListJS()
         {
+            if (Parents.Count == 0) return "";
             var parentName = CompilerUtilities.GetQualifiedName(Parents[0]);
             var parentType = CompilerUtilities.GetTypeFromName(Parents[0]);
             if (parentType is InterfaceDeclaration) return "";
-            return $"extends {parentName}";
+            return $"extends {CompilerUtilities.GetFullQualifiedTypeName(parentName)}";
         }
 
         private string GetConstructorsJS()
         {
+            var constructorsCode = "";
+            var constructors = new List<ConstructorDeclaration>();
             foreach (var member in Members)
             {
                 if(!(member is ConstructorDeclaration)) continue;
                 var constructor = member as ConstructorDeclaration;
-                return "";
-                //TODO Semantic: Continuar la generacion del constructor
+                constructors.Add(constructor);
             }
 
-            return "";
+            for (var i = 0; i < constructors.Count; i++)
+            {
+                if (constructors[i].IsDefault && constructors.Count > 1)
+                {
+                    constructors.RemoveAt(i);
+                    break;
+                }
+            }
+
+            foreach (var constructor in constructors)
+            {
+                constructorsCode += buildConstructorJS(constructor);
+            }
+
+            return constructorsCode;
+        }
+
+        private string GetMethodsJS()
+        {
+            var methodsCode = "";
+            foreach (var member in Members)
+            {
+                if(!(member is ClassMethodDeclaration)) continue;
+                var method = member as ClassMethodDeclaration;
+                methodsCode += buildMethodJS(method) + "\n";
+            }
+
+            return methodsCode;
+        }
+
+        private string buildConstructorJS(ConstructorDeclaration constructor)
+        {
+            var constructorJS = $"constructor(";
+            var hasParams = false;
+            foreach (var param in constructor.Params)
+            {
+                hasParams = true;
+                constructorJS += $" {param.Identifier},";
+            }
+
+            if (hasParams) constructorJS = constructorJS.Remove(constructorJS.Length - 1);
+            constructorJS += ") {\n";
+            return constructorJS  + GetConstructorFieldInitializers(constructor) + "\n}\n";
+        }
+
+        private string buildMethodJS(ClassMethodDeclaration method)
+        {
+            var methodJS = $"{method.Identifier}(";
+            var hasParams = false;
+            foreach (var param in method.Params)
+            {
+                methodJS += $"{param.Identifier}, ";
+                hasParams = true;
+            }
+
+            if(hasParams) methodJS = methodJS.Remove(methodJS.Length - 1);
+            methodJS += ") {}";
+            return methodJS;
+        }
+
+        private string GetConstructorFieldInitializers(ConstructorDeclaration constructor)
+        {
+            var constructorBodyInitializers = new List<string>();
+            var classFieldsToInitialize = new List<FieldDeclaration>();
+            var constructorBodyCode = "";
+
+            foreach (var statement in constructor.Statements.StatementList)
+            {
+                constructorBodyInitializers.Add(statement.GenerateJS());
+            }
+
+            foreach (var member in Members)
+            {
+                var exists = false;
+                if(!(member is FieldDeclaration)) continue;
+                var field = member as FieldDeclaration;
+
+                foreach (var constructorInitializer in constructorBodyInitializers)
+                {
+                    var initializerIdentifier = constructorInitializer.Split('=')[0].Trim();
+                    if (field.Identifier == initializerIdentifier)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if(!exists) classFieldsToInitialize.Add(field);
+            }
+
+            foreach (var fieldDeclaration in classFieldsToInitialize)
+            {
+                if (fieldDeclaration.Value.Expression == null)
+                {
+                    constructorBodyCode +=
+                        $"this.{fieldDeclaration.Identifier} = {fieldDeclaration.Type.EvaluateType().GetDefaultValue()}\n";
+                }
+
+                else
+                {
+                    constructorBodyCode +=
+                        $"this.{fieldDeclaration.Identifier} = {fieldDeclaration.Value.Expression.ToJS()}\n";
+                }
+            }
+
+            foreach (var constructorInitializer in constructorBodyInitializers)
+            {
+                constructorBodyCode += $"this.{constructorInitializer}\n";
+            }
+
+            return constructorBodyCode;
         }
     }
 }

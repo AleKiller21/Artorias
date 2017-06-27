@@ -107,6 +107,8 @@ namespace Artorias
                 GenerateJS(code.GlobalNamespace);
                 SymbolTable.GetInstance().PopScope();
             }
+
+            File.WriteAllText("C:\\Users\\alefe\\Desktop\\codeJS.js", _codeOutput);
         }
 
         private void GenerateJS(NamesapceDeclaration Namespace)

@@ -6,5 +6,7 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
 {
     public abstract class QualifiedIdentifierStatementExpressionPrime : LineNumbering
     {
+        public abstract void ValidateSemantic();
+        public abstract string GenerateJS();
     }
 }

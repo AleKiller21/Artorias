@@ -7,5 +7,15 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
     public class VariableDeclaratorListStatementExpression : QualifiedIdentifierStatementExpressionPrime
     {
         public List<VariableDeclarator> VariableDeclaratorList;
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            //TODO
+            return "";
+        }
     }
 }

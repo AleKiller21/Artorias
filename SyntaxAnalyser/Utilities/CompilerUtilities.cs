@@ -29,5 +29,11 @@ namespace SyntaxAnalyser.Utilities
             var parentName = CompilerUtilities.GetQualifiedName(parent);
             return SymbolTable.GetInstance().FindType(parentName);
         }
+
+        public static string GetFullQualifiedTypeName(string typeIdentifier)
+        {
+            return
+                $"{SymbolTable.GetInstance().CurrentScope.CurrentNamespace.Replace(".", string.Empty)}{typeIdentifier}";
+        }
     }
 }

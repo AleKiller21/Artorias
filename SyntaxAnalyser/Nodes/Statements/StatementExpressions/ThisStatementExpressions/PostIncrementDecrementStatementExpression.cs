@@ -8,5 +8,15 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions.ThisStatementExpr
     public class PostIncrementDecrementStatementExpression : QualifiedIdentifierStatementExpressionPrime
     {
         public UnaryOperator IncrementDecrement;
+        public override void ValidateSemantic()
+        {
+            //TODO
+        }
+
+        public override string GenerateJS()
+        {
+            //TODO
+            return "";
+        }
     }
 }
