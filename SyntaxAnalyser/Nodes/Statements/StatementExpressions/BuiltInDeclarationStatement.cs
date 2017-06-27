@@ -27,7 +27,14 @@ namespace SyntaxAnalyser.Nodes.Statements.StatementExpressions
 
         public override string GenerateJS()
         {
-            return "";
+            var declaratorsCode = "";
+            foreach (var variableDeclarator in VariableDeclaratorList)
+            {
+                declaratorsCode +=
+                    $"let {variableDeclarator.Identifier} = {variableDeclarator.VariableInitializer.Expression.ToJS()};\n";
+            }
+
+            return declaratorsCode;
         }
     }
 }

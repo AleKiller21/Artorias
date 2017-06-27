@@ -609,8 +609,16 @@ namespace SyntaxAnalyser.Nodes.Classes
             }
 
             if(hasParams) methodJS = methodJS.Remove(methodJS.Length - 1);
-            methodJS += ") {}";
+            methodJS += ") {\n";
+            methodJS += GenerateMethodBody(method);
+            methodJS += "\n}";
             return methodJS;
+        }
+
+        private string GenerateMethodBody(ClassMethodDeclaration method)
+        {
+            var methodCode = method.Statements.GenerateJS();
+            return methodCode;
         }
 
         private string GetConstructorFieldInitializers(ConstructorDeclaration constructor)

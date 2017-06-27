@@ -25,8 +25,13 @@ namespace SyntaxAnalyser.Nodes.Statements
 
         public override string GenerateJS()
         {
-            //TODO
-            return "";
+            var statementsCode = "";
+            foreach (var statement in StatementList)
+            {
+                statementsCode += statement.GenerateJS();
+            }
+
+            return statementsCode;
         }
     }
 }

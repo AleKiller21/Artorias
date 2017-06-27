@@ -20,7 +20,11 @@ namespace SyntaxAnalyser.Nodes.Statements.IterationStatements
 
         public override string GenerateJS()
         {
-            return "";
+            var doStatementCode = "do {\n";
+            doStatementCode += StatementBody.GenerateJS();
+            doStatementCode += "} while(";
+            doStatementCode += ConditionExpression.ToJS() + ")\n";
+            return doStatementCode;
         }
     }
 }
